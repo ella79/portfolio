@@ -68,6 +68,35 @@ test.describe('home page', () => {
     await expect(page.locator('.field.invalid')).toHaveCount(0);
   });
 
+  test('the CV button hands over the PDF rather than opening a page', async ({ page }) => {
+    const button = page.locator('.nav .nav-page');
+    await expect(button).toHaveAttribute('href', /assets\/cv\/Emanuela-Telescu-CV\.pdf$/);
+    await expect(button).toHaveAttribute('download', /\.pdf$/);
+
+    const pdf = await page.request.get('/assets/cv/Emanuela-Telescu-CV.pdf');
+    expect(pdf.status()).toBe(200);
+    expect(pdf.headers()['content-type']).toContain('pdf');
+  });
+
+  test('a reload opens the page at the top, not where the last visit ended', async ({ page }) => {
+    await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
+
+    await page.reload({ waitUntil: 'load' });
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(50);
+    await expect(page.locator('.nav a[href="#contact"]')).not.toHaveClass(/is-active/);
+  });
+
+  test('the floating button steps aside once Projects is on screen', async ({ page }) => {
+    const cta = page.locator('#stickyCta');
+
+    await page.locator('#experience').scrollIntoViewIfNeeded();
+    await expect(cta).toHaveClass(/\bon\b/);
+
+    await page.locator('#work').scrollIntoViewIfNeeded();
+    await expect(cta).not.toHaveClass(/\bon\b/);
+  });
+
   test('the direct contact links point where they should', async ({ page }) => {
     await expect(page.locator('a[href="mailto:emanuela.telescu@yahoo.com"]').first()).toBeVisible();
     await expect(page.locator('a[href*="linkedin.com/in/emanuelatelescu"]').first()).toBeVisible();

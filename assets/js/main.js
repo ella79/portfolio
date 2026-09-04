@@ -12,21 +12,35 @@
     location.replace("404.html");
   })();
 
+  /* Chrome remembers where you were and puts you back there on reload, so a
+     visitor who last looked at the footer reopens the page in the footer with
+     the footer's section highlighted. A portfolio should open at the top; a
+     shared address that names a section is the one case that still wins. */
+  try {
+    if("scrollRestoration" in history){
+      history.scrollRestoration = "manual";
+      if(!location.hash){ window.addEventListener("load", function(){ window.scrollTo(0, 0); }); }
+    }
+  } catch(e){}
+
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* header state + sticky cta */
   var header = document.getElementById("siteHeader");
   var cta = document.getElementById("stickyCta");
   var ctaStart = document.getElementById("about");
-  var ctaStop = document.getElementById("contact");
+  /* Projects is the last section before Contact, so by the time it is on screen
+     the real contact details are one scroll away and the floating button is
+     just noise in front of them. */
+  var ctaStop = document.getElementById("work") || document.getElementById("contact");
   function ctaVisible(y){
     /* The floating button is only useful between the point where someone is
-       reading about the work and the point where the real contact details
-       appear. On the CV page there is no contact section, so it stays. */
+       reading about the work and the point where contact is already in reach.
+       On the CV page there is no contact section, so it stays. */
     if(!ctaStart){ return y > 400; }
     var started = y + header.offsetHeight >= ctaStart.offsetTop - 120;
-    var reachedContact = ctaStop && (y + window.innerHeight >= ctaStop.offsetTop + 120);
-    return started && !reachedContact;
+    var nearlyThere = ctaStop && (y + window.innerHeight >= ctaStop.offsetTop + 120);
+    return started && !nearlyThere;
   }
   function onScroll(){
     var y = window.pageYOffset || document.documentElement.scrollTop;
@@ -84,13 +98,20 @@
       if(!section){ return; }
       var box = section.getBoundingClientRect();
       var visible = Math.min(box.bottom, bottom) - Math.max(box.top, top);
-      if(visible >= bestVisible && visible > 0){ bestVisible = visible; best = link; }
+      /* strict >, so when two sections show the same amount of screen the one
+         higher up wins. With >= a tie handed the highlight to the last link,
+         which is how Contact could light up while the hero was still on screen. */
+      if(visible > bestVisible){ bestVisible = visible; best = link; }
     });
+    if(bestVisible <= 0){ best = null; }
     setActive(best);
   }
 
   if(pageLink && !sectionLinks.length){ setActive(pageLink); }
-  navLinks.forEach(function(link){
+  /* only the section links take the highlight. The CV button downloads a file
+     and never becomes "where you are", so clicking it must not steal the
+     highlight or freeze the scroll spy behind it. */
+  sectionLinks.forEach(function(link){
     link.addEventListener("click", function(){
       setActive(link);
       /* hold the choice while the smooth scroll travels, then let the page decide */
@@ -98,6 +119,13 @@
     });
   });
   window.addEventListener("scroll", syncActive, { passive:true });
+  window.addEventListener("resize", syncActive);
+  /* the first measurement happens before images and web fonts change the
+     heights, so take it again once they have */
+  window.addEventListener("load", syncActive);
+  if(document.fonts && document.fonts.ready && document.fonts.ready.then){
+    document.fonts.ready.then(syncActive)["catch"](function(){});
+  }
   syncActive();
 
   /* reveal on scroll */
@@ -155,9 +183,12 @@
      are not drawn here. Drop the official SVGs into assets/img and they appear;
      until then the label stands on its own instead of a broken image. */
   [].slice.call(document.querySelectorAll("img.social-icon")).forEach(function(icon){
+    var link = icon.parentNode;
     function drop(){ if(icon.parentNode){ icon.parentNode.removeChild(icon); } }
+    function adopt(){ if(link){ link.classList.add("has-icon"); } }
     icon.addEventListener("error", drop);
-    if(icon.complete && icon.naturalWidth === 0){ drop(); }
+    icon.addEventListener("load", adopt);
+    if(icon.complete){ if(icon.naturalWidth === 0){ drop(); } else { adopt(); } }
   });
 
   /* expandable lists */
