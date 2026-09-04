@@ -76,6 +76,14 @@ p{margin:0 0 18px}
 }
 .nav a:hover,.nav a:focus-visible{color:var(--teal-dark);border-bottom-color:var(--teal)}
 .nav a.is-active{color:var(--teal-dark);font-weight:500;border-bottom-color:var(--teal)}
+/* the CV link opens another page, so it sits apart from the section links */
+.nav .nav-page{
+  color:var(--ink);margin-left:6px;padding-left:22px;position:relative;
+}
+.nav .nav-page::before{
+  content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:1px;height:15px;background:var(--line);
+}
 
 /* ---------- buttons ---------- */
 .btn{
