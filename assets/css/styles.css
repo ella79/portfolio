@@ -279,7 +279,7 @@ textarea{min-height:132px;resize:vertical}
 .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
 .footer-links{display:flex;gap:12px;flex-wrap:wrap}
 /* the mark from the header, sitting between the notice and the links */
-.footer-mark{flex:none;color:#3f6a72;opacity:.9}
+.footer-mark{flex:none;color:#4a8b85;opacity:1}
 /* An icon that is already a recognisable mark does not need a box drawn around
    it. Colour alone carries the hover, and the hit area stays finger sized. */
 .footer-links .social{
