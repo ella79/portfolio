@@ -60,15 +60,21 @@
 
   function syncActive(){
     if(!sectionLinks.length || Date.now() < lockUntil){ return; }
-    var line = (window.pageYOffset || document.documentElement.scrollTop) + header.offsetHeight + 12;
-    var atBottom = window.innerHeight + window.pageYOffset >= document.body.scrollHeight - 2;
-    var current = null;
+    /* The section that owns the most of the screen wins, measured below the
+       header. Anchoring on "which section top has scrolled past" instead would
+       favour tall sections and leave a short one highlighted for a moment. */
+    var top = header.offsetHeight;
+    var bottom = window.innerHeight;
+    var best = null;
+    var bestVisible = 0;
     sectionLinks.forEach(function(link){
       var section = document.getElementById(link.getAttribute("href").slice(1));
-      if(section && section.offsetTop <= line){ current = link; }
+      if(!section){ return; }
+      var box = section.getBoundingClientRect();
+      var visible = Math.min(box.bottom, bottom) - Math.max(box.top, top);
+      if(visible >= bestVisible && visible > 0){ bestVisible = visible; best = link; }
     });
-    if(atBottom){ current = sectionLinks[sectionLinks.length - 1]; }
-    setActive(current);
+    setActive(best);
   }
 
   if(pageLink && !sectionLinks.length){ setActive(pageLink); }
