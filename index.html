@@ -26,7 +26,8 @@
     <nav class="nav" aria-label="Main">
       <a href="#about">About</a>
       <a href="#approach">Approach</a>
-      <a href="#work">Work</a>
+      <a href="#experience">Experience</a>
+      <a href="#work">Projects</a>
       <a href="#skills">Skills</a>
       <a href="cv.html">CV</a>
       <a href="#contact">Contact</a>
@@ -73,9 +74,14 @@
     <div class="wrap about-grid">
       <div class="about-body reveal">
         <h2>About me</h2>
-        <p>I have spent fifteen years in software quality assurance, and the last six of them building automation instead of running tests by hand. Today I own the test automation strategy for safety critical embedded products at BTC Embedded Systems, where a regression suite that lies to you is worse than no suite at all.</p>
-        <p>Most of my work starts the same way. A suite is slow, flaky, or missing an entire layer, and someone has to decide what to rebuild and in what order. I led the migration of an end to end suite from Cypress to Playwright and TypeScript, then built a visual regression framework from scratch and scaled both across four consecutive automotive and HIL product lines. Flaky failures and escaped bugs dropped by 30 to 40 percent, and a full regression run got about 35 percent shorter.</p>
-        <p>Over the past year I have been folding AI tooling into that work in production, not as a side experiment. I replaced the team's GitHub Copilot workflow with Claude Code, Playwright Agents, Skills and MCP, and Figma MCP across two projects, which cut framework maintenance and test authoring time by 27 percent. I am certified by Anthropic on Claude Code, Agent Skills, Subagents and the Model Context Protocol, and I write my own agents and skills in TypeScript.</p>
+        <p>Fifteen years in quality assurance, six of them building automation instead of running tests by hand. Today I own the test automation strategy for safety critical embedded products at BTC Embedded Systems, where a regression suite that lies to you is worse than no suite at all.</p>
+        <p>Over the past year I have been folding AI tooling into that work in production, not as a side experiment. I moved my team from GitHub Copilot to Claude Code, Playwright Agents, Skills and MCP, and I write my own agents and skills in TypeScript. I am certified by Anthropic on Claude Code, Agent Skills, Subagents and the Model Context Protocol.</p>
+
+        <div class="journey">
+          <h3>My professional journey</h3>
+          <p>Eight companies since 2010, across automotive, maritime, insurance, media and offensive security, moving from manual testing into automation architecture and now into agentic tooling.</p>
+          <a class="journey-link" href="#experience">See the full career history &darr;</a>
+        </div>
       </div>
 
       <aside class="reveal">
@@ -119,83 +125,88 @@
     </div>
   </section>
 
-  <!-- WORK -->
-  <section id="work">
+  <!-- EXPERIENCE -->
+  <section id="experience">
     <div class="wrap">
       <div class="reveal">
-        <h2>Selected work</h2>
-        <p class="section-intro">Six projects where I owned the automation decision, not just the test cases. The work belongs to the companies I did it for, so there are no product screenshots here. What I can share is the problem, the approach and the effect it had, with percentages as measured or estimated by the teams involved.</p>
+        <h2>Experience</h2>
+        <p class="section-intro">The short version of fifteen years. The CV page has the full detail, role by role.</p>
       </div>
 
-      <div class="cards" id="cards">
-        <article class="card reveal">
-          <p class="card-domain">Automotive and HIL product lines</p>
-          <div class="card-body">
-            <h3>Cypress to Playwright migration, plus visual regression from scratch</h3>
-            <p class="where">BTC Embedded Systems, 2022 to present</p>
-            <p>Architected and led the move of the full end to end suite from Cypress to Playwright and TypeScript, then designed a visual regression framework that did not exist before. Both were scaled across four consecutive automotive and HIL product lines.</p>
-            <p class="result">Flaky failures and escaped bugs down 30 to 40 percent, full regression run about 35 percent faster.</p>
-            <div class="tags"><span class="tag">Playwright</span><span class="tag">TypeScript</span><span class="tag">Visual regression</span><span class="tag">CI/CD</span></div>
+      <div class="timeline" id="timeline">
+        <article class="tl-item reveal">
+          <p class="tl-when">12/2022 to present</p>
+          <div class="tl-body">
+            <h3>Senior QA Engineer, BTC Embedded Systems</h3>
+            <p>Own the test automation strategy for safety critical automotive and HIL products. Led the Cypress to Playwright and TypeScript migration, built visual regression from scratch, added GraphQL coverage inside the CI/CD quality gates, and moved the team onto Claude Code and Playwright MCP.</p>
+            <p class="tl-result">Regression run 35 percent faster, flaky failures and escaped bugs down 30 to 40 percent, maintenance and authoring time down 27 percent.</p>
           </div>
         </article>
 
-        <article class="card reveal">
-          <p class="card-domain">Team wide tooling change</p>
-          <div class="card-body">
-            <h3>AI augmented test automation in a production team</h3>
-            <p class="where">BTC Embedded Systems, 2025 to 2026</p>
-            <p>Led the adoption of Claude Code, Playwright Agents, Skills, MCP and CLI, and Figma MCP across two consecutive projects, replacing the team's GitHub Copilot based workflow. Custom agents and skills now handle the repetitive part of authoring and maintenance.</p>
-            <p class="result">Framework maintenance and test authoring time down 27 percent.</p>
-            <div class="tags"><span class="tag">Claude Code</span><span class="tag">Playwright MCP</span><span class="tag">Agents &amp; Skills</span><span class="tag">Figma MCP</span></div>
+        <article class="tl-item reveal">
+          <p class="tl-when">06/2021 to 12/2022</p>
+          <div class="tl-body">
+            <h3>Senior QA Engineer, Endava</h3>
+            <p>Built regression suites in WebdriverIO and Jest across two enterprise platforms, maritime and insurance, then removed their dependency on live third party systems through Docker, Mountebank stubbing and Pega orchestration.</p>
+            <p class="tl-result">Manual regression effort down 25 to 30 percent, third party downtime failures down about 32 percent.</p>
           </div>
         </article>
 
-        <article class="card reveal">
-          <p class="card-domain">CI/CD quality gates</p>
-          <div class="card-body">
-            <h3>GraphQL API coverage inside CI/CD quality gates</h3>
-            <p class="where">BTC Embedded Systems</p>
-            <p>Designed GraphQL API test coverage in Playwright and TypeScript, running next to the existing UI suites inside the pipeline quality gates. Testing moved left, and coverage went from UI only to a dual frontend and backend layer.</p>
-            <p class="result">Roughly 20 percent more backend layer defects caught before release.</p>
-            <div class="tags"><span class="tag">GraphQL</span><span class="tag">API testing</span><span class="tag">Shift left</span><span class="tag">Quality gates</span></div>
+        <article class="tl-item reveal">
+          <p class="tl-when">09/2019 to 09/2020</p>
+          <div class="tl-body">
+            <h3>Senior QA Engineer, Variston</h3>
+            <p>Wrote a Java and Selenium framework from scratch on Jenkins and Kubernetes, and self studied penetration testing to take on security QA of a command and control red teaming platform.</p>
+            <p class="tl-result">Regression cycles about 33 percent shorter, attack scenario coverage roughly 30 percent broader.</p>
           </div>
         </article>
 
-        <article class="card reveal">
-          <p class="card-domain">Enterprise platforms, maritime and insurance</p>
-          <div class="card-body">
-            <h3>Containerized suites that stopped depending on live services</h3>
-            <p class="where">Endava, 2021 to 2022</p>
-            <p>Built and scaled regression suites in WebdriverIO and Jest across two enterprise platforms, maritime and insurance, covering more than 150 scenarios. Then removed the dependency on live third party systems through Dockerized environments, Mountebank stubbing and Pega orchestration.</p>
-            <p class="result">Manual regression effort down 25 to 30 percent, third party downtime failures down about 32 percent.</p>
-            <div class="tags"><span class="tag">WebdriverIO</span><span class="tag">Docker</span><span class="tag">Mountebank</span><span class="tag">Pega</span></div>
+        <article class="tl-item reveal">
+          <p class="tl-when">01/2019 to 08/2019</p>
+          <div class="tl-body">
+            <h3>Senior QA Engineer, Ness Digital Engineering</h3>
+            <p>Engineered the first structured automation layer for Universal Music Group London's global platform in C#, Selenium, SpecFlow and NUnit, then extended it into the API layer and cross browser suites on BrowserStack.</p>
+            <p class="tl-result">Manual regression effort down about 30 percent, cross platform testing effort down about 35 percent.</p>
           </div>
         </article>
 
-        <article class="card card-extra reveal">
-          <p class="card-domain">Kubernetes based test infrastructure</p>
-          <div class="card-body">
-            <h3>Java and Selenium framework on a Kubernetes pipeline</h3>
-            <p class="where">Variston, 2019 to 2020</p>
-            <p>Wrote a Selenium WebDriver framework from scratch in Java, with JUnit and Maven, and wired it into Jenkins on a Kubernetes pipeline through Zalenium for grid execution with video recording, across Ubuntu and Windows VMware environments.</p>
-            <p class="result">Regression cycle time compressed by an estimated 33 percent.</p>
-            <div class="tags"><span class="tag">Java</span><span class="tag">Selenium Grid</span><span class="tag">Jenkins</span><span class="tag">Kubernetes</span></div>
+        <article class="tl-item tl-extra reveal">
+          <p class="tl-when">04/2018 to 01/2019</p>
+          <div class="tl-body">
+            <h3>Lead QA Engineer, IT Vizion</h3>
+            <p>Promoted from Senior QA Engineer to lead the team's day to day work, mentor testers and sign off releases. Rolled out codeless, keyword driven scripting so that non technical testers could contribute coverage.</p>
+            <p class="tl-result">35 percent of non technical testers writing automated coverage for the first time.</p>
           </div>
         </article>
 
-        <article class="card card-extra reveal">
-          <p class="card-domain">Offensive security platform</p>
-          <div class="card-body">
-            <h3>Security QA of a red teaming command and control platform</h3>
-            <p class="where">Variston, 2019 to 2020</p>
-            <p>Self studied cybersecurity and penetration testing, then applied it to QA of a C2 platform: agent orchestration, HTTP, DNS and SMB protocols, evasion techniques, data exfiltration and lateral movement workflows, plus a modular post exploitation framework.</p>
-            <p class="result">Attack scenario coverage broadened by an estimated 30 percent, with about 22 percent more critical defects surfaced before release.</p>
-            <div class="tags"><span class="tag">Security testing</span><span class="tag">C2 platforms</span><span class="tag">Protocol testing</span><span class="tag">Exploratory QA</span></div>
+        <article class="tl-item tl-extra reveal">
+          <p class="tl-when">01/2013 to 04/2018</p>
+          <div class="tl-body">
+            <h3>Software QA Engineer, Plan.Net Group</h3>
+            <p>Built a requirement based library of 300+ test scenarios in TestLink and sustained coverage across iOS, Android via Appium, and five browser engines, with crash triage on physical devices.</p>
+            <p class="tl-result">Post release crash reports down around 25 percent.</p>
+          </div>
+        </article>
+
+        <article class="tl-item tl-extra reveal">
+          <p class="tl-when">09/2010 to 01/2013</p>
+          <div class="tl-body">
+            <h3>Software QA Engineer, 12snap</h3>
+            <p>Launched the company's first test case library, 100+ scenarios, establishing functional, regression and acceptance coverage for airline and native mobile applications where no QA process existed.</p>
+            <p class="tl-result">Untracked defect leakage narrowed by nearly 20 percent.</p>
+          </div>
+        </article>
+
+        <article class="tl-item tl-extra reveal">
+          <p class="tl-when">08/2000 to 09/2010</p>
+          <div class="tl-body">
+            <h3>Earlier roles</h3>
+            <p>Software and database roles at Toluna and First Emergency Hospital, and infrastructure engineering at Iprotim and Halcrow, before moving into QA in 2010.</p>
           </div>
         </article>
       </div>
 
-      <button class="more" id="moreCards" type="button" aria-expanded="false" aria-controls="cards">Show all 6 projects &darr;</button>
+      <button class="more" id="moreTimeline" type="button" aria-expanded="false" aria-controls="timeline">Show the earlier roles &darr;</button>
     </div>
   </section>
 
@@ -204,13 +215,33 @@
     <div class="wrap">
       <div class="reveal">
         <h2>What that adds up to</h2>
-        <p class="section-intro">The numbers my teams tracked before and after the work above.</p>
+        <p class="section-intro">The numbers my teams tracked before and after the work described above.</p>
       </div>
       <div class="impact-grid">
         <div class="metric reveal"><div class="v">35%</div><div class="l">shorter full regression run after the Playwright migration</div><div class="s">automotive and HIL product lines</div></div>
         <div class="metric reveal"><div class="v">30-40%</div><div class="l">fewer flaky failures and escaped bugs</div><div class="s">four consecutive product lines</div></div>
         <div class="metric reveal"><div class="v">27%</div><div class="l">less framework maintenance and test authoring time</div><div class="s">after moving the team to Claude Code and MCP</div></div>
         <div class="metric reveal"><div class="v">20%</div><div class="l">more backend defects caught before release</div><div class="s">after adding GraphQL coverage to the gates</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="work">
+    <div class="wrap">
+      <div class="reveal">
+        <h2>Projects</h2>
+        <p class="section-intro">Everything above was built for the companies I worked for, so the code and the products belong to them. This section is for my own work, and I am putting it together now.</p>
+      </div>
+
+      <div class="empty-state reveal">
+        <h3>In progress</h3>
+        <p>What will land here: the agents and skills I write with Claude Code and TypeScript, Playwright MCP experiments, and small tools that came out of real testing problems rather than tutorials.</p>
+        <p>Until then, the fastest way to see how I work is the career history above, or a conversation.</p>
+        <div class="empty-actions">
+          <a class="btn btn-ghost" href="https://github.com/ella79" target="_top" rel="noopener noreferrer">My GitHub</a>
+          <a class="btn btn-ghost" href="#contact">Get in touch</a>
+        </div>
       </div>
     </div>
   </section>
