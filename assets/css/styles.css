@@ -75,6 +75,7 @@ p{margin:0 0 18px}
   padding:4px 0;border-bottom:1.5px solid transparent;transition:color .2s,border-color .2s;
 }
 .nav a:hover,.nav a:focus-visible{color:var(--teal-dark);border-bottom-color:var(--teal)}
+.nav a.is-active{color:var(--teal-dark);font-weight:500;border-bottom-color:var(--teal)}
 
 /* ---------- buttons ---------- */
 .btn{
