@@ -64,17 +64,28 @@ p{margin:0 0 18px}
   color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:9px;
 }
 .monogram em{font-style:normal}
-.monogram span{
-  width:26px;height:26px;border-radius:50%;
-  border:1.5px solid var(--teal);color:var(--teal-dark);
-  display:grid;place-items:center;font-size:.6875rem;font-weight:500;
+.monogram .mark{
+  width:30px;height:30px;flex:none;display:block;
+  color:var(--teal-dark);transition:color .2s ease;
 }
+.monogram:hover .mark{color:var(--teal)}
 .nav{display:flex;gap:28px;align-items:center}
 .nav a{
   font-size:.9375rem;color:var(--ink-soft);text-decoration:none;
   padding:4px 0;border-bottom:1.5px solid transparent;transition:color .2s,border-color .2s;
 }
 .nav a:hover,.nav a:focus-visible{color:var(--teal-dark);border-bottom-color:var(--teal)}
+.nav a.is-active{color:var(--teal-dark);font-weight:500;border-bottom-color:var(--teal)}
+/* the CV link opens another page, so it sits apart from the section links */
+.nav .nav-page{
+  margin-left:10px;padding:7px 16px;border:1.5px solid var(--teal-dark);
+  border-radius:2px;color:var(--teal-dark);font-weight:500;
+  transition:background .2s ease,color .2s ease;
+}
+.nav .nav-page:hover,.nav .nav-page:focus-visible{
+  background:var(--teal-dark);color:#fff;border-color:var(--teal-dark);
+}
+.nav .nav-page.is-active{background:var(--teal-dark);color:#fff;border-bottom-color:var(--teal-dark)}
 
 /* ---------- buttons ---------- */
 .btn{
@@ -251,7 +262,14 @@ textarea{min-height:132px;resize:vertical}
 /* ---------- footer ---------- */
 .site-footer{background:var(--panel);color:#8ea6b0;padding:36px 0;font-size:.875rem}
 .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
-.footer-links{display:flex;gap:22px}
+.footer-links{display:flex;gap:12px;flex-wrap:wrap}
+.footer-links .social{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 14px;border:1px solid #2b4552;border-radius:2px;
+  color:#c3d3d9;transition:border-color .2s ease,color .2s ease,background .2s ease;
+}
+.footer-links .social:hover{border-color:#4fb3a4;color:#fff;background:rgba(79,179,164,.08)}
+.social-icon{flex:none}
 .site-footer a{color:#c3d3d9;text-decoration:none;border-bottom:1px solid transparent}
 .site-footer a:hover{border-bottom-color:#5ec1b1;color:#fff}
 
@@ -311,6 +329,11 @@ textarea{min-height:132px;resize:vertical}
   *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important}
   .reveal,.run-line,.run-foot{opacity:1;transform:none}
 }
+
+/* ---------- sub blocks inside a section ---------- */
+.subblock{margin-top:72px;padding-top:34px;border-top:1px solid var(--line)}
+.subhead{font-size:1.5rem;line-height:1.2;margin-bottom:2px}
+.subblock .section-intro{margin-top:8px}
 
 /* ---------- approach ---------- */
 .principles{display:grid;grid-template-columns:repeat(2,1fr);gap:40px 56px;margin-top:48px}
@@ -395,4 +418,53 @@ textarea{min-height:132px;resize:vertical}
 @media (max-width:640px){
   .empty-state{padding:28px 22px}
   .empty-actions .btn{width:auto;flex:1 1 auto}
+}
+
+/* ---------- the CV, on paper ---------- */
+.print-head{display:none}
+
+@media print{
+  @page{size:A4;margin:13mm 14mm}
+
+  :root{--ink:#12222b;--ink-soft:#3f545e;--teal-dark:#0a554c;--line:#c9d4d1}
+
+  html,body{background:#fff;font-size:9.6pt;line-height:1.42}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+  .site-header,.sticky-cta,.site-footer,.page-head,.no-print,.more,.cv-actions{display:none !important}
+  .reveal{opacity:1 !important;transform:none !important}
+
+  .wrap{max-width:none;padding:0}
+  section{padding:0;border:0 !important}
+  .cv{padding-top:0}
+
+  .print-head{display:block;margin-bottom:14pt;padding-bottom:9pt;border-bottom:1.6pt solid var(--teal-dark)}
+  .print-name{font-family:var(--font-display);font-weight:600;font-size:22pt;line-height:1.05;letter-spacing:-.02em;margin:0 0 3pt}
+  .print-role{font-family:var(--font-mono);font-size:9pt;color:var(--teal-dark);margin:0 0 5pt}
+  .print-contact{font-size:8.6pt;color:var(--ink-soft);margin:0}
+
+  .cv-block{margin-bottom:13pt}
+  .cv h2{
+    font-size:11pt;margin-bottom:7pt;padding-bottom:3pt;
+    border-bottom:.6pt solid var(--line);color:var(--teal-dark);
+    break-after:avoid;page-break-after:avoid;
+  }
+  .cv-note{font-size:9.4pt;color:var(--ink);max-width:none;margin-bottom:5pt}
+
+  .role-entry{margin-bottom:9pt;max-width:none;break-inside:avoid;page-break-inside:avoid}
+  .role-entry h3{font-size:10pt;margin-bottom:1pt}
+  .role-entry .meta{font-size:8.4pt;margin-bottom:3.5pt;color:var(--ink-soft)}
+  .role-entry ul{padding-left:12pt;margin:0}
+  .role-entry li{font-size:9.2pt;color:var(--ink);margin-bottom:2.4pt}
+
+  .cv-cols{grid-template-columns:1fr 1fr;gap:0 22pt}
+  .cv-def dt{font-size:8.2pt;margin-bottom:1pt}
+  .cv-def dd{font-size:9.2pt;color:var(--ink);margin-bottom:6pt}
+
+  /* every certification prints, whatever the on screen toggle says */
+  .pills{gap:4pt}
+  .pill,.pill-extra{display:inline-flex !important;font-size:8pt;padding:2pt 5pt;border-color:var(--line);color:var(--ink-soft)}
+
+  a{color:var(--ink);text-decoration:none}
+  .cv-block:last-child{margin-bottom:0}
 }

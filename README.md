@@ -1,47 +1,52 @@
 # Personal landing page
 
-Single page portfolio for **Emanuela Telescu**, Senior QA Automation Engineer.
-Published with GitHub Pages at <https://ella79.github.io/portfolio/>.
+Single page portfolio and CV for **Emanuela Telescu**, Senior QA Automation Engineer.
+Live at <https://ella79.github.io/portfolio/>.
 
-## Repository layout
+Static HTML, CSS and vanilla JavaScript. No framework, no build step, no runtime
+dependencies. The only third party request the page makes is to Google Fonts.
+
+## Layout
 
 ```
 .
-|-- index.html                  # the page itself, no build step required
-|-- 404.html                    # custom not-found page
+|-- index.html                   # the landing page
+|-- cv.html                      # the full CV, and the source the PDF is printed from
+|-- 404.html                     # what GitHub Pages serves for an unknown path
 |-- assets/
-|   |-- css/styles.css          # all styling, custom properties at the top
-|   |-- js/main.js              # scroll effects, expandable lists, form validation
-|   \-- img/                    # profile photo and any future images
-|-- tests/
-|   \-- smoke.spec.ts           # Playwright smoke suite
+|   |-- css/styles.css           # design tokens first, then components, then print
+|   |-- js/main.js               # nav state, scroll reveals, expandable lists, form
+|   |-- img/                     # photo, logo mark, favicon
+|   \-- cv/                      # the downloadable PDF
+|-- tests/smoke.spec.ts          # Playwright smoke suite
+|-- playwright.config.ts
 |-- .github/
-|   |-- workflows/ci.yml        # runs on every push and pull request
-|   |-- workflows/deploy.yml    # builds and publishes to GitHub Pages
-|   \-- dependabot.yml          # keeps the actions up to date
-|-- robots.txt
-|-- sitemap.xml
-|-- SECURITY.md
-\-- LICENSE
+|   |-- workflows/ci.yml         # runs the suite on every push and pull request
+|   |-- workflows/deploy.yml     # publishes to GitHub Pages
+|   \-- dependabot.yml           # keeps the actions current
+|-- robots.txt, sitemap.xml      # indexing
+|-- SECURITY.md                  # what is hardened and how to report a problem
+\-- LICENSE                      # all rights reserved
 ```
 
-## Working on it locally
-
-No toolchain is needed to view the page. Open `index.html` in a browser, or
-serve the folder so that relative paths and the Content Security Policy behave
-exactly as they do in production:
+## Running it locally
 
 ```bash
 python3 -m http.server 8000
-# then open http://localhost:8000
+# http://localhost:8000
 ```
+
+Serving the folder matters. The Content Security Policy and the relative paths
+behave differently over `file://`.
 
 ## Tests
 
-The site ships with a Playwright smoke suite that runs in CI on every push.
-It checks that the page renders, that in page navigation reaches each section,
-that the project list expands, and that the contact form rejects an empty
-submission.
+Nine Playwright checks cover the paths a visitor actually takes. The page loads
+without JavaScript errors, the nav reaches every section and highlights the one
+in view, the career timeline expands, the skill bars fill when they scroll into
+view, the contact form stays closed until it is asked for and then validates,
+the direct contact links point where they claim to, and the CV page serves its
+PDF with a 200.
 
 ```bash
 npm install
@@ -49,22 +54,25 @@ npx playwright install --with-deps chromium
 npm test
 ```
 
+CI runs the same suite on every push. Runs are serialised per branch, so a new
+push cancels the one already in flight instead of racing it.
+
 ## Deployment
 
-Pushing to `main` triggers `deploy.yml`, which uploads the repository as a Pages
-artifact and publishes it. Deployments run inside a `concurrency` group, so a
-second push waits for the first one to finish instead of racing it.
+A push to `main` triggers `deploy.yml`, which uploads the repository as a Pages
+artifact and publishes it. Deployments share a `concurrency` group, so two of
+them never publish at the same time and an in flight publish is never cancelled
+half way through. Workflows run with `contents: read`; only the publish job is
+granted `pages: write` and `id-token: write`.
 
-## Adding a photo
+## The PDF
 
-Drop the image into `assets/img/` and replace the contents of the `.avatar`
-element in `index.html`:
+`assets/cv/Emanuela-Telescu-CV.pdf` is the two page CV kept as the source of
+truth outside this repository. When it changes, replace that file and update
+`cv.html` so the page and the document stay in step.
 
-```html
-<div class="avatar">
-  <img src="assets/img/photo.jpg" alt="Emanuela Telescu">
-</div>
-```
+`styles.css` also carries a print stylesheet, so `cv.html` prints to a clean A4
+document on its own if a browser generated PDF is ever wanted instead.
 
 ## Licence
 
