@@ -88,12 +88,6 @@ p{margin:0 0 18px}
   background:var(--teal-dark);color:#fff;border-color:var(--teal-dark);border-bottom-color:var(--teal-dark);
 }
 .nav-page .dl-icon{flex:none;display:block}
-/* the file format belongs on the button: it tells you what arrives when you click */
-.nav-page-ext{
-  font-size:.6875rem;font-weight:600;letter-spacing:.03em;
-  padding:1px 6px;border-radius:999px;background:rgba(10,85,76,.11);
-}
-.nav .nav-page:hover .nav-page-ext,.nav .nav-page:focus-visible .nav-page-ext{background:rgba(255,255,255,.2)}
 
 /* ---------- buttons ---------- */
 .btn{
@@ -271,18 +265,20 @@ textarea{min-height:132px;resize:vertical}
 .site-footer{background:var(--panel);color:#8ea6b0;padding:36px 0;font-size:.875rem}
 .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
 .footer-links{display:flex;gap:12px;flex-wrap:wrap}
+/* An icon that is already a recognisable mark does not need a box drawn around
+   it. Colour alone carries the hover, and the hit area stays finger sized. */
 .footer-links .social{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:9px 14px;border:1px solid #2b4552;border-radius:2px;
-  color:#c3d3d9;transition:border-color .2s ease,color .2s ease,background .2s ease;
+  padding:8px;border-radius:2px;
+  color:#c3d3d9;transition:color .2s ease,background .2s ease;
 }
 .footer-links .social:hover,.footer-links .social:focus-visible{
-  border-color:#4fb3a4;color:#fff;background:rgba(79,179,164,.08);
+  color:#fff;background:rgba(79,179,164,.12);
 }
-.social-icon{flex:none;display:block}
+.footer-links .social:focus-visible{outline:2px solid #4fb3a4;outline-offset:2px}
+.social-icon{flex:none;display:block;width:20px;height:20px}
 /* Once a real icon loads, the word behind it is redundant. Until then the word
    carries the link on its own, so nothing is lost if the file is missing. */
-.social.has-icon{width:40px;padding:9px 0}
 .social.has-icon .social-label{display:none}
 .site-footer a{color:#c3d3d9;text-decoration:none;border-bottom:1px solid transparent}
 .site-footer a:hover{border-bottom-color:#5ec1b1;color:#fff}
@@ -316,7 +312,6 @@ textarea{min-height:132px;resize:vertical}
   .impact-grid{grid-template-columns:repeat(2,1fr);gap:32px}
   .nav{gap:20px}
   .nav a{font-size:.875rem}
-  .nav-page-ext{display:none}
 }
 @media (max-width:640px){
   .wrap{padding:0 20px}

@@ -71,6 +71,16 @@ them never publish at the same time and an in flight publish is never cancelled
 half way through. Workflows run with `contents: read`; only the publish job is
 granted `pages: write` and `id-token: write`.
 
+## Asset versions
+
+`styles.css` and `main.js` are linked with a `?v=` token in `index.html` and
+`cv.html`. GitHub Pages lets a browser hold those two files for longer than a
+deploy takes, so without the token a visitor keeps the old stylesheet and script
+against the new markup, and the site looks unchanged after a successful publish.
+
+**Bump the token whenever either file changes**, in both pages, or the change
+will not reach anyone who has visited before.
+
 ## The CV
 
 `assets/cv/Emanuela-Telescu-CV.pdf` is the two page CV, kept as the source of
