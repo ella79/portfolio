@@ -313,6 +313,11 @@ textarea{min-height:132px;resize:vertical}
   .reveal,.run-line,.run-foot{opacity:1;transform:none}
 }
 
+/* ---------- sub blocks inside a section ---------- */
+.subblock{margin-top:72px;padding-top:34px;border-top:1px solid var(--line)}
+.subhead{font-size:1.5rem;line-height:1.2;margin-bottom:2px}
+.subblock .section-intro{margin-top:8px}
+
 /* ---------- approach ---------- */
 .principles{display:grid;grid-template-columns:repeat(2,1fr);gap:40px 56px;margin-top:48px}
 .principle{padding-left:22px;border-left:2px solid var(--teal-wash)}
