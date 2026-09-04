@@ -1,5 +1,17 @@
 (function(){
   "use strict";
+  /* A hash never reaches the server, so a wrong one cannot answer 404 by itself.
+     These two rules make the address bar behave the way a visitor expects:
+     anchors that used to exist keep working, anything else is a wrong address. */
+  var legacyAnchors = { approach: "about", skills: "experience" };
+  (function checkHash(){
+    var id = "";
+    try { id = decodeURIComponent(location.hash.slice(1)); } catch(e){ id = location.hash.slice(1); }
+    if(!id || document.getElementById(id)){ return; }
+    if(legacyAnchors[id]){ location.replace("#" + legacyAnchors[id]); return; }
+    location.replace("404.html");
+  })();
+
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* header state + sticky cta */
