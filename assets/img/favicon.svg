@@ -1,5 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="6" fill="#0e1e26"/>
-  <circle cx="16" cy="16" r="11" fill="none" stroke="#4fb3a4" stroke-width="1.6"/>
-  <text x="16" y="20.5" font-family="Verdana,DejaVu Sans,sans-serif" font-size="10.5" fill="#e4ecef" text-anchor="middle">ET</text>
+  <g fill="none" stroke="#4fb3a4" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 21 H8.5 V12 H13 V21 H16.5"/>
+    <path d="M16.5 21 L20 25 L28 9"/>
+  </g>
 </svg>

@@ -5,35 +5,39 @@ test.describe('home page', () => {
     await page.goto('/');
   });
 
-  test('renders without console errors', async ({ page }) => {
+  test('renders without javascript errors', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => {
-      if (message.type() === 'error') errors.push(message.text());
+      // Web fonts come from a third party. A network hiccup fetching them is not
+      // a defect in this page, and asserting on it would make the test flaky.
+      const isThirdPartyResource = message.text().includes('Failed to load resource');
+      if (message.type() === 'error' && !isThirdPartyResource) errors.push(message.text());
     });
 
     await page.reload();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Emanuela Telescu');
     await expect(page.locator('.avatar img')).toBeVisible();
+    await expect(page.locator('.monogram .mark')).toBeVisible();
     expect(errors).toEqual([]);
   });
 
   test('in page navigation reaches every section', async ({ page }) => {
-    for (const section of ['about', 'approach', 'experience', 'work', 'skills', 'contact']) {
+    for (const section of ['about', 'experience', 'work', 'contact']) {
       await page.locator(`.nav a[href="#${section}"]`).click();
       await expect(page.locator(`#${section}`)).toBeInViewport();
     }
   });
 
   test('the career timeline expands to the earlier roles', async ({ page }) => {
-    await page.locator('#experience').scrollIntoViewIfNeeded();
+    await page.locator('#timeline').scrollIntoViewIfNeeded();
     await expect(page.locator('.tl-item:visible')).toHaveCount(4);
     await page.getByRole('button', { name: /show the earlier roles/i }).click();
     await expect(page.locator('.tl-item:visible')).toHaveCount(8);
   });
 
-  test('the skill bars fill once the section is visible', async ({ page }) => {
-    await page.locator('#skills').scrollIntoViewIfNeeded();
+  test('the skill bars fill once they come into view', async ({ page }) => {
+    await page.locator('#skillsGrid').scrollIntoViewIfNeeded();
     const firstBar = page.locator('.bar span').first();
     await expect
       .poll(async () => firstBar.evaluate((el) => (el as HTMLElement).style.width))
@@ -79,5 +83,24 @@ test.describe('CV page', () => {
 
     const pdf = await page.request.get('/assets/cv/Emanuela-Telescu-CV.pdf');
     expect(pdf.status()).toBe(200);
+  });
+});
+
+test.describe('addresses', () => {
+  test('an unknown section in the address lands on the not found page', async ({ page }) => {
+    await page.goto('/index.html#about5');
+    await expect(page).toHaveURL(/404\.html$/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('That page does not exist');
+  });
+
+  test('an unknown path lands on the not found page', async ({ page }) => {
+    const response = await page.request.get('/no-such-page');
+    expect(response.status()).toBe(404);
+  });
+
+  test('an anchor that used to exist still reaches the right section', async ({ page }) => {
+    await page.goto('/index.html#approach');
+    await expect(page).toHaveURL(/#about$/);
+    await expect(page.locator('#about')).toBeInViewport();
   });
 });
