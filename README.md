@@ -27,7 +27,7 @@ dependencies. The only third party request the page makes is to Google Fonts.
 |-- .gitattributes               # LF in the repository, binaries left alone
 |-- robots.txt, sitemap.xml      # indexing
 |-- SECURITY.md                  # what is hardened and how to report a problem
-\-- LICENSE                      # all rights reserved
+\-- LICENSE.md                   # all rights reserved
 ```
 
 ## Running it locally
@@ -111,5 +111,5 @@ never broken, only plainer.
 
 ## Licence
 
-Copyright (c) 2026 Emanuela Telescu. All rights reserved. See `LICENSE`.
+Copyright (c) 2026 Emanuela Telescu. All rights reserved. See `LICENSE.md`.
 The design, code and written content of this site are not free to reuse.
