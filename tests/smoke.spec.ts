@@ -15,25 +15,26 @@ test.describe('home page', () => {
     await page.reload();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Emanuela Telescu');
     await expect(page.locator('.avatar img')).toBeVisible();
+    await expect(page.locator('.monogram .mark')).toBeVisible();
     expect(errors).toEqual([]);
   });
 
   test('in page navigation reaches every section', async ({ page }) => {
-    for (const section of ['about', 'approach', 'experience', 'work', 'skills', 'contact']) {
+    for (const section of ['about', 'experience', 'work', 'contact']) {
       await page.locator(`.nav a[href="#${section}"]`).click();
       await expect(page.locator(`#${section}`)).toBeInViewport();
     }
   });
 
   test('the career timeline expands to the earlier roles', async ({ page }) => {
-    await page.locator('#experience').scrollIntoViewIfNeeded();
+    await page.locator('#timeline').scrollIntoViewIfNeeded();
     await expect(page.locator('.tl-item:visible')).toHaveCount(4);
     await page.getByRole('button', { name: /show the earlier roles/i }).click();
     await expect(page.locator('.tl-item:visible')).toHaveCount(8);
   });
 
-  test('the skill bars fill once the section is visible', async ({ page }) => {
-    await page.locator('#skills').scrollIntoViewIfNeeded();
+  test('the skill bars fill once they come into view', async ({ page }) => {
+    await page.locator('#skillsGrid').scrollIntoViewIfNeeded();
     const firstBar = page.locator('.bar span').first();
     await expect
       .poll(async () => firstBar.evaluate((el) => (el as HTMLElement).style.width))
