@@ -1,0 +1,14 @@
+# One line ending convention for the whole repository. Without this, git on
+# Windows checks files out with CRLF and then reports every one of them as
+# modified, which buries real changes in noise.
+* text=auto eol=lf
+
+# Binary files must never be touched by line ending conversion.
+*.pdf  binary
+*.jpg  binary
+*.jpeg binary
+*.png  binary
+*.ico  binary
+
+# SVG is text, so it follows the same rule as the rest.
+*.svg  text eol=lf
