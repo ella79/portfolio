@@ -25,10 +25,8 @@
     <a class="monogram" href="#top"><svg class="mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21 H8 V11 H13 V21 H17"/><path d="M17 21 L21 26 L29 8"/></svg><em>Emanuela Telescu</em></a>
     <nav class="nav" aria-label="Main">
       <a href="#about">About</a>
-      <a href="#approach">Approach</a>
       <a href="#experience">Experience</a>
       <a href="#work">Projects</a>
-      <a href="#skills">Skills</a>
       <a href="cv.html">CV</a>
       <a href="#contact">Contact</a>
     </nav>
@@ -71,7 +69,8 @@
 
   <!-- ABOUT -->
   <section class="about" id="about">
-    <div class="wrap about-grid">
+    <div class="wrap">
+      <div class="about-grid">
       <div class="about-body reveal">
         <h2>About me</h2>
         <p>I own the test automation strategy at BTC Embedded Systems. A regression suite that lies to you is worse than no suite at all, so I treat stability as an acceptance criterion rather than something to fix later.</p>
@@ -95,13 +94,9 @@
         <p class="facts-note">Romanian, native. English, professional working proficiency. Italian and Spanish, limited working proficiency.</p>
       </aside>
     </div>
-  </section>
 
-  <!-- APPROACH -->
-  <section id="approach">
-    <div class="wrap">
-      <div class="reveal">
-        <h2>How I approach QA</h2>
+      <div class="subblock reveal">
+        <h3 class="subhead">How I approach QA</h3>
         <p class="section-intro">Four working principles I have arrived at after fifteen years, and what each one looks like in practice.</p>
       </div>
 
@@ -131,7 +126,7 @@
     <div class="wrap">
       <div class="reveal">
         <h2>Experience</h2>
-        <p class="section-intro">The short version of fifteen years. The CV page has the full detail, role by role.</p>
+        <p class="section-intro">The short version of fifteen years, and what I can do today. The CV page has the full detail, role by role.</p>
       </div>
 
       <div class="timeline" id="timeline">
@@ -208,50 +203,9 @@
       </div>
 
       <button class="more" id="moreTimeline" type="button" aria-expanded="false" aria-controls="timeline">Show the earlier roles &darr;</button>
-    </div>
-  </section>
 
-  <!-- IMPACT -->
-  <section class="impact">
-    <div class="wrap">
-      <div class="reveal">
-        <h2>What that adds up to</h2>
-        <p class="section-intro">Numbers measured before and after the work described above.</p>
-      </div>
-      <div class="impact-grid">
-        <div class="metric reveal"><div class="v">35%</div><div class="l">shorter full regression run after the Playwright migration</div><div class="s">automotive and HIL product lines</div></div>
-        <div class="metric reveal"><div class="v">30-40%</div><div class="l">fewer flaky failures and escaped bugs</div><div class="s">four consecutive product lines</div></div>
-        <div class="metric reveal"><div class="v">27%</div><div class="l">less framework maintenance and test authoring time</div><div class="s">after moving to Claude Code and MCP</div></div>
-        <div class="metric reveal"><div class="v">20%</div><div class="l">more backend defects caught before release</div><div class="s">after adding GraphQL coverage to the gates</div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PROJECTS -->
-  <section id="work">
-    <div class="wrap">
-      <div class="reveal">
-        <h2>Projects</h2>
-        <p class="section-intro">Everything above was built for the companies I worked for, so the code and the products belong to them. This section is for my own work, and I am putting it together now.</p>
-      </div>
-
-      <div class="empty-state reveal">
-        <h3>In progress</h3>
-        <p>What will land here: the agents and skills I write with Claude Code and TypeScript, Playwright MCP experiments, and small tools that came out of real testing problems rather than tutorials.</p>
-        <p>Until then, the fastest way to see how I work is the career history above, or a conversation.</p>
-        <div class="empty-actions">
-          <a class="btn btn-ghost" href="https://github.com/ella79" target="_top" rel="noopener noreferrer">My GitHub</a>
-          <a class="btn btn-ghost" href="#contact">Get in touch</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SKILLS -->
-  <section id="skills">
-    <div class="wrap">
-      <div class="reveal">
-        <h2>Skills</h2>
+      <div class="subblock reveal">
+        <h3 class="subhead">Skills and tools</h3>
         <p class="section-intro">Where I spend my working hours, and how deep each area actually goes.</p>
       </div>
 
@@ -323,6 +277,42 @@
           <span class="pill pill-extra">Figma MCP</span>
         </div>
         <button class="more" id="morePills" type="button" aria-expanded="false" aria-controls="pills">Show the full stack &darr;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMPACT -->
+  <section class="impact">
+    <div class="wrap">
+      <div class="reveal">
+        <h2>What that adds up to</h2>
+        <p class="section-intro">Numbers measured before and after the work described above.</p>
+      </div>
+      <div class="impact-grid">
+        <div class="metric reveal"><div class="v">35%</div><div class="l">shorter full regression run after the Playwright migration</div><div class="s">automotive and HIL product lines</div></div>
+        <div class="metric reveal"><div class="v">30-40%</div><div class="l">fewer flaky failures and escaped bugs</div><div class="s">four consecutive product lines</div></div>
+        <div class="metric reveal"><div class="v">27%</div><div class="l">less framework maintenance and test authoring time</div><div class="s">after moving to Claude Code and MCP</div></div>
+        <div class="metric reveal"><div class="v">20%</div><div class="l">more backend defects caught before release</div><div class="s">after adding GraphQL coverage to the gates</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="work">
+    <div class="wrap">
+      <div class="reveal">
+        <h2>Projects</h2>
+        <p class="section-intro">Everything above was built for the companies I worked for, so the code and the products belong to them. This section is for my own work, and I am putting it together now.</p>
+      </div>
+
+      <div class="empty-state reveal">
+        <h3>In progress</h3>
+        <p>What will land here: the agents and skills I write with Claude Code and TypeScript, Playwright MCP experiments, and small tools that came out of real testing problems rather than tutorials.</p>
+        <p>Until then, the fastest way to see how I work is the career history above, or a conversation.</p>
+        <div class="empty-actions">
+          <a class="btn btn-ghost" href="https://github.com/ella79" target="_top" rel="noopener noreferrer">My GitHub</a>
+          <a class="btn btn-ghost" href="#contact">Get in touch</a>
+        </div>
       </div>
     </div>
   </section>
