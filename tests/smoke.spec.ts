@@ -85,3 +85,22 @@ test.describe('CV page', () => {
     expect(pdf.status()).toBe(200);
   });
 });
+
+test.describe('addresses', () => {
+  test('an unknown section in the address lands on the not found page', async ({ page }) => {
+    await page.goto('/index.html#about5');
+    await expect(page).toHaveURL(/404\.html$/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('That page does not exist');
+  });
+
+  test('an unknown path lands on the not found page', async ({ page }) => {
+    const response = await page.request.get('/no-such-page');
+    expect(response.status()).toBe(404);
+  });
+
+  test('an anchor that used to exist still reaches the right section', async ({ page }) => {
+    await page.goto('/index.html#approach');
+    await expect(page).toHaveURL(/#about$/);
+    await expect(page.locator('#about')).toBeInViewport();
+  });
+});
