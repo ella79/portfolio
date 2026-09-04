@@ -94,11 +94,20 @@ browser if a generated PDF is ever wanted instead.
 
 ## Social icons
 
-`assets/img/linkedin.svg` and `assets/img/github.svg` are the official marks,
-downloaded from <https://brand.linkedin.com/downloads> and
-<https://github.com/logos>. They are not redistributed here as part of the
-licence below; they remain the trademarks of their owners. If either file is
-missing the footer falls back to the plain word, so nothing breaks.
+`assets/img/linkedin.svg` and `assets/img/github.svg` hold the LinkedIn and
+GitHub marks. They are not redistributed as part of the licence below; they
+remain the trademarks of their owners, used here only to link to the owner's own
+profiles.
+
+The two files are not embedded as images. They are CSS masks, and the colour is
+painted by the link, so whichever file is dropped in takes the footer palette and
+follows the hover instead of arriving in its own blue or black. The same masks
+label the contact list. An SVG whose cut outs are drawn as white shapes rather
+than as real holes will fill in under a mask; almost every brand SVG uses real
+paths and is fine.
+
+If either file is missing the plain word carries the link instead, so the page is
+never broken, only plainer.
 
 ## Licence
 
