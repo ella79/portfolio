@@ -5,10 +5,21 @@
   /* header state + sticky cta */
   var header = document.getElementById("siteHeader");
   var cta = document.getElementById("stickyCta");
+  var ctaStart = document.getElementById("about");
+  var ctaStop = document.getElementById("contact");
+  function ctaVisible(y){
+    /* The floating button is only useful between the point where someone is
+       reading about the work and the point where the real contact details
+       appear. On the CV page there is no contact section, so it stays. */
+    if(!ctaStart){ return y > 400; }
+    var started = y + header.offsetHeight >= ctaStart.offsetTop - 120;
+    var reachedContact = ctaStop && (y + window.innerHeight >= ctaStop.offsetTop + 120);
+    return started && !reachedContact;
+  }
   function onScroll(){
     var y = window.pageYOffset || document.documentElement.scrollTop;
     if(header){ header.classList.toggle("is-stuck", y > 24); }
-    if(cta){ cta.classList.toggle("on", y > 640); }
+    if(cta){ cta.classList.toggle("on", ctaVisible(y)); }
   }
   window.addEventListener("scroll", onScroll, { passive:true });
   onScroll();
