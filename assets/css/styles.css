@@ -278,6 +278,8 @@ textarea{min-height:132px;resize:vertical}
 .site-footer{background:var(--panel);color:#8ea6b0;padding:36px 0;font-size:.875rem}
 .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
 .footer-links{display:flex;gap:12px;flex-wrap:wrap}
+/* the mark from the header, sitting between the notice and the links */
+.footer-mark{flex:none;color:#3f6a72;opacity:.9}
 /* An icon that is already a recognisable mark does not need a box drawn around
    it. Colour alone carries the hover, and the hit area stays finger sized. */
 .footer-links .social{
@@ -460,11 +462,11 @@ textarea{min-height:132px;resize:vertical}
 .print-head{display:none}
 
 @media print{
-  @page{size:A4;margin:13mm 14mm}
+  @page{size:A4;margin:10mm 12mm}
 
   :root{--ink:#12222b;--ink-soft:#3f545e;--teal-dark:#0a554c;--line:#c9d4d1}
 
-  html,body{background:#fff;font-size:9.6pt;line-height:1.42}
+  html,body{background:#fff;font-size:8.5pt;line-height:1.23}
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 
   .site-header,.sticky-cta,.site-footer,.page-head,.no-print,.more,.cv-actions{display:none !important}
@@ -474,32 +476,47 @@ textarea{min-height:132px;resize:vertical}
   section{padding:0;border:0 !important}
   .cv{padding-top:0}
 
-  .print-head{display:block;margin-bottom:14pt;padding-bottom:9pt;border-bottom:1.6pt solid var(--teal-dark)}
-  .print-name{font-family:var(--font-display);font-weight:600;font-size:22pt;line-height:1.05;letter-spacing:-.02em;margin:0 0 3pt}
-  .print-role{font-family:var(--font-mono);font-size:9pt;color:var(--teal-dark);margin:0 0 5pt}
-  .print-contact{font-size:8.6pt;color:var(--ink-soft);margin:0}
+  .print-head{display:block;margin-bottom:8pt;padding-bottom:5pt;border-bottom:1.4pt solid var(--teal-dark)}
+  .print-name{font-family:var(--font-display);font-weight:600;font-size:18pt;line-height:1.05;letter-spacing:-.02em;margin:0 0 2pt}
+  .print-role{font-family:var(--font-mono);font-size:8.4pt;color:var(--teal-dark);margin:0 0 3pt}
+  .print-contact{font-size:7.8pt;color:var(--ink-soft);margin:0;white-space:nowrap}
 
-  .cv-block{margin-bottom:13pt}
+  .cv-block{margin-bottom:7pt}
   .cv h2{
-    font-size:11pt;margin-bottom:7pt;padding-bottom:3pt;
+    font-size:9.6pt;margin-bottom:3.5pt;padding-bottom:1.5pt;
     border-bottom:.6pt solid var(--line);color:var(--teal-dark);
     break-after:avoid;page-break-after:avoid;
   }
-  .cv-note{font-size:9.4pt;color:var(--ink);max-width:none;margin-bottom:5pt}
+  .cv-note{font-size:8.5pt;color:var(--ink);max-width:none;margin-bottom:3pt}
 
-  .role-entry{margin-bottom:9pt;max-width:none;break-inside:avoid;page-break-inside:avoid}
-  .role-entry h3{font-size:10pt;margin-bottom:1pt}
-  .role-entry .meta{font-size:8.4pt;margin-bottom:3.5pt;color:var(--ink-soft)}
-  .role-entry ul{padding-left:12pt;margin:0}
-  .role-entry li{font-size:9.2pt;color:var(--ink);margin-bottom:2.4pt}
+  .role-entry{margin-bottom:5pt;max-width:none;break-inside:avoid;page-break-inside:avoid}
+  .role-entry h3{font-size:9pt;margin-bottom:.5pt}
+  .role-entry .meta{font-size:7.8pt;margin-bottom:2pt;color:var(--ink-soft)}
+  .role-entry ul{padding-left:11pt;margin:0}
+  .role-entry li{font-size:8.4pt;color:var(--ink);margin-bottom:1pt}
 
-  .cv-cols{grid-template-columns:1fr 1fr;gap:0 22pt}
-  .cv-def dt{font-size:8.2pt;margin-bottom:1pt}
-  .cv-def dd{font-size:9.2pt;color:var(--ink);margin-bottom:6pt}
+  /* One reading column on paper. A parser walks the page top to bottom, and
+     two columns of skills side by side are where a CV scanner interleaves them.
+     The label sits beside its list instead, which is compact and stays linear. */
+  .cv-cols{display:block}
+  .cv-def{display:grid;grid-template-columns:92pt 1fr;gap:1pt 8pt;margin:0}
+  .cv-def dt{font-size:7.7pt;margin:0;color:var(--ink-soft)}
+  .cv-def dd{font-size:8.4pt;color:var(--ink);margin:0}
 
   /* every certification prints, whatever the on screen toggle says */
-  .pills{gap:4pt}
-  .pill,.pill-extra{display:inline-flex !important;font-size:8pt;padding:2pt 5pt;border-color:var(--line);color:var(--ink-soft)}
+  /* On paper the chips become a plain run of text: boxes cost four lines that
+     the page does not have, and a scanner reads a sentence more reliably than a
+     grid of framed fragments. */
+  .pills{display:block;gap:0}
+  .pill,.pill-extra{display:inline !important;border:0;padding:0;font-size:8pt;color:var(--ink)}
+  .pill::after{content:"; "}
+  .pill:last-child::after{content:""}
+
+  /* Education needs no second line per entry: the school belongs beside the degree */
+  .cv-compact .role-entry{margin-bottom:2.5pt}
+  .cv-compact .role-entry h3{display:inline}
+  .cv-compact .role-entry h3::after{content:", "}
+  .cv-compact .role-entry .meta{display:inline;margin:0}
 
   a{color:var(--ink);text-decoration:none}
   .cv-block:last-child{margin-bottom:0}
