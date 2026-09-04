@@ -91,10 +91,13 @@ p{margin:0 0 18px}
 
 /* ---------- buttons ---------- */
 .btn{
-  display:inline-block;font-family:var(--font-body);font-size:.9375rem;font-weight:500;
+  display:inline-flex;align-items:center;gap:9px;
+  font-family:var(--font-body);font-size:.9375rem;font-weight:500;
   padding:13px 24px;border-radius:2px;text-decoration:none;cursor:pointer;
   border:1.5px solid var(--teal-dark);transition:background .2s,color .2s,transform .2s;
 }
+/* the icon says what the button does before the label is read */
+.btn-icon{flex:none;display:block}
 .btn-solid{background:var(--teal-dark);color:#fff}
 .btn-solid:hover{background:var(--teal);transform:translateY(-1px)}
 .btn-ghost{background:transparent;color:var(--teal-dark)}
@@ -252,6 +255,10 @@ textarea{min-height:132px;resize:vertical}
 .form-note{margin-top:16px;font-size:.8125rem;color:var(--ink-soft);max-width:46ch}
 .form-status{margin-top:16px;font-size:.9375rem;color:var(--teal-dark);display:none}
 .form-status.on{display:block}
+/* The last section shares the bottom of the page with the footer, and the
+   footer brings its own breathing room. Full padding here pushed the pair past
+   one screen, so landing on Contact hid either its heading or the footer. */
+#contact{padding-bottom:56px}
 .direct{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:28px}
 .direct h3{margin-bottom:18px}
 .direct dl{margin:0}
@@ -304,6 +311,7 @@ textarea{min-height:132px;resize:vertical}
 /* ---------- sticky cta ---------- */
 .sticky-cta{
   position:fixed;right:24px;bottom:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
   background:var(--teal-dark);color:#fff;text-decoration:none;
   font-size:.875rem;padding:12px 20px;border-radius:2px;
   box-shadow:0 16px 30px -18px rgba(10,85,76,.9);
