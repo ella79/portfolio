@@ -9,3 +9,7 @@ Thumbs.db
 .env.*
 .idea/
 .vscode/
+
+# local design scratch, not part of the site
+logo-variante.png
+_local/
