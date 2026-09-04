@@ -89,7 +89,7 @@
       btn.innerHTML = open ? lessText : moreText;
     });
   }
-  wireToggle("moreCards", "cards", "Show all 6 projects &darr;", "Show fewer projects &uarr;");
+  wireToggle("moreTimeline", "timeline", "Show the earlier roles &darr;", "Show fewer roles &uarr;");
   wireToggle("morePills", "pills", "Show the full stack &darr;", "Show fewer tools &uarr;");
   wireToggle("moreCerts", "certPills", "Show all certifications listed here &darr;", "Show fewer certifications &uarr;");
   wireToggle("moreForm", "formPanel", "Prefer to write here? Open the contact form &darr;", "Close the contact form &uarr;");
