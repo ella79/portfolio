@@ -51,6 +51,10 @@
   onScroll();
 
   /* smooth scroll that survives sandboxed iframes */
+  var navSectionLinks = [].slice.call(document.querySelectorAll('.nav a[href^="#"]'));
+  var lastNavSectionId = navSectionLinks.length
+    ? navSectionLinks[navSectionLinks.length - 1].getAttribute("href").slice(1)
+    : "";
   document.querySelectorAll('a[href^="#"]').forEach(function(link){
     link.addEventListener("click", function(e){
       var id = link.getAttribute("href").slice(1);
@@ -61,10 +65,18 @@
         var y = window.pageYOffset || document.documentElement.scrollTop;
         var top = target.getBoundingClientRect().top + y - header.offsetHeight;
         var end = document.documentElement.scrollHeight - window.innerHeight;
-        /* Stopping at the top of the last section would leave the footer below
-           the fold, and the footer is where the links live. When the section is
-           already within a screen of the end, go to the end and show both. */
-        var to = (end - top < window.innerHeight) ? end : top;
+        /* Only the last section reaches for the end of the page: stopping at its
+           top would leave the footer below the fold, and the footer is where the
+           links live. Every other section stops at its own top, or a section that
+           merely sits near the end would be skipped past. */
+        var to = top;
+        if(id === lastNavSectionId){
+          var below = document.documentElement.scrollHeight - (target.getBoundingClientRect().top + y);
+          /* And only when the section and the footer both still fit on the
+             screen. On a narrow one they do not, and reaching for the end would
+             scroll straight past the heading. */
+          if(below <= window.innerHeight){ to = Math.max(top, end); }
+        }
         window.scrollTo({ top: Math.max(0, to), behavior: reduce ? "auto" : "smooth" });
         try{ if(history.pushState){ history.pushState(null, "", "#" + id); } }catch(err){}
       }

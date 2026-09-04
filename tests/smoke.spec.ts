@@ -68,6 +68,27 @@ test.describe('home page', () => {
     await expect(page.locator('.field.invalid')).toHaveCount(0);
   });
 
+  test('a nav click stops on its own section, never past it', async ({ page }) => {
+    // start at the bottom, where the last section reaches for the end of the page
+    await page.locator('.nav a[href="#contact"]').click();
+
+    for (const id of ['work', 'about', 'experience', 'contact']) {
+      await page.locator(`.nav a[href="#${id}"]`).click();
+      await expect
+        .poll(() =>
+          page.evaluate((section) => {
+            const heading = document.querySelector(`#${section} h2`);
+            const header = document.getElementById('siteHeader');
+            if (!heading || !header) return false;
+            const box = heading.getBoundingClientRect();
+            // clear of the sticky header, and inside the screen
+            return box.top >= header.offsetHeight - 2 && box.bottom <= window.innerHeight;
+          }, id),
+        )
+        .toBe(true);
+    }
+  });
+
   test('the CV button hands over the PDF rather than opening a page', async ({ page }) => {
     const button = page.locator('.nav .nav-page');
     await expect(button).toHaveAttribute('href', /assets\/cv\/Emanuela-Telescu-CV\.pdf$/);

@@ -99,6 +99,13 @@ GitHub marks. They are not redistributed as part of the licence below; they
 remain the trademarks of their owners, used here only to link to the owner's own
 profiles.
 
+`github.svg` comes from Simple Icons, which is CC0 and asks for nothing in
+return. `linkedin.svg` comes from Font Awesome Free, which is CC BY 4.0 and does
+ask for attribution; the copyright comment inside the file is what satisfies it,
+so **do not strip that comment when editing or minifying the file**. LinkedIn is
+no longer carried by Simple Icons, which is a fair signal of how closely that
+mark is watched.
+
 The two files are not embedded as images. They are CSS masks, and the colour is
 painted by the link, so whichever file is dropped in takes the footer palette and
 follows the hover instead of arriving in its own blue or black. The same masks
