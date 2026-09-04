@@ -255,7 +255,13 @@ textarea{min-height:132px;resize:vertical}
 .direct{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:28px}
 .direct h3{margin-bottom:18px}
 .direct dl{margin:0}
-.direct dt{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);margin-bottom:3px}
+.direct dt{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);margin-bottom:3px;
+}
+/* the label says what the channel is, the icon says it at a glance */
+.dt-icon{flex:none;width:14px;height:14px}
+.social-icon.dt-icon{width:14px;height:14px}
 .direct dd{margin:0 0 18px;font-size:.9375rem;word-break:break-word}
 .direct dd:last-child{margin-bottom:0}
 .direct a{text-decoration:none;border-bottom:1px solid var(--teal-wash)}
@@ -276,9 +282,21 @@ textarea{min-height:132px;resize:vertical}
   color:#fff;background:rgba(79,179,164,.12);
 }
 .footer-links .social:focus-visible{outline:2px solid #4fb3a4;outline-offset:2px}
-.social-icon{flex:none;display:block;width:20px;height:20px}
-/* Once a real icon loads, the word behind it is redundant. Until then the word
-   carries the link on its own, so nothing is lost if the file is missing. */
+.mail-icon{flex:none;display:block}
+/* The brand icons are painted, not embedded: the shape is a mask and the colour
+   comes from the link itself, so whichever file is dropped in matches the
+   footer and follows the hover instead of arriving in its own blue or black. */
+.social-icon{
+  flex:none;display:none;width:20px;height:20px;background-color:currentColor;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:center;mask-position:center;
+  -webkit-mask-size:contain;mask-size:contain;
+}
+.social-icon.li{-webkit-mask-image:url("../img/linkedin.svg");mask-image:url("../img/linkedin.svg")}
+.social-icon.gh{-webkit-mask-image:url("../img/github.svg");mask-image:url("../img/github.svg")}
+/* Once the file is confirmed to exist the word behind it is redundant. Until
+   then the word carries the link on its own, so a missing file is never a gap. */
+.has-icon > .social-icon{display:block}
 .social.has-icon .social-label{display:none}
 .site-footer a{color:#c3d3d9;text-decoration:none;border-bottom:1px solid transparent}
 .site-footer a:hover{border-bottom-color:#5ec1b1;color:#fff}

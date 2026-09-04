@@ -58,7 +58,14 @@
       var target = document.getElementById(id);
       if(target){
         e.preventDefault();
-        target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block:"start" });
+        var y = window.pageYOffset || document.documentElement.scrollTop;
+        var top = target.getBoundingClientRect().top + y - header.offsetHeight;
+        var end = document.documentElement.scrollHeight - window.innerHeight;
+        /* Stopping at the top of the last section would leave the footer below
+           the fold, and the footer is where the links live. When the section is
+           already within a screen of the end, go to the end and show both. */
+        var to = (end - top < window.innerHeight) ? end : top;
+        window.scrollTo({ top: Math.max(0, to), behavior: reduce ? "auto" : "smooth" });
         try{ if(history.pushState){ history.pushState(null, "", "#" + id); } }catch(err){}
       }
     });
@@ -182,13 +189,14 @@
   /* Footer icons. The LinkedIn and GitHub marks are their trademarks, so they
      are not drawn here. Drop the official SVGs into assets/img and they appear;
      until then the label stands on its own instead of a broken image. */
-  [].slice.call(document.querySelectorAll("img.social-icon")).forEach(function(icon){
-    var link = icon.parentNode;
-    function drop(){ if(icon.parentNode){ icon.parentNode.removeChild(icon); } }
-    function adopt(){ if(link){ link.classList.add("has-icon"); } }
-    icon.addEventListener("error", drop);
-    icon.addEventListener("load", adopt);
-    if(icon.complete){ if(icon.naturalWidth === 0){ drop(); } else { adopt(); } }
+  /* A masked icon cannot report a missing file: an absent mask hides everything
+     and the link would go blank. So the file is checked first, and only a file
+     that actually loaded is allowed to replace the word. */
+  [].slice.call(document.querySelectorAll(".social-icon[data-src]")).forEach(function(span){
+    var link = span.parentNode;
+    var probe = new Image();
+    probe.onload = function(){ if(link){ link.classList.add("has-icon"); } };
+    probe.src = span.getAttribute("data-src");
   });
 
   /* expandable lists */
