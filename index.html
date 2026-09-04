@@ -3,326 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Emanuela Telescu, Senior QA Automation Engineer">
+<meta property="og:description" content="Playwright, TypeScript, visual regression, and AI augmented and agentic test automation with Claude Code and Playwright MCP.">
+<meta property="og:url" content="https://ella79.github.io/portfolio/">
+<link rel="canonical" href="https://ella79.github.io/portfolio/">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <title>Emanuela Telescu, Senior QA Automation Engineer</title>
-<meta name="description" content="Senior QA Automation Engineer with 15+ years in software quality assurance. Playwright, TypeScript, visual regression and AI-augmented test automation for safety critical products.">
+<meta name="description" content="Senior QA Automation Engineer with 15+ years in quality assurance. Playwright, TypeScript, visual regression, and AI augmented and agentic test automation with Claude Code and Playwright MCP.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{
-  --ink:#12222b;
-  --ink-soft:#4a5f6a;
-  --paper:#f3f5f4;
-  --card:#ffffff;
-  --line:#dde4e2;
-  --teal:#0f6e63;
-  --teal-dark:#0a554c;
-  --teal-wash:#e6f0ee;
-  --amber:#b4620f;
-  --panel:#0e1e26;
-  --panel-line:#223a45;
-  --panel-text:#c6d7dd;
-  --font-display:"Archivo",Georgia,sans-serif;
-  --font-body:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
-  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-  --header-h:76px;
-  --max:1120px;
-}
-
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;
-  background:var(--paper);
-  color:var(--ink);
-  font-family:var(--font-body);
-  font-size:1rem;
-  line-height:1.7;
-  -webkit-font-smoothing:antialiased;
-}
-img{max-width:100%}
-a{color:var(--teal-dark)}
-
-.wrap{width:100%;max-width:var(--max);margin:0 auto;padding:0 32px}
-
-section{scroll-margin-top:var(--header-h);padding:104px 0}
-section + section{border-top:1px solid var(--line)}
-
-h1,h2,h3{font-family:var(--font-display);font-weight:600;letter-spacing:-.02em;margin:0}
-h2{font-size:2rem;line-height:1.2}
-h3{font-size:1.125rem;line-height:1.35}
-p{margin:0 0 18px}
-.lead{font-size:1.0625rem;color:var(--ink-soft);max-width:62ch}
-
-/* ---------- header ---------- */
-.site-header{
-  position:fixed;top:0;left:0;right:0;z-index:60;
-  height:var(--header-h);
-  display:flex;align-items:center;
-  background:transparent;
-  border-bottom:1px solid transparent;
-  transition:background .35s ease,border-color .35s ease,box-shadow .35s ease;
-}
-.site-header.is-stuck{
-  background:rgba(255,255,255,.92);
-  backdrop-filter:saturate(140%) blur(10px);
-  border-bottom-color:var(--line);
-  box-shadow:0 6px 24px -20px rgba(18,34,43,.6);
-}
-.header-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%}
-.monogram{
-  font-family:var(--font-mono);font-size:.8125rem;letter-spacing:.06em;
-  color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:9px;
-}
-.monogram em{font-style:normal}
-.monogram span{
-  width:26px;height:26px;border-radius:50%;
-  border:1.5px solid var(--teal);color:var(--teal-dark);
-  display:grid;place-items:center;font-size:.6875rem;font-weight:500;
-}
-.nav{display:flex;gap:28px;align-items:center}
-.nav a{
-  font-size:.9375rem;color:var(--ink-soft);text-decoration:none;
-  padding:4px 0;border-bottom:1.5px solid transparent;transition:color .2s,border-color .2s;
-}
-.nav a:hover,.nav a:focus-visible{color:var(--teal-dark);border-bottom-color:var(--teal)}
-
-/* ---------- buttons ---------- */
-.btn{
-  display:inline-block;font-family:var(--font-body);font-size:.9375rem;font-weight:500;
-  padding:13px 24px;border-radius:2px;text-decoration:none;cursor:pointer;
-  border:1.5px solid var(--teal-dark);transition:background .2s,color .2s,transform .2s;
-}
-.btn-solid{background:var(--teal-dark);color:#fff}
-.btn-solid:hover{background:var(--teal);transform:translateY(-1px)}
-.btn-ghost{background:transparent;color:var(--teal-dark)}
-.btn-ghost:hover{background:var(--teal-wash);transform:translateY(-1px)}
-
-/* ---------- hero ---------- */
-.hero{padding:calc(var(--header-h) + 88px) 0 96px;border-top:0}
-.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:72px;align-items:center}
-.hero h1{font-size:clamp(2.25rem,4.6vw,3rem);line-height:1.05;margin-bottom:18px}
-.hero .role{
-  font-family:var(--font-mono);font-size:.875rem;color:var(--teal-dark);
-  margin:0 0 26px;letter-spacing:.01em;
-}
-.hero .bio{font-size:1.0625rem;color:var(--ink-soft);max-width:52ch;margin-bottom:32px}
-.hero-actions{display:flex;gap:14px;flex-wrap:wrap}
-.hero-meta{
-  margin-top:36px;font-family:var(--font-mono);font-size:.8125rem;color:var(--ink-soft);
-}
-
-.hero-side{display:flex;flex-direction:column;align-items:center;gap:28px}
-/* Swap the monogram for a photo: replace the contents of .avatar with
-   <img src="photo.jpg" alt="Emanuela Telescu"> and it will fill the circle. */
-.avatar{
-  width:186px;height:186px;border-radius:50%;
-  background:var(--card);border:1px solid var(--line);
-  box-shadow:0 0 0 6px var(--paper),0 0 0 7.5px var(--teal);
-  display:grid;place-items:center;overflow:hidden;flex:none;
-}
-.avatar-initials{font-family:var(--font-display);font-size:2.5rem;color:var(--teal-dark);letter-spacing:.02em}
-.avatar img{width:100%;height:100%;object-fit:cover}
-
-/* signature element: a suite run */
-.run{
-  width:100%;background:var(--panel);border-radius:4px;
-  padding:20px 22px 18px;font-family:var(--font-mono);font-size:.8125rem;
-  color:var(--panel-text);box-shadow:0 24px 48px -32px rgba(14,30,38,.9);
-}
-.run-head{
-  display:flex;justify-content:space-between;align-items:center;
-  padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--panel-line);
-  color:#7f9aa5;font-size:.75rem;
-}
-.run-dot{width:7px;height:7px;border-radius:50%;background:#4fb3a4;display:inline-block;margin-right:7px;vertical-align:1px}
-.run-line{
-  display:flex;gap:10px;align-items:baseline;padding:4px 0;
-  opacity:0;transform:translateY(4px);transition:opacity .3s ease,transform .3s ease;
-}
-.run-line.on{opacity:1;transform:none}
-.run-line .tick{color:#4fb3a4;flex:none}
-.run-line .name{color:var(--panel-text);flex:1;min-width:0}
-.run-line .ms{color:#6b8894;flex:none}
-.run-foot{
-  margin-top:12px;padding-top:12px;border-top:1px solid var(--panel-line);
-  font-size:.75rem;color:#7f9aa5;opacity:0;transition:opacity .4s ease;
-}
-.run-foot.on{opacity:1}
-.run-foot b{color:#4fb3a4;font-weight:500}
-
-/* ---------- about ---------- */
-.about-grid{display:grid;grid-template-columns:1.5fr .8fr;gap:64px;align-items:start}
-.about-body{max-width:66ch}
-.about h2{margin-bottom:28px}
-.facts{
-  background:var(--card);border:1px solid var(--line);border-radius:3px;padding:8px 24px 20px;
-}
-.fact{padding:16px 0;border-bottom:1px solid var(--line)}
-.fact:last-child{border-bottom:0}
-.fact .n{font-family:var(--font-display);font-size:1.75rem;line-height:1.1;color:var(--ink)}
-.fact .k{font-size:.875rem;color:var(--ink-soft);margin-top:2px}
-.facts-note{margin:16px 0 0;font-size:.8125rem;color:var(--ink-soft);line-height:1.6}
-
-/* ---------- work ---------- */
-.section-intro{max-width:60ch;color:var(--ink-soft);margin-top:14px}
-.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;margin-top:48px}
-.card{
-  background:var(--card);border:1px solid var(--line);border-radius:3px;
-  display:flex;flex-direction:column;overflow:hidden;
-  transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
-}
-.card:hover{transform:translateY(-5px);box-shadow:0 22px 40px -30px rgba(18,34,43,.55);border-color:#c8d5d1}
-.shot{
-  height:132px;display:grid;place-items:center;
-  font-family:var(--font-mono);font-size:.75rem;color:#5d7982;
-  background:
-    repeating-linear-gradient(90deg,rgba(15,110,99,.07) 0 1px,transparent 1px 22px),
-    repeating-linear-gradient(0deg,rgba(15,110,99,.07) 0 1px,transparent 1px 22px),
-    var(--teal-wash);
-  border-bottom:1px solid var(--line);text-align:center;padding:0 16px;
-}
-.card-body{padding:24px 24px 26px;display:flex;flex-direction:column;flex:1}
-.card h3{margin-bottom:6px}
-.card .where{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);margin-bottom:14px}
-.card p{font-size:.9375rem;color:var(--ink-soft);margin-bottom:16px}
-.result{
-  font-weight:600;color:var(--amber);font-size:.9375rem;line-height:1.5;
-  padding-left:14px;border-left:2px solid var(--amber);margin-bottom:18px;
-}
-.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto}
-.tag{
-  font-family:var(--font-mono);font-size:.6875rem;color:var(--teal-dark);
-  background:var(--teal-wash);padding:4px 9px;border-radius:2px;
-}
-.card-extra{display:none}
-.cards.is-expanded .card-extra{display:flex}
-.more{
-  margin-top:32px;background:none;border:0;padding:6px 0;cursor:pointer;
-  font-family:var(--font-body);font-size:.9375rem;color:var(--teal-dark);
-  border-bottom:1.5px solid var(--teal);
-}
-.more:hover{color:var(--teal)}
-
-/* ---------- impact ---------- */
-.impact{background:var(--panel);color:#e4ecef;border-top:0}
-.impact h2{color:#fff}
-.impact .section-intro{color:#9db4bd}
-.impact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:34px;margin-top:52px}
-.metric .v{font-family:var(--font-display);font-size:2.5rem;line-height:1;color:#5ec1b1}
-.metric .l{margin-top:12px;font-size:.9375rem;color:#c3d3d9;line-height:1.55}
-.metric .s{margin-top:10px;font-family:var(--font-mono);font-size:.75rem;color:#7f9aa5}
-
-/* ---------- skills ---------- */
-.skills-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:30px 56px;margin-top:48px}
-.skill-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
-.skill-head .nm{font-size:.9375rem;font-weight:500}
-.skill-head .pc{font-family:var(--font-mono);font-size:.8125rem;color:var(--ink-soft)}
-.bar{height:5px;background:#e2e8e6;border-radius:3px;overflow:hidden}
-.bar span{display:block;height:100%;width:0;background:var(--teal);border-radius:3px;transition:width 1.1s cubic-bezier(.2,.7,.3,1)}
-.skills-note{margin-top:38px;font-size:.875rem;color:var(--ink-soft)}
-.stack{margin-top:52px}
-.stack h3{font-size:1rem;margin-bottom:16px}
-.pills{display:flex;flex-wrap:wrap;gap:8px}
-.pill{
-  font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);
-  border:1px solid var(--line);background:var(--card);padding:6px 11px;border-radius:2px;
-}
-.pill-extra{display:none}
-.pills.is-expanded .pill-extra{display:inline-flex}
-
-/* ---------- contact ---------- */
-.contact-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:64px;align-items:start;margin-top:44px}
-.field{margin-bottom:20px}
-label{display:block;font-size:.875rem;font-weight:500;margin-bottom:7px}
-input,select,textarea{
-  width:100%;font-family:var(--font-body);font-size:.9375rem;color:var(--ink);
-  background:var(--card);border:1px solid var(--line);border-radius:2px;padding:12px 13px;
-  transition:border-color .2s,box-shadow .2s;
-}
-input:focus,select:focus,textarea:focus{
-  outline:none;border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-wash);
-}
-textarea{min-height:132px;resize:vertical}
-.err{display:none;color:#a12b1e;font-size:.8125rem;margin-top:6px}
-.field.invalid .err{display:block}
-.field.invalid input,.field.invalid select,.field.invalid textarea{border-color:#a12b1e}
-.form-note{margin-top:16px;font-size:.8125rem;color:var(--ink-soft);max-width:46ch}
-.form-status{margin-top:16px;font-size:.9375rem;color:var(--teal-dark);display:none}
-.form-status.on{display:block}
-.direct{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:28px}
-.direct h3{margin-bottom:18px}
-.direct dl{margin:0}
-.direct dt{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);margin-bottom:3px}
-.direct dd{margin:0 0 18px;font-size:.9375rem;word-break:break-word}
-.direct dd:last-child{margin-bottom:0}
-.direct a{text-decoration:none;border-bottom:1px solid var(--teal-wash)}
-.direct a:hover{border-bottom-color:var(--teal)}
-
-/* ---------- footer ---------- */
-.site-footer{background:var(--panel);color:#8ea6b0;padding:36px 0;font-size:.875rem}
-.footer-inner{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
-.footer-links{display:flex;gap:22px}
-.site-footer a{color:#c3d3d9;text-decoration:none;border-bottom:1px solid transparent}
-.site-footer a:hover{border-bottom-color:#5ec1b1;color:#fff}
-
-/* ---------- sticky cta ---------- */
-.sticky-cta{
-  position:fixed;right:24px;bottom:24px;z-index:70;
-  background:var(--teal-dark);color:#fff;text-decoration:none;
-  font-size:.875rem;padding:12px 20px;border-radius:2px;
-  box-shadow:0 16px 30px -18px rgba(10,85,76,.9);
-  opacity:0;pointer-events:none;transform:translateY(8px);
-  transition:opacity .3s ease,transform .3s ease,background .2s;
-}
-.sticky-cta.on{opacity:1;pointer-events:auto;transform:none}
-.sticky-cta:hover{background:var(--teal)}
-
-/* ---------- reveal ---------- */
-.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
-.reveal.is-visible{opacity:1;transform:none}
-
-:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
-
-@media (max-width:960px){
-  section{padding:80px 0}
-  .hero{padding:calc(var(--header-h) + 48px) 0 72px}
-  .hero-grid,.about-grid,.contact-grid{grid-template-columns:1fr;gap:44px}
-  .hero-side{display:contents}
-  .avatar{order:1;margin:0 auto}
-  .hero-text{order:2}
-  .run{order:3}
-  .impact-grid{grid-template-columns:repeat(2,1fr);gap:32px}
-  .nav{gap:20px}
-  .nav a{font-size:.875rem}
-}
-@media (max-width:640px){
-  .wrap{padding:0 20px}
-  section{padding:64px 0}
-  h2{font-size:1.625rem}
-  .hero-grid{text-align:center;gap:34px}
-  .hero .bio{margin-left:auto;margin-right:auto}
-  .hero-actions{justify-content:center}
-  .avatar{width:152px;height:152px}
-  .run,.run-head,.run-line,.run-foot{text-align:left}
-  .run-line .name{text-align:left}
-  .cards,.skills-grid,.impact-grid{grid-template-columns:1fr}
-  .btn{width:100%;text-align:center}
-  .monogram em{display:none}
-  .nav{gap:16px}
-  .nav a{font-size:.8125rem}
-  .sticky-cta{right:16px;bottom:16px;padding:11px 16px}
-}
-@media (max-width:380px){
-  .nav{gap:12px}
-  .nav a{font-size:.75rem}
-}
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important}
-  .reveal,.run-line,.run-foot{opacity:1;transform:none}
-}
-</style>
+<link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
 
@@ -331,8 +25,10 @@ textarea{min-height:132px;resize:vertical}
     <a class="monogram" href="#top"><span>ET</span><em>Emanuela Telescu</em></a>
     <nav class="nav" aria-label="Main">
       <a href="#about">About</a>
+      <a href="#approach">Approach</a>
       <a href="#work">Work</a>
       <a href="#skills">Skills</a>
+      <a href="cv.html">CV</a>
       <a href="#contact">Contact</a>
     </nav>
   </div>
@@ -345,18 +41,18 @@ textarea{min-height:132px;resize:vertical}
     <div class="wrap hero-grid">
       <div class="hero-text">
         <h1>Emanuela Telescu</h1>
-        <p class="role">Senior QA Automation Engineer / SDET</p>
-        <p class="bio">I build test automation that engineering teams trust, for products where a missed defect is expensive. Fifteen years in quality assurance, the last six spent designing Playwright and TypeScript frameworks for safety critical embedded software.</p>
+        <p class="role">Senior QA Automation Engineer / SDET, AI augmented and agentic testing</p>
+        <p class="bio">Fifteen years in quality assurance, six of them building test automation for safety critical embedded products. I design Playwright and TypeScript frameworks, and over the past year I moved my teams onto AI augmented testing with Claude Code, Playwright MCP and agents I write myself.</p>
         <div class="hero-actions">
           <a class="btn btn-solid" href="#work">See my work</a>
           <a class="btn btn-ghost" href="#contact">Get in touch</a>
         </div>
-        <p class="hero-meta">Timisoara, Romania. Open to remote roles across Europe.</p>
+        <p class="hero-meta">Timisoara, Romania. Open to remote roles across the world.</p>
       </div>
 
       <div class="hero-side">
-        <div class="avatar" aria-hidden="true">
-          <span class="avatar-initials">ET</span>
+        <div class="avatar">
+          <img src="assets/img/photo.jpg" alt="Emanuela Telescu" width="512" height="512">
         </div>
 
         <div class="run" id="run" role="img" aria-label="Illustration of a passing Playwright test run covering visual regression, GraphQL contracts, CI quality gates and cross browser checks.">
@@ -394,17 +90,46 @@ textarea{min-height:132px;resize:vertical}
     </div>
   </section>
 
+  <!-- APPROACH -->
+  <section id="approach">
+    <div class="wrap">
+      <div class="reveal">
+        <h2>How I approach QA</h2>
+        <p class="section-intro">Four working principles I have arrived at after fifteen years, and what each one looks like in practice.</p>
+      </div>
+
+      <div class="principles">
+        <div class="principle reveal">
+          <h3>A suite nobody trusts is worse than no suite</h3>
+          <p>A flaky test is a defect in the test code, not background noise to be retried away. When I rebuilt the end to end suite in Playwright I treated stability as the acceptance criterion, which is how flaky failures and escaped bugs came down by 30 to 40 percent.</p>
+        </div>
+        <div class="principle reveal">
+          <h3>Testing belongs inside the pipeline, not after it</h3>
+          <p>Quality gates that block a failing build are worth more than a report nobody opens. I put GraphQL API coverage next to the UI suites inside CI/CD, which moved roughly 20 percent more backend defects to before the release instead of after it.</p>
+        </div>
+        <div class="principle reveal">
+          <h3>Automate the maintenance, not only the tests</h3>
+          <p>Most automation effort is spent keeping a framework alive rather than writing new coverage. That is where agentic tooling actually pays: Claude Code, Playwright MCP and agents I write myself took 27 percent off maintenance and authoring time across two projects.</p>
+        </div>
+        <div class="principle reveal">
+          <h3>Own the strategy, not just the tickets</h3>
+          <p>Deciding what to test, in which layer, and what to stop testing is the part that needs a senior engineer. I have owned test strategy independently in Agile teams and kept on time delivery across every quarterly release for four consecutive years.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- WORK -->
   <section id="work">
     <div class="wrap">
       <div class="reveal">
         <h2>Selected work</h2>
-        <p class="section-intro">Six projects where I owned the automation decision, not just the test cases. Percentages are the measured or estimated effect reported to the teams involved.</p>
+        <p class="section-intro">Six projects where I owned the automation decision, not just the test cases. The work belongs to the companies I did it for, so there are no product screenshots here. What I can share is the problem, the approach and the effect it had, with percentages as measured or estimated by the teams involved.</p>
       </div>
 
       <div class="cards" id="cards">
         <article class="card reveal">
-          <div class="shot">Screenshot: Playwright migration and visual regression suite</div>
+          <p class="card-domain">Automotive and HIL product lines</p>
           <div class="card-body">
             <h3>Cypress to Playwright migration, plus visual regression from scratch</h3>
             <p class="where">BTC Embedded Systems, 2022 to present</p>
@@ -415,7 +140,7 @@ textarea{min-height:132px;resize:vertical}
         </article>
 
         <article class="card reveal">
-          <div class="shot">Screenshot: agentic test authoring with Claude Code and Playwright MCP</div>
+          <p class="card-domain">Team wide tooling change</p>
           <div class="card-body">
             <h3>AI augmented test automation in a production team</h3>
             <p class="where">BTC Embedded Systems, 2025 to 2026</p>
@@ -426,7 +151,7 @@ textarea{min-height:132px;resize:vertical}
         </article>
 
         <article class="card reveal">
-          <div class="shot">Screenshot: GraphQL contract coverage inside the CI quality gate</div>
+          <p class="card-domain">CI/CD quality gates</p>
           <div class="card-body">
             <h3>GraphQL API coverage inside CI/CD quality gates</h3>
             <p class="where">BTC Embedded Systems</p>
@@ -437,7 +162,7 @@ textarea{min-height:132px;resize:vertical}
         </article>
 
         <article class="card reveal">
-          <div class="shot">Screenshot: containerized runs with stubbed third party services</div>
+          <p class="card-domain">Enterprise platforms, maritime and insurance</p>
           <div class="card-body">
             <h3>Containerized suites that stopped depending on live services</h3>
             <p class="where">Endava, 2021 to 2022</p>
@@ -448,7 +173,7 @@ textarea{min-height:132px;resize:vertical}
         </article>
 
         <article class="card card-extra reveal">
-          <div class="shot">Screenshot: Selenium Grid running on a Kubernetes pipeline</div>
+          <p class="card-domain">Kubernetes based test infrastructure</p>
           <div class="card-body">
             <h3>Java and Selenium framework on a Kubernetes pipeline</h3>
             <p class="where">Variston, 2019 to 2020</p>
@@ -459,7 +184,7 @@ textarea{min-height:132px;resize:vertical}
         </article>
 
         <article class="card card-extra reveal">
-          <div class="shot">Screenshot: security QA of a command and control platform</div>
+          <p class="card-domain">Offensive security platform</p>
           <div class="card-body">
             <h3>Security QA of a red teaming command and control platform</h3>
             <p class="where">Variston, 2019 to 2020</p>
@@ -579,7 +304,31 @@ textarea{min-height:132px;resize:vertical}
       </div>
 
       <div class="contact-grid">
-        <form id="contactForm" novalidate class="reveal">
+        <div class="direct reveal">
+          <h3>Where to reach me</h3>
+          <dl>
+            <dt>Email</dt>
+            <dd><a href="mailto:emanuela.telescu@yahoo.com" target="_top" rel="noopener noreferrer">emanuela.telescu@yahoo.com</a></dd>
+            <dt>LinkedIn</dt>
+            <dd><a href="https://www.linkedin.com/in/emanuelatelescu" target="_top" rel="noopener noreferrer">linkedin.com/in/emanuelatelescu</a></dd>
+            <dt>GitHub</dt>
+            <dd><a href="https://github.com/ella79" target="_top" rel="noopener noreferrer">github.com/ella79</a></dd>
+            <dt>CV</dt>
+            <dd><a href="cv.html">Read the full CV</a>, or <a href="assets/cv/Emanuela-Telescu-CV.pdf" download>download the PDF</a>.</dd>
+            <dt>Based in</dt>
+            <dd>Timisoara, Romania. Open to remote roles across the world.</dd>
+          </dl>
+        </div>
+
+        <div class="contact-aside reveal">
+          <p>Email is the fastest way to reach me, and LinkedIn works just as well if that is where you found me. I usually reply within a day.</p>
+          <p>If you are hiring, the CV page has the full history, and the PDF is ready to attach to an application.</p>
+          <button class="more" id="moreForm" type="button" aria-expanded="false" aria-controls="formPanel">Prefer to write here? Open the contact form &darr;</button>
+        </div>
+      </div>
+
+      <div class="form-panel" id="formPanel">
+        <form id="contactForm" novalidate>
           <div class="field">
             <label for="name">Your name</label>
             <input type="text" id="name" name="name" autocomplete="name">
@@ -606,23 +355,9 @@ textarea{min-height:132px;resize:vertical}
             <span class="err" id="err-message">Please write at least a short message.</span>
           </div>
           <button class="btn btn-solid" type="submit">Send message</button>
-          <p class="form-note">This opens your email app with the message ready to send, so nothing is stored on this page.</p>
+          <p class="form-note">This opens your own email app with the message ready to send. Nothing is stored on this page and nothing is posted to a server.</p>
           <p class="form-status" id="formStatus">Your email app should be open now. If nothing happened, write to emanuela.telescu@yahoo.com directly.</p>
         </form>
-
-        <div class="direct reveal">
-          <h3>Direct</h3>
-          <dl>
-            <dt>Email</dt>
-            <dd><a href="mailto:emanuela.telescu@yahoo.com" target="_top" rel="noopener noreferrer">emanuela.telescu@yahoo.com</a></dd>
-            <dt>LinkedIn</dt>
-            <dd><a href="https://www.linkedin.com/in/emanuelatelescu" target="_top" rel="noopener noreferrer">linkedin.com/in/emanuelatelescu</a></dd>
-            <dt>Phone</dt>
-            <dd><a href="tel:+40757017779" target="_top" rel="noopener noreferrer">+40 757 017 779</a></dd>
-            <dt>Based in</dt>
-            <dd>Timisoara, Romania. Working remotely with international teams.</dd>
-          </dl>
-        </div>
       </div>
     </div>
   </section>
@@ -634,6 +369,7 @@ textarea{min-height:132px;resize:vertical}
     <span>&copy; 2026 Emanuela Telescu</span>
     <div class="footer-links">
       <a href="https://www.linkedin.com/in/emanuelatelescu" target="_top" rel="noopener noreferrer">LinkedIn</a>
+      <a href="https://github.com/ella79" target="_top" rel="noopener noreferrer">GitHub</a>
       <a href="mailto:emanuela.telescu@yahoo.com" target="_top" rel="noopener noreferrer">Email</a>
     </div>
   </div>
@@ -641,137 +377,6 @@ textarea{min-height:132px;resize:vertical}
 
 <a class="sticky-cta" id="stickyCta" href="#contact">Get in touch</a>
 
-<script>
-(function(){
-  "use strict";
-  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  /* header state + sticky cta */
-  var header = document.getElementById("siteHeader");
-  var cta = document.getElementById("stickyCta");
-  function onScroll(){
-    var y = window.pageYOffset || document.documentElement.scrollTop;
-    header.classList.toggle("is-stuck", y > 24);
-    cta.classList.toggle("on", y > 640);
-  }
-  window.addEventListener("scroll", onScroll, { passive:true });
-  onScroll();
-
-  /* smooth scroll that survives sandboxed iframes */
-  document.querySelectorAll('a[href^="#"]').forEach(function(link){
-    link.addEventListener("click", function(e){
-      var id = link.getAttribute("href").slice(1);
-      if(!id){ return; }
-      var target = document.getElementById(id);
-      if(target){
-        e.preventDefault();
-        target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block:"start" });
-        try{ if(history.pushState){ history.pushState(null, "", "#" + id); } }catch(err){}
-      }
-    });
-  });
-
-  /* reveal on scroll */
-  var revealables = document.querySelectorAll(".reveal");
-  if(reduce || !("IntersectionObserver" in window)){
-    revealables.forEach(function(el){ el.classList.add("is-visible"); });
-  } else {
-    var revealObserver = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        if(entry.isIntersecting){
-          entry.target.classList.add("is-visible");
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold:.15, rootMargin:"0px 0px -40px 0px" });
-    revealables.forEach(function(el){ revealObserver.observe(el); });
-  }
-
-  /* skill bars fill when the grid comes into view */
-  var grid = document.getElementById("skillsGrid");
-  function fillBars(){
-    document.querySelectorAll(".bar span").forEach(function(bar){
-      bar.style.width = bar.getAttribute("data-level") + "%";
-    });
-  }
-  if(reduce || !("IntersectionObserver" in window)){
-    fillBars();
-  } else {
-    var barObserver = new IntersectionObserver(function(entries, obs){
-      entries.forEach(function(entry){
-        if(entry.isIntersecting){ fillBars(); obs.disconnect(); }
-      });
-    }, { threshold:.3 });
-    barObserver.observe(grid);
-  }
-
-  /* hero run sequence, the one orchestrated moment on the page */
-  var lines = document.querySelectorAll("#run .run-line");
-  var foot = document.getElementById("runFoot");
-  if(reduce){
-    lines.forEach(function(l){ l.classList.add("on"); });
-    foot.classList.add("on");
-  } else {
-    lines.forEach(function(line, i){
-      setTimeout(function(){ line.classList.add("on"); }, 380 + i * 260);
-    });
-    setTimeout(function(){ foot.classList.add("on"); }, 380 + lines.length * 260 + 160);
-  }
-
-  /* expandable lists */
-  function wireToggle(btnId, listId, moreText, lessText){
-    var btn = document.getElementById(btnId);
-    var list = document.getElementById(listId);
-    if(!btn || !list){ return; }
-    btn.addEventListener("click", function(){
-      var open = list.classList.toggle("is-expanded");
-      btn.setAttribute("aria-expanded", open ? "true" : "false");
-      btn.innerHTML = open ? lessText : moreText;
-    });
-  }
-  wireToggle("moreCards", "cards", "Show all 6 projects &darr;", "Show fewer projects &uarr;");
-  wireToggle("morePills", "pills", "Show the full stack &darr;", "Show fewer tools &uarr;");
-
-  /* contact form: validate, then hand off to the email client */
-  var form = document.getElementById("contactForm");
-  var status = document.getElementById("formStatus");
-  function setInvalid(id, invalid){
-    var field = document.getElementById(id).closest(".field");
-    field.classList.toggle("invalid", invalid);
-    return !invalid;
-  }
-  ["name","email","subject","message"].forEach(function(id){
-    var el = document.getElementById(id);
-    el.addEventListener("input", function(){ el.closest(".field").classList.remove("invalid"); });
-    el.addEventListener("change", function(){ el.closest(".field").classList.remove("invalid"); });
-  });
-  form.addEventListener("submit", function(e){
-    e.preventDefault();
-    var name = document.getElementById("name").value.trim();
-    var email = document.getElementById("email").value.trim();
-    var subject = document.getElementById("subject").value;
-    var message = document.getElementById("message").value.trim();
-    var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
-
-    var ok = true;
-    ok = setInvalid("name", name.length < 2) && ok;
-    ok = setInvalid("email", !emailOk) && ok;
-    ok = setInvalid("subject", subject === "") && ok;
-    ok = setInvalid("message", message.length < 10) && ok;
-    if(!ok){
-      status.classList.remove("on");
-      form.querySelector(".field.invalid input, .field.invalid select, .field.invalid textarea").focus();
-      return;
-    }
-
-    var body = message + "\n\n" + name + "\n" + email;
-    var href = "mailto:emanuela.telescu@yahoo.com"
-      + "?subject=" + encodeURIComponent(subject + " enquiry from " + name)
-      + "&body=" + encodeURIComponent(body);
-    status.classList.add("on");
-    window.location.href = href;
-  });
-})();
-</script>
+<script src="assets/js/main.js" defer></script>
 </body>
 </html>
