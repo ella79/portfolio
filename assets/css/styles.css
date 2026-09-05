@@ -153,7 +153,8 @@ p{margin:0 0 18px}
 .hero .bio{font-size:1.0625rem;color:var(--ink-soft);max-width:52ch;margin-bottom:32px}
 .hero-actions{display:flex;gap:14px;flex-wrap:wrap}
 .hero-meta{
-  margin-top:36px;font-family:var(--font-mono);font-size:.8125rem;color:var(--ink-soft);
+  margin:0;font-family:var(--font-mono);font-size:.8125rem;line-height:1.7;
+  color:var(--ink-soft);text-align:center;max-width:30ch;
 }
 
 .hero-side{display:flex;flex-direction:column;align-items:center;gap:28px}
@@ -393,6 +394,7 @@ textarea{min-height:132px;resize:vertical}
   .hero-grid,.about-grid,.contact-grid{grid-template-columns:1fr;gap:44px}
   .hero-side{display:contents}
   .avatar{order:1;margin:0 auto}
+  .hero-meta{order:1;margin:0 auto}
   .hero-text{order:2}
   .impact-grid{grid-template-columns:repeat(2,1fr);gap:32px}
   .nav{gap:20px}
