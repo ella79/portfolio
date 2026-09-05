@@ -183,21 +183,6 @@
     barObserver.observe(grid);
   }
 
-  /* hero run sequence, the one orchestrated moment on the page */
-  var lines = document.querySelectorAll("#run .run-line");
-  var foot = document.getElementById("runFoot");
-  if(!lines.length || !foot){
-    /* no run panel on this page */
-  } else if(reduce){
-    lines.forEach(function(l){ l.classList.add("on"); });
-    foot.classList.add("on");
-  } else {
-    lines.forEach(function(line, i){
-      setTimeout(function(){ line.classList.add("on"); }, 380 + i * 260);
-    });
-    setTimeout(function(){ foot.classList.add("on"); }, 380 + lines.length * 260 + 160);
-  }
-
   /* Footer icons. The LinkedIn and GitHub marks are their trademarks, so they
      are not drawn here. Drop the official SVGs into assets/img and they appear;
      until then the label stands on its own instead of a broken image. */
