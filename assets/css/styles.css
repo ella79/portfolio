@@ -396,6 +396,10 @@ textarea{min-height:132px;resize:vertical}
 .role-entry ul{margin:0;padding-left:20px}
 .role-entry li{font-size:.9375rem;color:var(--ink-soft);margin-bottom:9px}
 .cv-note{font-size:.9375rem;color:var(--ink-soft);max-width:78ch}
+/* competencies read as a scanning list, so they sit two abreast on screen */
+.competencies{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,1fr);gap:9px 44px}
+.competencies li{position:relative;padding-left:17px;font-size:.9375rem;color:var(--ink-soft)}
+.competencies li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:1.5px;background:var(--teal)}
 .cv-cols{display:grid;grid-template-columns:repeat(2,1fr);gap:28px 56px}
 .cv-def dt{font-family:var(--font-mono);font-size:.75rem;color:var(--teal-dark);margin-bottom:4px}
 .cv-def dd{margin:0 0 18px;font-size:.9375rem;color:var(--ink-soft)}
@@ -405,6 +409,7 @@ textarea{min-height:132px;resize:vertical}
 
 @media (max-width:960px){
   .principles,.cv-cols{grid-template-columns:1fr;gap:32px}
+  .competencies{grid-template-columns:1fr;gap:7px}
 }
 @media (max-width:640px){
   .nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:calc(100% - 46px)}
@@ -466,11 +471,16 @@ textarea{min-height:132px;resize:vertical}
 
   :root{--ink:#12222b;--ink-soft:#3f545e;--teal-dark:#0a554c;--line:#c9d4d1}
 
-  html,body{background:#fff;font-size:8.5pt;line-height:1.23}
+  html,body{background:#fff;font-size:8.5pt;line-height:1.2}
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 
   .site-header,.sticky-cta,.site-footer,.page-head,.no-print,.more,.cv-actions{display:none !important}
-  .reveal{opacity:1 !important;transform:none !important}
+  /* The reveal animation must not be running when the page is captured. Without
+     transition:none the browser starts fading a section in and prints it at
+     whatever opacity it had reached, which silently drops whole sections from
+     the PDF. */
+  .reveal{opacity:1 !important;transform:none !important;transition:none !important;animation:none !important}
+  *,*::before,*::after{transition:none !important;animation:none !important}
 
   .wrap{max-width:none;padding:0}
   section{padding:0;border:0 !important}
@@ -481,29 +491,42 @@ textarea{min-height:132px;resize:vertical}
   .print-role{font-family:var(--font-mono);font-size:8.4pt;color:var(--teal-dark);margin:0 0 3pt}
   .print-contact{font-size:7.8pt;color:var(--ink-soft);margin:0;white-space:nowrap}
 
-  .cv-block{margin-bottom:7pt}
+  .cv-block{margin-bottom:6pt}
   .cv h2{
-    font-size:9.6pt;margin-bottom:3.5pt;padding-bottom:1.5pt;
+    font-size:9.6pt;margin-bottom:3pt;padding-bottom:1.5pt;
     border-bottom:.6pt solid var(--line);color:var(--teal-dark);
     break-after:avoid;page-break-after:avoid;
   }
-  .cv-note{font-size:8.5pt;color:var(--ink);max-width:none;margin-bottom:3pt}
+  .cv-note{font-size:8.5pt;color:var(--ink);max-width:none;margin-bottom:2.5pt}
 
-  .role-entry{margin-bottom:5pt;max-width:none;break-inside:avoid;page-break-inside:avoid}
+  /* An entry no longer refuses to split. Keeping every role whole left a hand's
+     width of empty page above each break, which is what pushed the document onto
+     a third page. The title still travels with its dates and first lines. */
+  .role-entry{margin-bottom:4pt;max-width:none}
+  .role-entry h3,.role-entry .meta{break-after:avoid;page-break-after:avoid}
+  .role-entry li{break-inside:avoid;page-break-inside:avoid}
   .role-entry h3{font-size:9pt;margin-bottom:.5pt}
   .role-entry .meta{font-size:7.8pt;margin-bottom:2pt;color:var(--ink-soft)}
   .role-entry ul{padding-left:11pt;margin:0}
-  .role-entry li{font-size:8.4pt;color:var(--ink);margin-bottom:1pt}
+  .role-entry li{font-size:8.4pt;color:var(--ink);margin-bottom:.8pt}
 
   /* One reading column on paper. A parser walks the page top to bottom, and
      two columns of skills side by side are where a CV scanner interleaves them.
      The label sits beside its list instead, which is compact and stays linear. */
   .cv-cols{display:block}
-  .cv-def{display:grid;grid-template-columns:92pt 1fr;gap:1pt 8pt;margin:0}
+  .cv-def{display:grid;grid-template-columns:92pt 1fr;gap:1pt 9pt;margin:0}
   .cv-def dt{font-size:7.7pt;margin:0;color:var(--ink-soft)}
   .cv-def dd{font-size:8.4pt;color:var(--ink);margin:0}
 
   /* every certification prints, whatever the on screen toggle says */
+  /* Competencies are keywords, and a scanner reads a run of them more reliably
+     than a two column list. Thirteen bullets also cost thirteen lines. */
+  .competencies{display:block}
+  .competencies li{display:inline;padding:0;font-size:8.4pt;color:var(--ink)}
+  .competencies li::before{display:none}
+  .competencies li::after{content:"; "}
+  .competencies li:last-child::after{content:""}
+
   /* On paper the chips become a plain run of text: boxes cost four lines that
      the page does not have, and a scanner reads a sentence more reliably than a
      grid of framed fragments. */
