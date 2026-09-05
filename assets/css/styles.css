@@ -12,6 +12,7 @@
   --panel-line:#223a45;
   --panel-text:#c6d7dd;
   --font-display:"Archivo",Georgia,sans-serif;
+  --font-script:"Allura","Segoe Script","Brush Script MT",cursive;
   --font-body:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --header-h:76px;
@@ -106,7 +107,13 @@ p{margin:0 0 18px}
 /* ---------- hero ---------- */
 .hero{padding:calc(var(--header-h) + 88px) 0 96px;border-top:0}
 .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:72px;align-items:center}
-.hero h1{font-size:clamp(2.25rem,4.6vw,3rem);line-height:1.05;margin-bottom:18px}
+/* the name is set the way it is set on her LinkedIn banner, as a signature.
+   A script face needs the size and the leading that a printed signature has. */
+.hero h1{
+  font-family:var(--font-script);font-weight:400;
+  font-size:clamp(3.4rem,7.4vw,5rem);line-height:1;letter-spacing:0;
+  margin-bottom:10px;
+}
 .hero .role{
   font-family:var(--font-mono);font-size:.875rem;color:var(--teal-dark);
   margin:0 0 26px;letter-spacing:.01em;
@@ -291,24 +298,26 @@ textarea{min-height:132px;resize:vertical}
 .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
 .footer-links{display:flex;gap:12px;flex-wrap:wrap}
 /* the mark from the header, sitting between the notice and the links */
+/* the mark belongs to the notice beside it, not to the space between them */
+.footer-mid{display:inline-flex;align-items:center;gap:9px}
 .footer-mark{flex:none;color:#4a8b85;opacity:1}
 /* An icon that is already a recognisable mark does not need a box drawn around
    it. Colour alone carries the hover, and the hit area stays finger sized. */
 .footer-links .social{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:8px;border-radius:999px;
+  padding:6px;border-radius:999px;
   color:#c3d3d9;transition:color .2s ease,background .2s ease;
 }
 .footer-links .social:hover,.footer-links .social:focus-visible{
   color:#fff;background:rgba(79,179,164,.12);
 }
 .footer-links .social:focus-visible{outline:2px solid #4fb3a4;outline-offset:2px}
-.mail-icon{flex:none;display:block}
+.mail-icon{flex:none;display:block;width:26px;height:26px}
 /* The brand icons are painted, not embedded: the shape is a mask and the colour
    comes from the link itself, so whichever file is dropped in matches the
    footer and follows the hover instead of arriving in its own blue or black. */
 .social-icon{
-  flex:none;display:none;width:20px;height:20px;background-color:currentColor;
+  flex:none;display:none;width:26px;height:26px;background-color:currentColor;
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   -webkit-mask-position:center;mask-position:center;
   -webkit-mask-size:contain;mask-size:contain;
