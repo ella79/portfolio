@@ -212,20 +212,27 @@
   });
 
   /* expandable lists */
+  /* The arrow is wrapped so it can move on its own: a label that says "show
+     more" is more convincing when its arrow leans the way the list will go. */
+  function label(text, arrow){
+    return text + ' <span class="more-arrow">' + arrow + "</span>";
+  }
   function wireToggle(btnId, listId, moreText, lessText){
     var btn = document.getElementById(btnId);
     var list = document.getElementById(listId);
     if(!btn || !list){ return; }
+    btn.innerHTML = label(moreText, "\u2193");
     btn.addEventListener("click", function(){
       var open = list.classList.toggle("is-expanded");
       btn.setAttribute("aria-expanded", open ? "true" : "false");
-      btn.innerHTML = open ? lessText : moreText;
+      btn.classList.toggle("is-open", open);
+      btn.innerHTML = open ? label(lessText, "\u2191") : label(moreText, "\u2193");
     });
   }
-  wireToggle("moreTimeline", "timeline", "Show the earlier roles &darr;", "Show fewer roles &uarr;");
-  wireToggle("morePills", "pills", "Show the full stack &darr;", "Show fewer tools &uarr;");
-  wireToggle("moreCerts", "certPills", "Show all certifications listed here &darr;", "Show fewer certifications &uarr;");
-  wireToggle("moreForm", "formPanel", "Prefer to write here? Open the contact form &darr;", "Close the contact form &uarr;");
+  wireToggle("moreTimeline", "timeline", "Show the earlier roles", "Show fewer roles");
+  wireToggle("morePills", "pills", "Show the full stack", "Show fewer tools");
+  wireToggle("moreCerts", "certPills", "Show all certifications listed here", "Show fewer certifications");
+  wireToggle("moreForm", "formPanel", "Prefer to write here? Open the contact form", "Close the contact form");
 
   /* contact form: validate, then hand off to the email client */
   var form = document.getElementById("contactForm");
