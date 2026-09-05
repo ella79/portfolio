@@ -106,6 +106,23 @@ p{margin:0 0 18px}
 /* the arrow takes a step down, which is the thing the button is about to do */
 .nav .nav-page:hover .dl-icon,.nav .nav-page:focus-visible .dl-icon{transform:translateY(2px)}
 
+/* Prose is justified across the landing page, the way the CV is. Hyphenation
+   comes with it: without it, justified text at these column widths opens white
+   rivers between the words. Short labels, dates, mono panels and headings are
+   left out; stretching a line that never wraps does nothing but risk it. */
+.hero .bio,
+.section-intro,
+.about-body p,
+.facts-note,
+.principle p,
+.tl-body p,
+.metric p,
+.empty-state p,
+.contact-aside p,
+.direct dd{
+  text-align:justify;-webkit-hyphens:auto;hyphens:auto;
+}
+
 /* ---------- buttons ---------- */
 .btn{
   display:inline-flex;align-items:center;gap:9px;
@@ -234,11 +251,24 @@ p{margin:0 0 18px}
 .card-extra{display:none}
 .cards.is-expanded .card-extra{display:flex}
 .more{
-  margin-top:32px;background:none;border:0;padding:6px 0;cursor:pointer;
+  position:relative;margin-top:32px;background:none;border:0;padding:6px 0;cursor:pointer;
   font-family:var(--font-body);font-size:.9375rem;color:var(--teal-dark);
-  border-bottom:1.5px solid var(--teal);
+  transition:color .2s ease;
 }
-.more:hover{color:var(--teal)}
+/* the rule under these links is drawn from the left, like the one in the nav */
+.more::after,.journey-link::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1.5px;
+  background:var(--teal);transform-origin:left center;
+  transition:transform .28s cubic-bezier(.2,.7,.3,1);
+}
+.more:hover,.more:focus-visible{color:var(--teal)}
+.more:hover::after,.more:focus-visible::after,
+.journey-link:hover::after,.journey-link:focus-visible::after{transform:scaleX(1.02)}
+/* and the arrow leans the way the list is about to go */
+.more-arrow{display:inline-block;transition:transform .28s ease}
+.more:hover .more-arrow,.more:focus-visible .more-arrow,
+.journey-link:hover .more-arrow,.journey-link:focus-visible .more-arrow{transform:translateY(3px)}
+.more.is-open:hover .more-arrow,.more.is-open:focus-visible .more-arrow{transform:translateY(-3px)}
 
 /* ---------- impact ---------- */
 .impact{background:var(--panel);color:#e4ecef;border-top:0}
@@ -497,10 +527,11 @@ textarea{min-height:132px;resize:vertical}
 .journey h3{font-size:1.0625rem;margin-bottom:8px}
 .journey p{font-size:.9375rem;color:var(--ink-soft);margin-bottom:14px;max-width:56ch}
 .journey-link{
-  font-size:.9375rem;color:var(--teal-dark);text-decoration:none;
-  border-bottom:1.5px solid var(--teal);padding-bottom:2px;
+  position:relative;display:inline-block;font-size:.9375rem;
+  color:var(--teal-dark);text-decoration:none;padding-bottom:3px;
+  transition:color .2s ease;
 }
-.journey-link:hover{color:var(--teal)}
+.journey-link:hover,.journey-link:focus-visible{color:var(--teal)}
 
 /* ---------- experience timeline ---------- */
 .timeline{margin-top:48px;border-left:1px solid var(--line);padding-left:0}
@@ -590,7 +621,12 @@ textarea{min-height:132px;resize:vertical}
   .role-entry h3,.role-entry .meta{break-after:avoid;page-break-after:avoid}
   .role-entry li{break-inside:avoid;page-break-inside:avoid}
   .role-entry h3{font-size:9pt;margin-bottom:.5pt}
-  .role-entry .meta{font-size:7.8pt;margin-bottom:2pt;color:var(--ink-soft)}
+  /* the company and dates are ordinary text in the source, not a typewriter
+     face set in teal; on paper that reads as a different document */
+  .role-entry .meta{
+    font-family:var(--font-body);font-size:8pt;margin-bottom:2pt;
+    color:var(--ink);font-style:italic;
+  }
   .role-entry ul{padding-left:11pt;margin:0}
   .role-entry li{font-size:8.2pt;color:var(--ink);margin-bottom:.5pt}
 
@@ -598,12 +634,16 @@ textarea{min-height:132px;resize:vertical}
      two columns of skills side by side are where a CV scanner interleaves them.
      The label sits beside its list instead, which is compact and stays linear. */
   .cv-cols{display:block}
-  /* a label column wide enough for the longest category: wrapping the labels
-     cost more lines than the extra width costs the values */
-  .cv-def{display:grid;grid-template-columns:120pt 1fr;gap:1pt 9pt;margin:0}
-  /* the labels are body text in the source, not a typewriter face */
-  .cv-def dt{font-family:var(--font-body);font-size:8pt;margin:0;color:var(--ink-soft)}
-  .cv-def dd{font-size:8.4pt;color:var(--ink);margin:0}
+  /* the source writes these as a bold label followed by its list on the same
+     line, not as a two column table */
+  .cv-def{display:block;margin:0}
+  .cv-def dt{
+    display:inline;font-family:var(--font-body);font-weight:600;
+    font-size:8.3pt;color:var(--ink);margin:0;
+  }
+  .cv-def dt::after{content:": "}
+  .cv-def dd{display:inline;font-size:8.3pt;color:var(--ink);margin:0}
+  .cv-def dd::after{content:"";display:block;height:2.4pt}
 
   /* every certification prints, whatever the on screen toggle says */
   /* real bullets, one per line, exactly as the source document has them */
