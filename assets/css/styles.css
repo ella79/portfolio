@@ -232,6 +232,18 @@ p{margin:0 0 18px}
 .pill-extra{display:none}
 .pills.is-expanded .pill-extra{display:inline-flex}
 
+/* certifications read as a list in the CV, the way the source document has them */
+.cert-list{list-style:none;padding:0;margin:0}
+.cert-list li{
+  position:relative;padding-left:17px;margin-bottom:9px;
+  font-size:.9375rem;color:var(--ink-soft);
+}
+.cert-list li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:1.5px;background:var(--teal)}
+.cert-extra{display:none}
+.cert-list.is-expanded .cert-extra{display:block}
+/* the two career notes are notes, not roles */
+.role-note h3{font-style:italic;font-weight:500}
+
 /* ---------- contact ---------- */
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;margin-top:44px}
 .contact-aside p{font-size:.9375rem;color:var(--ink-soft);max-width:46ch}
@@ -485,7 +497,7 @@ textarea{min-height:132px;resize:vertical}
 
   :root{--ink:#12222b;--ink-soft:#3f545e;--teal-dark:#0a554c;--line:#c9d4d1}
 
-  html,body{background:#fff;font-size:8.5pt;line-height:1.2}
+  html,body{background:#fff;font-size:8.5pt;line-height:1.17}
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 
   .site-header,.sticky-cta,.site-footer,.page-head,.no-print,.more,.cv-actions{display:none !important}
@@ -505,7 +517,7 @@ textarea{min-height:132px;resize:vertical}
   .print-role{font-family:var(--font-mono);font-size:8.4pt;color:var(--teal-dark);margin:0 0 3pt}
   .print-contact{font-size:7.8pt;color:var(--ink-soft);margin:0;white-space:nowrap}
 
-  .cv-block{margin-bottom:6pt}
+  .cv-block{margin-bottom:5pt}
   .cv h2{
     font-size:9.6pt;margin-bottom:3pt;padding-bottom:1.5pt;
     border-bottom:.6pt solid var(--line);color:var(--teal-dark);
@@ -548,6 +560,10 @@ textarea{min-height:132px;resize:vertical}
   .pill,.pill-extra{display:inline !important;border:0;padding:0;font-size:8pt;color:var(--ink)}
   .pill::after{content:"; "}
   .pill:last-child::after{content:""}
+  /* every certification prints, whatever the on screen toggle says */
+  .cert-list li,.cert-extra{display:list-item !important;font-size:8.3pt;color:var(--ink);margin-bottom:.3pt;padding-left:10pt}
+  .cert-list{padding-left:0}
+  .cert-list li::before{top:.55em;width:4pt}
 
   /* Education needs no second line per entry: the school belongs beside the degree */
   .cv-compact .role-entry{margin-bottom:2.5pt}
