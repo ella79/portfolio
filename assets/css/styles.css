@@ -113,7 +113,6 @@ p{margin:0 0 18px}
 .hero .bio,
 .section-intro,
 .about-body p,
-.facts-note,
 .principle p,
 .tl-body p,
 .metric p,
@@ -219,7 +218,12 @@ p{margin:0 0 18px}
 .fact:last-child{border-bottom:0}
 .fact .n{font-family:var(--font-display);font-size:1.75rem;line-height:1.1;color:var(--ink)}
 .fact .k{font-size:.875rem;color:var(--ink-soft);margin-top:2px}
-.facts-note{margin:16px 0 0;font-size:.8125rem;color:var(--ink-soft);line-height:1.6}
+/* four levels read as four facts, not as one sentence to be parsed */
+.langs{margin-top:18px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--card-wash)}
+.langs h4{font-family:var(--font-mono);font-size:.6875rem;font-weight:500;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase;margin:0 0 10px}
+.langs dl{display:grid;grid-template-columns:auto 1fr;gap:5px 16px;margin:0;font-size:.8125rem}
+.langs dt{color:var(--ink);font-weight:500}
+.langs dd{margin:0;color:var(--ink-soft);text-align:right}
 
 /* ---------- work ---------- */
 .section-intro{max-width:60ch;color:var(--ink-soft);margin-top:14px}
