@@ -3,6 +3,7 @@
   --ink-soft:#4a5f6a;
   --paper:#f3f5f4;
   --card:#ffffff;
+  --card-wash:linear-gradient(158deg,#fff 0%,#f9fcfb 52%,#eef6f4 100%);
   --line:#dde4e2;
   --teal:#0f6e63;
   --teal-dark:#0a554c;
@@ -168,7 +169,7 @@ p{margin:0 0 18px}
 .about-body{max-width:66ch}
 .about h2{margin-bottom:28px}
 .facts{
-  background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px 24px 20px;
+  background:var(--card-wash);border:1px solid var(--line);border-radius:16px;padding:8px 24px 20px;
 }
 .fact{padding:16px 0;border-bottom:1px solid var(--line)}
 .fact:last-child{border-bottom:0}
@@ -180,7 +181,7 @@ p{margin:0 0 18px}
 .section-intro{max-width:60ch;color:var(--ink-soft);margin-top:14px}
 .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;margin-top:48px}
 .card{
-  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  background:var(--card-wash);border:1px solid var(--line);border-radius:16px;
   display:flex;flex-direction:column;overflow:hidden;
   transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
 }
@@ -278,7 +279,7 @@ textarea{min-height:132px;resize:vertical}
    footer brings its own breathing room. Full padding here pushed the pair past
    one screen, so landing on Contact hid either its heading or the footer. */
 #contact{padding-bottom:56px}
-.direct{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px}
+.direct{background:var(--card-wash);border:1px solid var(--line);border-radius:16px;padding:28px}
 .direct h3{margin-bottom:18px}
 .direct dl{margin:0}
 .direct dt{
@@ -398,7 +399,7 @@ textarea{min-height:132px;resize:vertical}
 .principles{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:48px}
 .principle{
   position:relative;overflow:hidden;
-  background:linear-gradient(158deg,#fff 0%,#f8fbfa 52%,#edf5f3 100%);
+  background:var(--card-wash);
   border:1px solid var(--line);border-radius:20px;padding:26px 28px 30px;
   box-shadow:0 20px 38px -32px rgba(18,34,43,.55);
   transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
@@ -408,14 +409,6 @@ textarea{min-height:132px;resize:vertical}
   box-shadow:0 28px 48px -28px rgba(18,34,43,.5);
   border-color:#bfd3ce;
 }
-/* the wash in the corner keeps the card from reading as a plain white box */
-.principle::after{
-  content:"";position:absolute;right:-38px;bottom:-38px;width:128px;height:128px;
-  border-radius:50%;background:rgba(94,193,177,.16);
-  transition:transform .35s ease,background .35s ease;
-}
-/* the wash swells towards the cursor, so the card answers the pointer */
-.principle:hover::after{transform:scale(1.3);background:rgba(94,193,177,.24)}
 .principle-n{
   position:relative;display:block;font-family:var(--font-mono);
   font-size:.75rem;color:var(--teal);margin-bottom:14px;
@@ -491,7 +484,7 @@ textarea{min-height:132px;resize:vertical}
 
 /* ---------- empty state ---------- */
 .empty-state{
-  margin-top:44px;padding:40px;background:var(--card);
+  margin-top:44px;padding:40px;background:var(--card-wash);
   border:1px dashed var(--line);border-radius:16px;max-width:680px;
 }
 .empty-state h3{margin-bottom:12px}
