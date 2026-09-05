@@ -74,22 +74,37 @@ p{margin:0 0 18px}
 .nav{display:flex;gap:28px;align-items:center}
 .nav a{
   font-size:.9375rem;color:var(--ink-soft);text-decoration:none;
-  padding:4px 0;border-bottom:1.5px solid transparent;transition:color .2s,border-color .2s;
+  padding:4px 0;transition:color .2s ease;
 }
-.nav a:hover,.nav a:focus-visible{color:var(--teal-dark);border-bottom-color:var(--teal)}
-.nav a.is-active{color:var(--teal-dark);font-weight:500;border-bottom-color:var(--teal)}
+/* the rule is drawn rather than switched on: it grows from the left edge of the
+   word, so the eye follows it to the item it belongs to */
+.nav a:not(.nav-page)::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1.5px;
+  background:var(--teal);transform:scaleX(0);transform-origin:left center;
+  transition:transform .28s cubic-bezier(.2,.7,.3,1);
+}
+.nav a:not(.nav-page){position:relative}
+.nav a:hover,.nav a:focus-visible{color:var(--teal-dark)}
+.nav a:not(.nav-page):hover::after,
+.nav a:not(.nav-page):focus-visible::after,
+.nav a:not(.nav-page).is-active::after{transform:scaleX(1)}
+.nav a.is-active{color:var(--teal-dark);font-weight:500}
 /* the CV button downloads a file rather than moving to a section, so it is
    shaped differently from the section links: rounded, with a download arrow */
 .nav .nav-page{
   display:inline-flex;align-items:center;gap:7px;
   margin-left:10px;padding:7px 16px;border:1.5px solid var(--teal-dark);
   border-radius:999px;color:var(--teal-dark);font-weight:500;
-  transition:background .2s ease,color .2s ease,border-color .2s ease;
+  transition:background .2s ease,color .2s ease,border-color .2s ease,
+             transform .25s ease,box-shadow .25s ease;
 }
 .nav .nav-page:hover,.nav .nav-page:focus-visible{
-  background:var(--teal-dark);color:#fff;border-color:var(--teal-dark);border-bottom-color:var(--teal-dark);
+  background:var(--teal-dark);color:#fff;border-color:var(--teal-dark);
+  transform:translateY(-2px);box-shadow:0 14px 22px -14px rgba(10,85,76,.9);
 }
-.nav-page .dl-icon{flex:none;display:block}
+.nav-page .dl-icon{flex:none;display:block;transition:transform .25s ease}
+/* the arrow takes a step down, which is the thing the button is about to do */
+.nav .nav-page:hover .dl-icon,.nav .nav-page:focus-visible .dl-icon{transform:translateY(2px)}
 
 /* ---------- buttons ---------- */
 .btn{
@@ -322,10 +337,10 @@ textarea{min-height:132px;resize:vertical}
 .footer-links .social{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
   padding:6px;border-radius:999px;
-  color:#c3d3d9;transition:color .2s ease,background .2s ease;
+  color:#c3d3d9;transition:color .2s ease,background .2s ease,transform .25s ease;
 }
 .footer-links .social:hover,.footer-links .social:focus-visible{
-  color:#fff;background:rgba(79,179,164,.12);
+  color:#fff;background:rgba(79,179,164,.14);transform:translateY(-3px) scale(1.08);
 }
 .footer-links .social:focus-visible{outline:2px solid #4fb3a4;outline-offset:2px}
 .mail-icon{flex:none;display:block;width:26px;height:26px}
