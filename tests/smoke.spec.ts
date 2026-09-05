@@ -125,6 +125,31 @@ test.describe('home page', () => {
   });
 });
 
+test.describe('asset versions', () => {
+  // The ?v= token is what makes a deploy reach a browser that has been here
+  // before. index.html once fell behind cv.html by six revisions, and the site
+  // looked unchanged for anyone with a warm cache. The two pages must agree.
+  test('both pages ask for the same stylesheet and script', async ({ page }) => {
+    const versions = async (path: string) => {
+      await page.goto(path);
+      return page.evaluate(() => ({
+        css: (document.querySelector('link[href*="styles.css"]') as HTMLLinkElement)
+          .getAttribute('href'),
+        js: (document.querySelector('script[src*="main.js"]') as HTMLScriptElement)
+          .getAttribute('src'),
+      }));
+    };
+
+    const home = await versions('/');
+    const cv = await versions('/cv.html');
+
+    expect(home.css).toMatch(/\?v=/);
+    expect(home.js).toMatch(/\?v=/);
+    expect(cv.css).toBe(home.css);
+    expect(cv.js).toBe(home.js);
+  });
+});
+
 test.describe('CV page', () => {
   test('loads and offers the PDF', async ({ page }) => {
     await page.goto('/cv.html');

@@ -535,6 +535,11 @@ textarea{min-height:132px;resize:vertical}
   :root{--ink:#12222b;--ink-soft:#3f545e;--teal-dark:#0a554c;--line:#c9d4d1}
 
   html,body{background:#fff;font-size:8.3pt;line-height:1.14}
+  /* the source document is justified, and hyphenation is what keeps justified
+     text from opening rivers between the words */
+  .cv-note,.role-entry li,.competencies li,.cert-list li,.cv-def dd{
+    text-align:justify;-webkit-hyphens:auto;hyphens:auto;
+  }
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 
   .site-header,.sticky-cta,.site-footer,.page-head,.no-print,.more,.cv-actions{display:none !important}
@@ -581,17 +586,18 @@ textarea{min-height:132px;resize:vertical}
   /* a label column wide enough for the longest category: wrapping the labels
      cost more lines than the extra width costs the values */
   .cv-def{display:grid;grid-template-columns:120pt 1fr;gap:1pt 9pt;margin:0}
-  .cv-def dt{font-size:7.7pt;margin:0;color:var(--ink-soft)}
+  /* the labels are body text in the source, not a typewriter face */
+  .cv-def dt{font-family:var(--font-body);font-size:8pt;margin:0;color:var(--ink-soft)}
   .cv-def dd{font-size:8.4pt;color:var(--ink);margin:0}
 
   /* every certification prints, whatever the on screen toggle says */
-  /* one column of bullets, exactly as the source document has them */
-  .competencies{display:block}
+  /* real bullets, one per line, exactly as the source document has them */
+  .competencies{display:block;list-style:disc;padding-left:11pt;margin:0}
   .competencies li{
-    position:relative;display:block;padding-left:10pt;
+    position:static;display:list-item;padding-left:0;
     font-size:8.3pt;color:var(--ink);margin-bottom:.3pt;
   }
-  .competencies li::before{top:.55em;width:4pt;height:.6pt}
+  .competencies li::before{content:none}
 
   /* On paper the chips become a plain run of text: boxes cost four lines that
      the page does not have, and a scanner reads a sentence more reliably than a
@@ -601,9 +607,12 @@ textarea{min-height:132px;resize:vertical}
   .pill::after{content:"; "}
   .pill:last-child::after{content:""}
   /* every certification prints, whatever the on screen toggle says */
-  .cert-list li,.cert-extra{display:list-item !important;font-size:8.3pt;color:var(--ink);margin-bottom:.3pt;padding-left:10pt}
-  .cert-list{padding-left:0}
-  .cert-list li::before{top:.55em;width:4pt}
+  .cert-list li,.cert-extra{
+    display:list-item !important;position:static;padding-left:0;
+    font-size:8.3pt;color:var(--ink);margin-bottom:.3pt;
+  }
+  .cert-list{list-style:disc;padding-left:11pt}
+  .cert-list li::before{content:none}
 
   /* Education needs no second line per entry: the school belongs beside the degree */
   .cv-compact .role-entry{margin-bottom:2.5pt}
