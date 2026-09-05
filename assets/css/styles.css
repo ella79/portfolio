@@ -508,7 +508,7 @@ textarea{min-height:132px;resize:vertical}
 
   :root{--ink:#12222b;--ink-soft:#3f545e;--teal-dark:#0a554c;--line:#c9d4d1}
 
-  html,body{background:#fff;font-size:8.5pt;line-height:1.17}
+  html,body{background:#fff;font-size:8.3pt;line-height:1.14}
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 
   .site-header,.sticky-cta,.site-footer,.page-head,.no-print,.more,.cv-actions{display:none !important}
@@ -528,9 +528,10 @@ textarea{min-height:132px;resize:vertical}
   .print-role{font-family:var(--font-mono);font-size:8.4pt;color:var(--teal-dark);margin:0 0 3pt}
   .print-contact{font-size:7.8pt;color:var(--ink-soft);margin:0;white-space:nowrap}
 
-  .cv-block{margin-bottom:5pt}
+  .cv-block{margin-bottom:4.5pt}
   .cv h2{
-    font-size:9.6pt;margin-bottom:3pt;padding-bottom:1.5pt;
+    font-size:9pt;margin-bottom:3pt;padding-bottom:1.5pt;
+    text-transform:uppercase;letter-spacing:.055em;
     border-bottom:.6pt solid var(--line);color:var(--teal-dark);
     break-after:avoid;page-break-after:avoid;
   }
@@ -539,30 +540,32 @@ textarea{min-height:132px;resize:vertical}
   /* An entry no longer refuses to split. Keeping every role whole left a hand's
      width of empty page above each break, which is what pushed the document onto
      a third page. The title still travels with its dates and first lines. */
-  .role-entry{margin-bottom:4pt;max-width:none}
+  .role-entry{margin-bottom:3.4pt;max-width:none}
   .role-entry h3,.role-entry .meta{break-after:avoid;page-break-after:avoid}
   .role-entry li{break-inside:avoid;page-break-inside:avoid}
   .role-entry h3{font-size:9pt;margin-bottom:.5pt}
   .role-entry .meta{font-size:7.8pt;margin-bottom:2pt;color:var(--ink-soft)}
   .role-entry ul{padding-left:11pt;margin:0}
-  .role-entry li{font-size:8.4pt;color:var(--ink);margin-bottom:.8pt}
+  .role-entry li{font-size:8.2pt;color:var(--ink);margin-bottom:.5pt}
 
   /* One reading column on paper. A parser walks the page top to bottom, and
      two columns of skills side by side are where a CV scanner interleaves them.
      The label sits beside its list instead, which is compact and stays linear. */
   .cv-cols{display:block}
-  .cv-def{display:grid;grid-template-columns:92pt 1fr;gap:1pt 9pt;margin:0}
+  /* a label column wide enough for the longest category: wrapping the labels
+     cost more lines than the extra width costs the values */
+  .cv-def{display:grid;grid-template-columns:120pt 1fr;gap:1pt 9pt;margin:0}
   .cv-def dt{font-size:7.7pt;margin:0;color:var(--ink-soft)}
   .cv-def dd{font-size:8.4pt;color:var(--ink);margin:0}
 
   /* every certification prints, whatever the on screen toggle says */
-  /* Competencies are keywords, and a scanner reads a run of them more reliably
-     than a two column list. Thirteen bullets also cost thirteen lines. */
+  /* one column of bullets, exactly as the source document has them */
   .competencies{display:block}
-  .competencies li{display:inline;padding:0;font-size:8.4pt;color:var(--ink)}
-  .competencies li::before{display:none}
-  .competencies li::after{content:"; "}
-  .competencies li:last-child::after{content:""}
+  .competencies li{
+    position:relative;display:block;padding-left:10pt;
+    font-size:8.3pt;color:var(--ink);margin-bottom:.3pt;
+  }
+  .competencies li::before{top:.55em;width:4pt;height:.6pt}
 
   /* On paper the chips become a plain run of text: boxes cost four lines that
      the page does not have, and a scanner reads a sentence more reliably than a
