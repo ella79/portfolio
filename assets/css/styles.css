@@ -93,7 +93,7 @@ p{margin:0 0 18px}
 .btn{
   display:inline-flex;align-items:center;gap:9px;
   font-family:var(--font-body);font-size:.9375rem;font-weight:500;
-  padding:13px 24px;border-radius:2px;text-decoration:none;cursor:pointer;
+  padding:13px 24px;border-radius:999px;text-decoration:none;cursor:pointer;
   border:1.5px solid var(--teal-dark);transition:background .2s,color .2s,transform .2s;
 }
 /* the icon says what the button does before the label is read */
@@ -131,7 +131,7 @@ p{margin:0 0 18px}
 
 /* signature element: a suite run */
 .run{
-  width:100%;background:var(--panel);border-radius:4px;
+  width:100%;background:var(--panel);border-radius:14px;
   padding:20px 22px 18px;font-family:var(--font-mono);font-size:.8125rem;
   color:var(--panel-text);box-shadow:0 24px 48px -32px rgba(14,30,38,.9);
 }
@@ -161,7 +161,7 @@ p{margin:0 0 18px}
 .about-body{max-width:66ch}
 .about h2{margin-bottom:28px}
 .facts{
-  background:var(--card);border:1px solid var(--line);border-radius:3px;padding:8px 24px 20px;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px 24px 20px;
 }
 .fact{padding:16px 0;border-bottom:1px solid var(--line)}
 .fact:last-child{border-bottom:0}
@@ -173,7 +173,7 @@ p{margin:0 0 18px}
 .section-intro{max-width:60ch;color:var(--ink-soft);margin-top:14px}
 .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;margin-top:48px}
 .card{
-  background:var(--card);border:1px solid var(--line);border-radius:3px;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
   display:flex;flex-direction:column;overflow:hidden;
   transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
 }
@@ -194,7 +194,7 @@ p{margin:0 0 18px}
 .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto}
 .tag{
   font-family:var(--font-mono);font-size:.6875rem;color:var(--teal-dark);
-  background:var(--teal-wash);padding:4px 9px;border-radius:2px;
+  background:var(--teal-wash);padding:4px 9px;border-radius:999px;
 }
 .card-extra{display:none}
 .cards.is-expanded .card-extra{display:flex}
@@ -227,7 +227,7 @@ p{margin:0 0 18px}
 .pills{display:flex;flex-wrap:wrap;gap:8px}
 .pill{
   font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);
-  border:1px solid var(--line);background:var(--card);padding:6px 11px;border-radius:2px;
+  border:1px solid var(--line);background:var(--card);padding:6px 11px;border-radius:999px;
 }
 .pill-extra{display:none}
 .pills.is-expanded .pill-extra{display:inline-flex}
@@ -242,7 +242,7 @@ p{margin:0 0 18px}
 label{display:block;font-size:.875rem;font-weight:500;margin-bottom:7px}
 input,select,textarea{
   width:100%;font-family:var(--font-body);font-size:.9375rem;color:var(--ink);
-  background:var(--card);border:1px solid var(--line);border-radius:2px;padding:12px 13px;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 13px;
   transition:border-color .2s,box-shadow .2s;
 }
 input:focus,select:focus,textarea:focus{
@@ -259,7 +259,7 @@ textarea{min-height:132px;resize:vertical}
    footer brings its own breathing room. Full padding here pushed the pair past
    one screen, so landing on Contact hid either its heading or the footer. */
 #contact{padding-bottom:56px}
-.direct{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:28px}
+.direct{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px}
 .direct h3{margin-bottom:18px}
 .direct dl{margin:0}
 .direct dt{
@@ -284,7 +284,7 @@ textarea{min-height:132px;resize:vertical}
    it. Colour alone carries the hover, and the hit area stays finger sized. */
 .footer-links .social{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:8px;border-radius:2px;
+  padding:8px;border-radius:999px;
   color:#c3d3d9;transition:color .2s ease,background .2s ease;
 }
 .footer-links .social:hover,.footer-links .social:focus-visible{
@@ -315,7 +315,7 @@ textarea{min-height:132px;resize:vertical}
   position:fixed;right:24px;bottom:24px;z-index:70;
   display:inline-flex;align-items:center;gap:8px;
   background:var(--teal-dark);color:#fff;text-decoration:none;
-  font-size:.875rem;padding:12px 20px;border-radius:2px;
+  font-size:.875rem;padding:12px 20px;border-radius:999px;
   box-shadow:0 16px 30px -18px rgba(10,85,76,.9);
   opacity:0;pointer-events:none;transform:translateY(8px);
   transition:opacity .3s ease,transform .3s ease,background .2s;
@@ -374,10 +374,24 @@ textarea{min-height:132px;resize:vertical}
 .subblock .section-intro{margin-top:8px}
 
 /* ---------- approach ---------- */
-.principles{display:grid;grid-template-columns:repeat(2,1fr);gap:40px 56px;margin-top:48px}
-.principle{padding-left:22px;border-left:2px solid var(--teal-wash)}
-.principle h3{margin-bottom:10px}
-.principle p{font-size:.9375rem;color:var(--ink-soft);margin:0}
+.principles{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:48px}
+.principle{
+  position:relative;overflow:hidden;
+  background:linear-gradient(158deg,#fff 0%,#f8fbfa 52%,#edf5f3 100%);
+  border:1px solid var(--line);border-radius:20px;padding:26px 28px 30px;
+  box-shadow:0 20px 38px -32px rgba(18,34,43,.55);
+}
+/* the wash in the corner keeps the card from reading as a plain white box */
+.principle::after{
+  content:"";position:absolute;right:-38px;bottom:-38px;width:128px;height:128px;
+  border-radius:50%;background:rgba(94,193,177,.16);
+}
+.principle-n{
+  position:relative;display:block;font-family:var(--font-mono);
+  font-size:.75rem;color:var(--teal);margin-bottom:14px;
+}
+.principle h3{position:relative;font-size:1.0625rem;margin-bottom:10px}
+.principle p{position:relative;font-size:.9375rem;color:var(--ink-soft);margin:0}
 
 /* ---------- cv page ---------- */
 .page-head{padding:calc(var(--header-h) + 72px) 0 0}
@@ -404,7 +418,7 @@ textarea{min-height:132px;resize:vertical}
 .cv-def dt{font-family:var(--font-mono);font-size:.75rem;color:var(--teal-dark);margin-bottom:4px}
 .cv-def dd{margin:0 0 18px;font-size:.9375rem;color:var(--ink-soft)}
 .cv-def dd:last-child{margin-bottom:0}
-.embed{margin-top:26px;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:var(--card)}
+.embed{margin-top:26px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card)}
 .embed object,.embed iframe{display:block;width:100%;height:min(80vh,900px);border:0}
 
 @media (max-width:960px){
@@ -448,7 +462,7 @@ textarea{min-height:132px;resize:vertical}
 /* ---------- empty state ---------- */
 .empty-state{
   margin-top:44px;padding:40px;background:var(--card);
-  border:1px dashed var(--line);border-radius:3px;max-width:680px;
+  border:1px dashed var(--line);border-radius:16px;max-width:680px;
 }
 .empty-state h3{margin-bottom:12px}
 .empty-state p{font-size:.9375rem;color:var(--ink-soft);max-width:58ch}
