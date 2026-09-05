@@ -138,7 +138,7 @@ p{margin:0 0 18px}
 
 /* ---------- hero ---------- */
 .hero{padding:calc(var(--header-h) + 88px) 0 96px;border-top:0}
-.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:72px;align-items:center}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:72px;align-items:start}
 /* the name is set the way it is set on her LinkedIn banner, as a signature.
    A script face needs the size and the leading that a printed signature has. */
 .hero h1{
@@ -153,15 +153,15 @@ p{margin:0 0 18px}
 .hero .bio{font-size:1.0625rem;color:var(--ink-soft);max-width:52ch;margin-bottom:32px}
 .hero-actions{display:flex;gap:14px;flex-wrap:wrap}
 .hero-meta{
-  margin:0;font-family:var(--font-mono);font-size:.8125rem;line-height:1.7;
-  color:var(--ink-soft);text-align:center;max-width:30ch;
+  margin:0;font-family:var(--font-mono);font-size:.8125rem;line-height:1.9;
+  color:var(--ink-soft);text-align:center;
 }
 
-.hero-side{display:flex;flex-direction:column;align-items:center;gap:28px}
+.hero-side{display:flex;flex-direction:column;align-items:center;gap:26px;padding-top:8px}
 /* Swap the monogram for a photo: replace the contents of .avatar with
    <img src="photo.jpg" alt="Emanuela Telescu"> and it will fill the circle. */
 .avatar{
-  width:186px;height:186px;border-radius:50%;
+  width:228px;height:228px;border-radius:50%;
   background:var(--card);border:1px solid var(--line);
   box-shadow:0 0 0 6px var(--paper),0 0 0 7.5px var(--teal);
   display:grid;place-items:center;overflow:hidden;flex:none;
@@ -407,7 +407,7 @@ textarea{min-height:132px;resize:vertical}
   .hero-grid{text-align:center;gap:34px}
   .hero .bio{margin-left:auto;margin-right:auto}
   .hero-actions{justify-content:center}
-  .avatar{width:152px;height:152px}
+  .avatar{width:168px;height:168px}
   .cards,.skills-grid,.impact-grid{grid-template-columns:1fr}
   .btn{width:100%;text-align:center}
   .monogram em{display:none}
