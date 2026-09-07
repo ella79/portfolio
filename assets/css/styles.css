@@ -305,6 +305,13 @@ p{margin:0 0 18px}
 .t-dot{position:absolute;top:50%;width:9px;height:9px;border-radius:50%;background:var(--teal-dark);transform:translate(-50%,-50%);border:2px solid var(--paper)}
 .t-yrs{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);text-align:right}
 
+/* the same show-more pattern as the career timeline: extras exist in the
+   DOM (so the fill-on-reveal JS still finds and sets them) but stay
+   display:none until the section is expanded. */
+.t-row.t-extra,.skills-earlier-extra{display:none}
+.skills-timeline.is-expanded .t-row.t-extra{display:grid}
+.skills-timeline.is-expanded ~ .skills-earlier-extra{display:block}
+
 .skills-note{margin-top:38px;font-size:.875rem;color:var(--ink-soft)}
 .skills-earlier{
   margin-top:22px;padding-top:18px;border-top:1px dashed var(--line);

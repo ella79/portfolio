@@ -216,6 +216,7 @@
     });
   }
   wireToggle("moreTimeline", "timeline", "Show the earlier roles", "Show fewer roles");
+  wireToggle("moreSkills", "skillsGrid", "Show the rest of my skills", "Show fewer skills");
   wireToggle("moreCerts", "certPills", "Show all certifications listed here", "Show fewer certifications");
   wireToggle("moreForm", "formPanel", "Prefer to write here? Open the contact form", "Close the contact form");
 
