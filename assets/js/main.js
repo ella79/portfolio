@@ -184,6 +184,21 @@
   }
 
 
+  /* skill-years labels recompute from their start date every time the page
+     loads, against whatever "now" actually is -- so a number that was
+     accurate the day this was written does not quietly go stale six months
+     later. The static text in the HTML is only the no-JS fallback. */
+  function updateSinceYears(){
+    var now = new Date();
+    document.querySelectorAll(".t-yrs[data-since]").forEach(function(el){
+      var parts = el.getAttribute("data-since").split("-");
+      var since = new Date(parseInt(parts[0], 10), parts[1] ? parseInt(parts[1], 10) - 1 : 0, 1);
+      var months = (now.getFullYear() - since.getFullYear()) * 12 + (now.getMonth() - since.getMonth());
+      el.textContent = "~" + Math.max(1, Math.round(months / 12)) + "y";
+    });
+  }
+  updateSinceYears();
+
   /* Footer icons. The LinkedIn and GitHub marks are their trademarks, so they
      are not drawn here. Drop the official SVGs into assets/img and they appear;
      until then the label stands on its own instead of a broken image. */
