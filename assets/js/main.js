@@ -163,10 +163,10 @@
     revealables.forEach(function(el){ revealObserver.observe(el); });
   }
 
-  /* skill bars fill when the grid comes into view */
+  /* skill timeline bars fill when the grid comes into view */
   var grid = document.getElementById("skillsGrid");
   function fillBars(){
-    document.querySelectorAll(".bar span").forEach(function(bar){
+    document.querySelectorAll(".t-fill[data-level]").forEach(function(bar){
       bar.style.width = bar.getAttribute("data-level") + "%";
     });
   }

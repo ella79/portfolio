@@ -37,7 +37,7 @@ test.describe('home page', () => {
     await expect(page.locator('.tl-item:visible')).toHaveCount(8);
   });
 
-  test('the skill bars fill to the value each one declares', async ({ page }) => {
+  test('the skill timeline bars fill to the value each one declares', async ({ page }) => {
     await page.locator('#skillsGrid').scrollIntoViewIfNeeded();
 
     // asserting the declared level rather than a number written here, so
@@ -45,14 +45,14 @@ test.describe('home page', () => {
     await expect
       .poll(() =>
         page.evaluate(() =>
-          [...document.querySelectorAll<HTMLElement>('.bar span')].every(
+          [...document.querySelectorAll<HTMLElement>('.t-fill[data-level]')].every(
             (bar) => bar.style.width === `${bar.dataset.level}%`,
           ),
         ),
       )
       .toBe(true);
 
-    expect(await page.locator('.bar span').count()).toBeGreaterThan(3);
+    expect(await page.locator('.t-fill[data-level]').count()).toBeGreaterThan(3);
   });
 
   test('the contact form stays closed until it is asked for', async ({ page }) => {

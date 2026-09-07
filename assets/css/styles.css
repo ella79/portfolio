@@ -255,19 +255,69 @@ p{margin:0 0 18px}
 .metric .v{font-family:var(--font-display);font-size:2.5rem;line-height:1;color:#5ec1b1}
 .metric .l{margin-top:12px;font-size:.9375rem;color:#c3d3d9;line-height:1.55}
 
-/* ---------- skills ---------- */
-.skills-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:30px 56px;margin-top:48px}
-.skill-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
-.skill-head .nm{font-size:.9375rem;font-weight:500}
-.skill-head .pc{font-family:var(--font-mono);font-size:.8125rem;color:var(--ink-soft)}
-/* where the work happened, in support of the label above it. Amber is reserved
-   for measured results, and these are context, not outcomes. */
-.skill-proof{
-  margin:8px 0 0;font-size:.8125rem;color:var(--ink-soft);
+/* ---------- skills timeline ---------- */
+/* dates over rounded year counts: a start date is checkable against LinkedIn,
+   a rounded "X years" label is what actually got disputed and had to be
+   corrected. Amber stays reserved for measured results (see .result below),
+   so recency here is shown by position on the axis, not by color. */
+.skills-now{
+  display:flex;align-items:flex-start;gap:13px;
+  background:var(--teal-wash);border-radius:10px;
+  padding:16px 22px;margin:44px 0 40px;
 }
-.bar{height:5px;background:#e2e8e6;border-radius:3px;overflow:hidden}
-.bar span{display:block;height:100%;width:0;background:var(--teal);border-radius:3px;transition:width 1.1s cubic-bezier(.2,.7,.3,1)}
+.skills-now .now-dot{
+  flex:0 0 auto;width:9px;height:9px;margin-top:7px;border-radius:50%;
+  background:var(--teal-dark);position:relative;
+}
+.skills-now .now-dot::after{
+  content:"";position:absolute;inset:-6px;border-radius:50%;
+  border:1px solid var(--teal-dark);opacity:.5;
+  animation:pulse-ring 2.4s ease-out infinite;
+}
+@keyframes pulse-ring{
+  0%{transform:scale(.6);opacity:.55}
+  100%{transform:scale(2);opacity:0}
+}
+.skills-now p{margin:0;font-size:.9375rem;color:var(--ink)}
+.skills-now strong{
+  font-family:var(--font-mono);font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--teal-dark);display:block;margin-bottom:5px;
+}
+
+.skills-timeline{margin-top:8px}
+.t-axis{position:relative;height:1px;background:var(--line);margin:0 0 36px}
+.t-axis span{position:absolute;top:11px;transform:translateX(-50%);font-family:var(--font-mono);font-size:.6875rem;color:var(--ink-soft)}
+.t-axis span:last-child{transform:translateX(-100%)}
+.t-axis span::before{content:"";position:absolute;top:-11px;left:50%;width:1px;height:7px;background:var(--line)}
+
+.t-rows{display:flex;flex-direction:column;gap:20px}
+.t-divider{
+  margin:6px 0 -2px;padding-top:18px;border-top:1px dashed var(--line);
+  font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);
+}
+.t-row{display:grid;grid-template-columns:250px 1fr 40px;align-items:center;gap:16px}
+.t-label{display:flex;flex-direction:column}
+.t-nm{font-size:.9375rem;font-weight:500}
+.t-since{font-size:.75rem;color:var(--ink-soft);margin-top:2px}
+.t-track{position:relative;height:8px;background:#e2e8e6;border-radius:4px}
+.t-fill{position:absolute;top:0;bottom:0;width:0;background:var(--teal);border-radius:4px;transition:width 1.1s cubic-bezier(.2,.7,.3,1)}
+.t-gap{position:absolute;top:0;bottom:0;background-image:repeating-linear-gradient(90deg,var(--line) 0 4px,transparent 4px 8px);border-radius:4px}
+.t-dot{position:absolute;top:50%;width:9px;height:9px;border-radius:50%;background:var(--teal-dark);transform:translate(-50%,-50%);border:2px solid var(--paper)}
+.t-yrs{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);text-align:right}
+
+/* earlier-career languages: real, hands on, no longer the daily stack -
+   muted color and a bar that stops instead of reaching "now" say that
+   without needing extra words. */
+.t-row--past .t-nm{color:var(--ink-soft);font-weight:400}
+.t-row--past .t-fill{background:var(--ink-soft);opacity:.5}
+.t-row--past .t-dot{background:var(--ink-soft)}
+
 .skills-note{margin-top:38px;font-size:.875rem;color:var(--ink-soft)}
+
+@media (max-width:720px){
+  .t-row{grid-template-columns:1fr;gap:6px}
+  .t-yrs{text-align:left}
+}
 
 /* certifications read as a list in the CV, the way the source document has them */
 .cert-list{list-style:none;padding:0;margin:0}
