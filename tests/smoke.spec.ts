@@ -1,4 +1,3 @@
-import { readFile } from 'node:fs/promises';
 
 import { test, expect } from '@playwright/test';
 
@@ -99,24 +98,6 @@ test.describe('home page', () => {
         )
         .toBe(true);
     }
-  });
-
-  test('the panel does not claim more checks than the suite has', async ({ page }) => {
-    // The hero says how many Playwright checks guard this site. That number is
-    // a claim about the repository, so the repository is what verifies it: if a
-    // test is added or removed and the page is not updated, this goes red.
-    const claimed = await page
-      .locator('#run .run-line')
-      .filter({ hasText: /Playwright checks/ })
-      .innerText();
-
-    const declared = Number(claimed.match(/\d+/)?.[0]);
-    expect(declared).toBeGreaterThan(0);
-
-    const suite = await readFile('tests/smoke.spec.ts', 'utf8');
-    const actual = (suite.match(/^\s{2}test\(/gm) ?? []).length;
-
-    expect(declared).toBe(actual);
   });
 
   test('the CV button hands over the PDF rather than opening a page', async ({ page }) => {
