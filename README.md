@@ -42,8 +42,8 @@ behave differently over `file://`.
 
 ## Tests
 
-Fifteen Playwright checks cover the paths a visitor actually takes, and each one
-runs twice, on desktop Chromium and on a mobile viewport.
+Seventeen Playwright checks cover the paths a visitor actually takes, and each
+one runs twice, on desktop Chromium and on a mobile viewport.
 
 The page loads without JavaScript errors, the nav reaches every section and
 highlights the one in view, a reload opens at the top instead of restoring the
@@ -56,7 +56,7 @@ an unknown address or anchor lands on the not found page.
 
 ```bash
 npm install
-npx playwright install --with-deps chromium
+npx playwright install chromium
 npm test
 ```
 
