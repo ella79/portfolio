@@ -20,7 +20,7 @@ jobs:
   smoke:
     name: Playwright smoke suite
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -31,8 +31,24 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Read the Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the browser from cache
+        id: browser-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      # No --with-deps. The runner image already has every library Chromium
+      # needs; that flag only added CJK and decorative fonts, and fetching them
+      # is what hung the run past the job timeout.
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        if: steps.browser-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium
+        timeout-minutes: 5
 
       - name: Run the smoke suite
         run: npx playwright test --project=chromium
