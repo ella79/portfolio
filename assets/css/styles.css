@@ -305,14 +305,26 @@ p{margin:0 0 18px}
 .t-dot{position:absolute;top:50%;width:9px;height:9px;border-radius:50%;background:var(--teal-dark);transform:translate(-50%,-50%);border:2px solid var(--paper)}
 .t-yrs{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);text-align:right}
 
-/* earlier-career languages: real, hands on, no longer the daily stack -
-   muted color and a bar that stops instead of reaching "now" say that
-   without needing extra words. */
-.t-row--past .t-nm{color:var(--ink-soft);font-weight:400}
-.t-row--past .t-fill{background:var(--ink-soft);opacity:.5}
-.t-row--past .t-dot{background:var(--ink-soft)}
-
 .skills-note{margin-top:38px;font-size:.875rem;color:var(--ink-soft)}
+.skills-earlier{
+  margin-top:22px;padding-top:18px;border-top:1px dashed var(--line);
+  font-size:.8125rem;color:var(--ink-soft);
+}
+
+/* fixed offsets for the timeline, as classes rather than inline styles -
+   the page's own CSP (style-src 'self', no unsafe-inline) blocks the
+   style="" attribute outright, so position has to live in the stylesheet,
+   the same reason .t-fill's width is set through JS + data-level instead
+   of a style attribute. */
+.pos-L0{left:0%}
+.pos-L22{left:22%}
+.pos-L26{left:26%}
+.pos-L51{left:51%}
+.pos-L52{left:52%}
+.pos-L80{left:80%}
+.pos-L87{left:87%}
+.pos-L100{left:100%}
+.pos-W29{width:29%}
 
 @media (max-width:720px){
   .t-row{grid-template-columns:1fr;gap:6px}
