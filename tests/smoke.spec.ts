@@ -271,10 +271,12 @@ test.describe('projects', () => {
       cards.nth(1).locator('a[href="https://github.com/ella79/agentic-playwright-suite"]'),
     ).toBeVisible();
 
-    // a card that names no stack is a link with a headline on it
-    for (const card of await cards.all()) {
-      expect(await card.locator('.card-tags li').count()).toBeGreaterThan(0);
-    }
+    // The portfolio card is deliberately the quiet one: a short description and
+    // the repository, nothing that opens a page of its own. The suite card is
+    // the one that carries a stack and a way in.
+    await expect(cards.nth(0).locator('.card-tags')).toHaveCount(0);
+    await expect(cards.nth(0).locator('.card-actions a')).toHaveCount(1);
+    expect(await cards.nth(1).locator('.card-tags li').count()).toBeGreaterThan(0);
   });
 
   // Deployment links are the first thing someone opens from a repository, so
