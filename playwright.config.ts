@@ -16,7 +16,10 @@ export default defineConfig({
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
   ],
   webServer: {
-    command: 'python3 -m http.server 8000',
+    // A Node server rather than python3: the command is portable, and it does
+    // not refuse connections when the suite asks for several pages at once.
+    // See scripts/serve.mjs.
+    command: 'node scripts/serve.mjs 8000',
     url: 'http://127.0.0.1:8000',
     reuseExistingServer: !process.env.CI,
   },
