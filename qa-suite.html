@@ -86,7 +86,7 @@
           <pre class="console-log" id="consoleLog" role="log" aria-live="polite" aria-label="Test run output"><span class="muted">&gt; Waiting for a run.</span>
 <span class="muted">Run the QA suites replays the latest run published by CI, test by test.</span></pre>
           <div class="console-actions">
-            <button class="btn btn-run" id="runSuites" type="button"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.5 17.5 12 9 17.5z"/></svg><span class="run-label">Run the QA suites</span></button>
+            <button class="btn btn-run" id="runSuites" type="button" disabled><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.5 17.5 12 9 17.5z"/></svg><span class="run-label">Reading the report</span></button>
             <p class="hint" id="runHint">Replays the last run recorded in the Allure report, then opens that report below.</p>
           </div>
         </div>
@@ -120,14 +120,14 @@
             <div id="resultCards"></div>
           </div>
 
-          <div class="dash-card">
+          <div class="dash-card" id="envCard">
             <h3>Environment</h3>
             <dl class="env" id="envList"></dl>
           </div>
         </div>
 
         <div class="dash-row dash-row-2">
-          <div class="dash-card">
+          <div class="dash-card" id="trendCard">
             <h3>Run history</h3>
             <p class="dash-note" id="trendNote">Wall time of each published run, newest on the right.</p>
             <div class="trend" id="trend"></div>

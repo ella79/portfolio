@@ -749,7 +749,9 @@ textarea{min-height:132px;resize:vertical}
 .runner-results.is-ready{display:block}
 .dash-title{font-size:1.5rem}
 .dash-row{display:grid;gap:22px;margin-top:26px}
-.dash-row-3{grid-template-columns:repeat(3,1fr)}
+/* auto-fit rather than three fixed columns: a panel whose widget was
+   missing from the report hides itself, and the row closes over the gap */
+.dash-row-3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .dash-row-2{grid-template-columns:1fr 1.35fr}
 .dash-card{
   background:var(--card-wash);border:1px solid var(--line);border-radius:16px;
@@ -759,6 +761,7 @@ textarea{min-height:132px;resize:vertical}
   font-family:var(--font-mono);font-size:.6875rem;font-weight:500;letter-spacing:.09em;
   text-transform:uppercase;color:var(--ink-soft);margin-bottom:16px;
 }
+.dash-card[hidden]{display:none}
 .dash-card h4{font-family:var(--font-display);font-size:.9375rem;margin:0}
 .dash-note{font-size:.8125rem;color:var(--ink-soft);margin:0 0 18px;line-height:1.6}
 

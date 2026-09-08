@@ -361,6 +361,22 @@ test.describe('qa suite runner', () => {
         },
       }),
     );
+    await page.route(`${REPORT}/widgets/environment.json`, (route) =>
+      route.fulfill({
+        json: [
+          { name: 'base_url', values: ['https://automationexercise.com'] },
+          { name: 'browser', values: ['Chromium'] },
+        ],
+      }),
+    );
+    await page.route(`${REPORT}/widgets/history-trend.json`, (route) =>
+      route.fulfill({
+        json: [
+          { buildOrder: 9, data: { failed: 0, broken: 0, passed: 4, total: 4 } },
+          { buildOrder: 8, data: { failed: 1, broken: 0, passed: 3, total: 4 } },
+        ],
+      }),
+    );
     await page.route(`${REPORT}/`, (route) =>
       route.fulfill({ contentType: 'text/html', body: '<h1>Allure report</h1>' }),
     );
@@ -414,11 +430,58 @@ test.describe('qa suite runner', () => {
     await expect(page.getByRole('button', { name: /run again/i })).toBeEnabled();
   });
 
+  // Publishing the report is not atomic, so a file can be missing for a moment
+  // while a deploy replaces it. A page that gave up on the first 404 would tell
+  // a visitor the suite is broken on the strength of a race.
+  test('a widget that is missing for a moment does not cost the page', async ({ page }) => {
+    let asked = 0;
+    await page.route(`${REPORT}/data/suites.json`, async (route) => {
+      asked += 1;
+      if (asked === 1) return route.fulfill({ status: 404, body: 'not yet' });
+      return route.fallback();
+    });
+
+    await page.reload();
+
+    await expect(page.locator('#statTests')).toHaveText('4');
+    await expect(page.locator('#suiteList .suite')).toHaveCount(2);
+    expect(asked).toBeGreaterThan(1);
+  });
+
+  // The trend and the environment come from their own files. Losing one of
+  // those should cost that panel, not the run and not the rest of the board.
+  test('a panel whose widget never arrives hides itself', async ({ page }) => {
+    await page.route(`${REPORT}/widgets/environment.json`, (route) => route.abort());
+    await page.reload();
+
+    await page.getByRole('button', { name: /run the qa suites/i }).click();
+    await expect(page.locator('#runnerResults')).toBeVisible();
+
+    await expect(page.locator('#envCard')).toBeHidden();
+    await expect(page.locator('#ringWrap svg')).toBeVisible();
+    await expect(page.locator('#resultCards .result-card')).toHaveCount(2);
+  });
+
+  test('the history chart falls back to test counts without the duration widget', async ({ page }) => {
+    await page.route(`${REPORT}/widgets/duration-trend.json`, (route) => route.abort());
+    await page.reload();
+
+    await page.getByRole('button', { name: /run the qa suites/i }).click();
+    await expect(page.locator('#runnerResults')).toBeVisible();
+
+    await expect(page.locator('#trendCard')).toBeVisible();
+    await expect(page.locator('#trend .trend-col')).toHaveCount(2);
+    await expect(page.locator('#trendNote')).toContainText('Tests carried by');
+    // the run that had a failure is the one marked
+    await expect(page.locator('#trend .trend-col.is-fail')).toHaveCount(1);
+  });
+
   test('an unreachable report says so instead of showing an empty runner', async ({ page }) => {
     await page.route(`${REPORT}/data/suites.json`, (route) => route.abort());
     await page.reload();
 
     await expect(page.locator('#consoleLog')).toContainText('Could not read the published report');
     await expect(page.locator('#consoleLog')).toContainText(REPORT);
+    await expect(page.getByRole('button', { name: /open the report/i })).toBeEnabled();
   });
 });

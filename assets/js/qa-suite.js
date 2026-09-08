@@ -136,8 +136,8 @@
     var retry = (report.retries || [])[0];
     var stop = (report.summary.time || {}).stop;
 
-    set("provBuild", executor.buildName || "Local run");
-    set("provBranch", value(env, "branch") || "main");
+    set("provBuild", executor.buildName || "not recorded");
+    set("provBranch", value(env, "branch") || "not recorded");
     set("provCommit", (value(env, "commit") || "").slice(0, 8) || "not recorded");
     set("provRetries", retry && retry.data ? String(retry.data.retry) : "0");
     set("provWhen", stop ? when(stop) : "not recorded");
@@ -381,6 +381,12 @@
       ["Pipeline", value(env, "ci")]
     ].filter(function (row) { return row[1]; });
 
+    var card = document.getElementById("envCard");
+    if (!rows.length) {
+      if (card) { card.hidden = true; }
+      return;
+    }
+    if (card) { card.hidden = false; }
     host.innerHTML = "";
     rows.forEach(function (row) {
       host.appendChild(el("dt", null, row[0]));
@@ -393,13 +399,20 @@
     if (!host) { return; }
     var history = (report.history || []).slice().reverse();
     var durations = (report.durations || []).slice().reverse();
+    var card = document.getElementById("trendCard");
     if (!history.length) {
-      fill(host, [el("p", "dash-note", "This is the first published run, so there is nothing to compare it with yet.")]);
+      if (card) { card.hidden = true; }
       return;
     }
+    if (card) { card.hidden = false; }
 
-    var longest = durations.reduce(function (most, row) {
-      return Math.max(most, (row.data && row.data.duration) || 0);
+    /* the duration widget is a separate file, so it can be the one that is
+       missing. The history alone still draws a chart, it just measures the
+       runs by the tests they carried rather than by the time they took. */
+    var byTime = durations.length === history.length;
+    var longest = (byTime ? durations : history).reduce(function (most, row) {
+      var data = row.data || {};
+      return Math.max(most, byTime ? data.duration || 0 : data.total || 0);
     }, 1);
 
     fill(
@@ -410,7 +423,7 @@
         var ms = ((durations[index] || {}).data || {}).duration || 0;
         var column = el("div", "trend-col" + (clean ? "" : " is-fail"));
         var bar = el("span", "trend-bar");
-        bar.style.height = Math.max(6, (ms / longest) * 100) + "%";
+        bar.style.height = Math.max(6, ((byTime ? ms : data.total || 0) / longest) * 100) + "%";
         bar.title =
           (row.buildName || "Run " + (row.buildOrder || index + 1)) + ": " +
           plural(data.passed || 0, "test") + " passed" +
@@ -425,7 +438,8 @@
     var note = document.getElementById("trendNote");
     if (note) {
       note.textContent =
-        "Wall time of the last " + plural(history.length, "published run") +
+        (byTime ? "Wall time of the last " : "Tests carried by the last ") +
+        plural(history.length, "published run") +
         ", newest on the right. A bar turns amber when that run had a failure.";
     }
   }
@@ -496,11 +510,25 @@
 
   /* The run needs the summary and the suites. Everything else only adds a
      panel, so a widget that is missing costs that panel rather than the page. */
+  function ask(path) {
+    return fetch(REPORT + path).then(function (response) {
+      if (!response.ok) { throw new Error(path + " answered " + response.status); }
+      return response.json();
+    });
+  }
+
+  function pause(ms) {
+    return new Promise(function (resolve) { window.setTimeout(resolve, ms); });
+  }
+
   function json(path, fallback) {
-    return fetch(REPORT + path)
-      .then(function (response) {
-        if (!response.ok) { throw new Error(path + " answered " + response.status); }
-        return response.json();
+    /* Publishing the report is not one atomic step: for a moment during a
+       deploy a file can be gone, or half of the old report can be answering
+       beside half of the new one. A single retry covers that window, and it is
+       cheaper than showing a visitor an error for a run that is fine. */
+    return ask(path)
+      .catch(function () {
+        return pause(1500).then(function () { return ask(path); });
       })
       .catch(function (error) {
         if (fallback === undefined) { throw error; }
@@ -536,7 +564,11 @@
       renderSuites();
       renderStats();
       renderProvenance();
+      /* the button waits for the report rather than pretending to be ready:
+         until the numbers are in there is nothing for it to replay */
       runButton.addEventListener("click", replay);
+      runLabel.textContent = "Run the QA suites";
+      runButton.disabled = false;
     })
     .catch(function (error) {
       unreachable(error && error.message ? error.message : "The request did not complete.");
