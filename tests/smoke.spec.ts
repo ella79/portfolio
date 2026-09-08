@@ -277,6 +277,18 @@ test.describe('projects', () => {
     }
   });
 
+  // Deployment links are the first thing someone opens from a repository, so
+  // the card carries them rather than making a visitor find them on GitHub.
+  test('the suite card links what CI publishes', async ({ page }) => {
+    const card = page.locator('#projects .project-card').nth(1);
+
+    for (const path of ['', 'metrics/', 'playwright-report/']) {
+      await expect(
+        card.locator(`a[href="https://ella79.github.io/agentic-playwright-suite/${path}"]`),
+      ).toBeVisible();
+    }
+  });
+
   test('the suite card opens the runner', async ({ page }) => {
     await page.getByRole('link', { name: /run the qa suites/i }).click();
 
@@ -354,6 +366,15 @@ test.describe('qa suite runner', () => {
     );
 
     await page.goto('/qa-suite.html');
+  });
+
+  test('the published addresses are reachable without playing the replay', async ({ page }) => {
+    const strip = page.locator('.published');
+    await expect(strip).toBeVisible();
+
+    for (const path of ['', 'functional/', 'visual/', 'playwright-report/', 'metrics/']) {
+      await expect(strip.locator(`a[href="${REPORT}/${path}"]`)).toBeVisible();
+    }
   });
 
   test('the suites and the totals are the ones the report holds', async ({ page }) => {

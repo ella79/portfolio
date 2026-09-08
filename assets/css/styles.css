@@ -726,6 +726,24 @@ textarea{min-height:132px;resize:vertical}
 .btn-run:hover{background:#7ad3c4;border-color:#7ad3c4;transform:translateY(-1px)}
 .btn-run[disabled]{opacity:.6;cursor:default;transform:none}
 
+/* the addresses CI keeps current, listed where they can be reached without
+   playing the replay first */
+.published{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;
+  margin-top:20px;padding:15px 22px;
+  border:1px solid var(--line);border-radius:14px;background:var(--card);
+}
+.published-l{font-family:var(--font-mono);font-size:.625rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+.published a{
+  font-size:.8125rem;color:var(--teal-dark);text-decoration:none;
+  border-bottom:1px solid var(--teal-wash);transition:border-color .2s ease;
+}
+.published a:hover{border-bottom-color:var(--teal)}
+
+.card-links{font-size:.8125rem;color:var(--ink-soft);margin:0 0 22px}
+.card-links a{color:var(--teal-dark);text-decoration:none;border-bottom:1px solid var(--teal-wash);transition:border-color .2s ease}
+.card-links a:hover{border-bottom-color:var(--teal)}
+
 /* ---------- the dashboard the run opens ---------- */
 .runner-results{display:none;margin-top:64px}
 .runner-results.is-ready{display:block}

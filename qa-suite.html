@@ -36,7 +36,7 @@
   <section class="page-head">
     <div class="wrap">
       <h1>Agentic Playwright suite</h1>
-      <p class="role">Playwright and TypeScript, two suites, an Allure report published by CI</p>
+      <p class="role">Playwright and TypeScript, agents over Playwright MCP, a containerised pipeline</p>
       <p class="runner-intro">Every run of this suite in GitHub Actions publishes its results as an Allure report. This page reads that report: the suites and the areas on the left are the ones that ran, and the runner replays them test by test, with the statuses and the durations the run recorded. A browser cannot start Playwright itself, so what you watch here is that published run rather than a new one, and the report it came from is embedded at the bottom of the page.</p>
       <div class="cv-actions">
         <a class="btn btn-ghost" href="https://github.com/ella79/agentic-playwright-suite" target="_top" rel="noopener noreferrer"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.6a2 2 0 012-2h3.7a2 2 0 011.6.8l1.2 1.6H19a2 2 0 012 2v7.4a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>GitHub repository</a>
@@ -90,6 +90,17 @@
             <p class="hint" id="runHint">Replays the last run recorded in the Allure report, then opens that report below.</p>
           </div>
         </div>
+      </div>
+
+      <!-- the five addresses CI republishes on every push to main, so a
+           visitor can reach the raw report without waiting for the replay -->
+      <div class="published reveal">
+        <span class="published-l">Published on every push to main</span>
+        <a href="https://ella79.github.io/agentic-playwright-suite/" target="_top" rel="noopener noreferrer">Results dashboard</a>
+        <a href="https://ella79.github.io/agentic-playwright-suite/functional/" target="_top" rel="noopener noreferrer">Functional trend</a>
+        <a href="https://ella79.github.io/agentic-playwright-suite/visual/" target="_top" rel="noopener noreferrer">Visual trend</a>
+        <a href="https://ella79.github.io/agentic-playwright-suite/playwright-report/" target="_top" rel="noopener noreferrer">Trace viewer</a>
+        <a href="https://ella79.github.io/agentic-playwright-suite/metrics/" target="_top" rel="noopener noreferrer">Suite health</a>
       </div>
 
       <div class="runner-results" id="runnerResults">
