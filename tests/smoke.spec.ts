@@ -32,9 +32,15 @@ test.describe('home page', () => {
 
   test('the career timeline expands to the earlier roles', async ({ page }) => {
     await page.locator('#timeline').scrollIntoViewIfNeeded();
-    await expect(page.locator('.tl-item:visible')).toHaveCount(4);
+
+    // reading the expected counts from the markup rather than hardcoding them,
+    // so moving a role behind the expand button cannot turn the suite red on its own
+    const total = await page.locator('.tl-item').count();
+    const collapsed = await page.locator('.tl-item:not(.tl-extra)').count();
+
+    await expect(page.locator('.tl-item:visible')).toHaveCount(collapsed);
     await page.getByRole('button', { name: /show the earlier roles/i }).click();
-    await expect(page.locator('.tl-item:visible')).toHaveCount(8);
+    await expect(page.locator('.tl-item:visible')).toHaveCount(total);
   });
 
   test('the skill timeline bars fill to the value each one declares', async ({ page }) => {
