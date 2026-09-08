@@ -12,12 +12,15 @@ dependencies. The only third party request the page makes is to Google Fonts.
 .
 |-- index.html                   # the landing page
 |-- cv.html                      # the full CV, and the print source for an A4 PDF
+|-- qa-suite.html                # the QA suite runner, reading the published Allure report
 |-- 404.html                     # what GitHub Pages serves for an unknown path
 |-- assets/
 |   |-- css/styles.css           # design tokens first, then components, then print
 |   |-- js/main.js               # nav state, scroll reveals, expandable lists, form
+|   |-- js/qa-suite.js           # reads the Allure report and replays the run it recorded
 |   |-- img/                     # photo, favicon, social icons
 |   \-- cv/                      # the two page PDF the CV button hands over
+|-- scripts/serve.mjs            # the static server the tests and previews run on
 |-- tests/smoke.spec.ts          # Playwright smoke suite
 |-- playwright.config.ts
 |-- .github/
@@ -33,17 +36,19 @@ dependencies. The only third party request the page makes is to Google Fonts.
 ## Running it locally
 
 ```bash
-python3 -m http.server 8000
-# http://localhost:8000
+npm run serve
+# http://127.0.0.1:8000
 ```
 
 Serving the folder matters. The Content Security Policy and the relative paths
-behave differently over `file://`.
+behave differently over `file://`. The server is `scripts/serve.mjs`, a few
+lines of Node with no dependencies, and it answers an unknown path with
+`404.html` and a 404 the way GitHub Pages does.
 
 ## Tests
 
-Seventeen Playwright checks cover the paths a visitor actually takes, and each
-one runs twice, on desktop Chromium and on a mobile viewport.
+The Playwright suite covers the paths a visitor actually takes, and each check
+runs twice, on desktop Chromium and on a mobile viewport.
 
 The page loads without JavaScript errors, the nav reaches every section and
 highlights the one in view, a reload opens at the top instead of restoring the
@@ -51,8 +56,11 @@ last scroll position, the floating contact button appears while the work is
 being read and steps aside once Projects is on screen, the CV button hands over
 the PDF rather than opening a page, the career timeline expands, the skill bars
 fill when they scroll into view, the contact form stays closed until it is asked
-for and then validates, the direct contact links point where they claim to, and
-an unknown address or anchor lands on the not found page.
+for and then validates, the direct contact links point where they claim to, the
+project cards carry their repositories and the suite card opens the runner, the
+runner turns the published report into suites, totals and a replayed run and
+says so when that report cannot be reached, and an unknown address or anchor
+lands on the not found page.
 
 ```bash
 npm install

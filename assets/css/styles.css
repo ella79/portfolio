@@ -612,6 +612,208 @@ textarea{min-height:132px;resize:vertical}
   .empty-actions .btn{width:auto;flex:1 1 auto}
 }
 
+/* ---------- project cards ---------- */
+.project-cards{align-items:stretch}
+.project-card h3{margin-bottom:10px}
+.project-card .card-body p{font-size:.9375rem;color:var(--ink-soft);text-align:justify;-webkit-hyphens:auto;hyphens:auto}
+/* the stack tells a reader what the project is made of before they decide to
+   open a repository, which is the question a link alone leaves unanswered */
+.card-tags{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 24px;padding:0}
+.card-tags li{
+  font-family:var(--font-mono);font-size:.6875rem;letter-spacing:.04em;
+  color:var(--ink-soft);background:#fff;border:1px solid var(--line);
+  border-radius:999px;padding:4px 11px;
+}
+.card-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:auto}
+.card-actions .btn{padding:11px 19px;font-size:.875rem}
+
+/* ---------- qa suite runner ---------- */
+/* The page borrows the vocabulary of the site rather than inventing a second
+   one: card wash and hairlines for anything a visitor reads, the panel colours
+   for the console, and teal kept for a result. Amber keeps the meaning it has
+   on the landing page, a measured number worth stopping on, which here is a
+   run that did not come back clean. */
+.runner-intro{max-width:66ch;color:var(--ink-soft);margin-top:14px;text-align:justify;-webkit-hyphens:auto;hyphens:auto}
+.runner-section{padding-top:72px}
+
+/* provenance: the run these numbers came from, named before they are shown */
+.provenance{
+  display:flex;flex-wrap:wrap;align-items:center;gap:14px 34px;
+  padding:16px 22px;border:1px solid var(--line);border-radius:14px;
+  background:var(--card);
+}
+.prov-item{display:flex;flex-direction:column;gap:3px;min-width:0}
+.prov-l{font-family:var(--font-mono);font-size:.625rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+.prov-v{font-family:var(--font-mono);font-size:.8125rem;color:var(--ink)}
+.prov-link{
+  margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+  font-size:.8125rem;color:var(--teal-dark);text-decoration:none;
+  border-bottom:1px solid transparent;transition:border-color .2s ease;
+}
+.prov-link:hover{border-bottom-color:var(--teal)}
+
+.runner-stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:20px;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
+.runner-stats .stat{padding:20px 22px;border-right:1px solid var(--line)}
+.runner-stats .stat:last-child{border-right:0}
+.runner-stats .v{font-family:var(--font-display);font-size:1.75rem;line-height:1;color:var(--teal-dark)}
+.runner-stats .l{margin-top:9px;font-family:var(--font-mono);font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+
+.runner{
+  display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);
+  margin-top:20px;border:1px solid var(--line);border-radius:16px;
+  background:var(--card);overflow:hidden;
+}
+.runner-suites{border-right:1px solid var(--line);min-width:0}
+.suite{border-bottom:1px solid var(--line)}
+.suite:last-child{border-bottom:0}
+.suite-head{
+  width:100%;display:flex;align-items:center;gap:14px;padding:20px 22px;
+  background:none;border:0;font:inherit;color:var(--ink);text-align:left;cursor:pointer;
+  transition:background .2s ease;
+}
+.suite-head:hover{background:var(--teal-wash)}
+.suite-mark{
+  flex:none;width:22px;height:22px;border-radius:50%;font-size:.75rem;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--teal-wash);color:var(--teal-dark);
+}
+/* a suite that is mid replay is the one place the amber belongs here */
+.suite.is-running .suite-mark{background:#fbeedd;color:var(--amber)}
+.suite.is-running .suite-count{color:var(--amber)}
+.suite-name{flex:1;font-family:var(--font-display);font-weight:600;font-size:1rem}
+.suite-count{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft)}
+.suite-arrow{flex:none;color:var(--ink-soft);font-size:.75rem;transition:transform .28s ease}
+.suite.is-open .suite-arrow{transform:rotate(180deg)}
+.suite-groups{display:none;margin:0;padding:0 22px 20px;list-style:none}
+.suite.is-open .suite-groups{display:block}
+.suite-groups li{
+  display:grid;grid-template-columns:minmax(0,1fr) 72px auto;align-items:center;gap:14px;
+  padding:9px 0;border-top:1px solid var(--line);
+  font-size:.875rem;color:var(--ink-soft);
+}
+.suite-groups li b{font-weight:500;color:var(--ink)}
+.area-bar{height:5px;border-radius:999px;background:var(--line);overflow:hidden}
+.area-bar span{display:block;height:100%;background:var(--teal);opacity:.55}
+.suite-groups .n{font-family:var(--font-mono);font-size:.75rem;white-space:nowrap}
+
+/* the console is the one part of the page that should look like the terminal
+   the run actually happened in, so it takes the panel colours */
+.runner-console{background:var(--panel);color:var(--panel-text);display:flex;flex-direction:column;min-width:0}
+.console-bar{
+  display:flex;align-items:center;gap:10px;padding:14px 20px;
+  border-bottom:1px solid var(--panel-line);
+  font-family:var(--font-mono);font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:#8ea6b0;
+}
+.console-dot{width:8px;height:8px;border-radius:50%;background:#5ec1b1;flex:none}
+.console-bar .browser{margin-left:auto;text-transform:none;letter-spacing:.02em}
+.console-bar .counter{text-transform:none;letter-spacing:.02em;color:#5ec1b1;min-width:74px;text-align:right}
+.console-progress{height:2px;background:var(--panel-line)}
+.console-progress span{display:block;height:100%;width:0;background:#5ec1b1;transition:width .18s linear}
+.console-log{
+  margin:0;padding:20px;flex:1;min-height:340px;max-height:440px;overflow:auto;
+  font-family:var(--font-mono);font-size:.78rem;line-height:1.85;white-space:pre-wrap;word-break:break-word;
+}
+.console-log .muted{color:#7f97a1}
+.console-log .ok{color:#5ec1b1}
+.console-log .warn{color:#e8a75a}
+.console-log .head{color:#fff}
+.console-actions{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:18px 20px;border-top:1px solid var(--panel-line);
+}
+.console-actions .hint{font-size:.8125rem;color:#8ea6b0;margin:0;flex:1;min-width:210px}
+.btn-run{background:#5ec1b1;border-color:#5ec1b1;color:#08222a;font-weight:600}
+.btn-run:hover{background:#7ad3c4;border-color:#7ad3c4;transform:translateY(-1px)}
+.btn-run[disabled]{opacity:.6;cursor:default;transform:none}
+
+/* ---------- the dashboard the run opens ---------- */
+.runner-results{display:none;margin-top:64px}
+.runner-results.is-ready{display:block}
+.dash-title{font-size:1.5rem}
+.dash-row{display:grid;gap:22px;margin-top:26px}
+.dash-row-3{grid-template-columns:repeat(3,1fr)}
+.dash-row-2{grid-template-columns:1fr 1.35fr}
+.dash-card{
+  background:var(--card-wash);border:1px solid var(--line);border-radius:16px;
+  padding:24px;display:flex;flex-direction:column;
+}
+.dash-card h3{
+  font-family:var(--font-mono);font-size:.6875rem;font-weight:500;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:16px;
+}
+.dash-card h4{font-family:var(--font-display);font-size:.9375rem;margin:0}
+.dash-note{font-size:.8125rem;color:var(--ink-soft);margin:0 0 18px;line-height:1.6}
+
+/* pass rate */
+.ring-wrap{display:flex;justify-content:center;padding:4px 0 8px}
+.ring{width:150px;height:150px}
+.ring-track{fill:none;stroke:var(--line);stroke-width:9}
+.ring-fill{fill:none;stroke:var(--teal);stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.1s ease}
+.ring-v{fill:var(--ink);font-family:"Archivo",Georgia,sans-serif;font-size:1.65rem;font-weight:600;text-anchor:middle}
+.ring-l{fill:var(--ink-soft);font-family:"IBM Plex Mono",monospace;font-size:.62rem;text-anchor:middle}
+.legend{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.legend li{display:flex;align-items:center;gap:10px;font-size:.8125rem;color:var(--ink-soft)}
+.legend .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);flex:none}
+.legend .is-fail .dot{background:var(--amber)}
+.legend .is-skip .dot{background:var(--line)}
+.legend .label{flex:1}
+.legend .n{font-family:var(--font-mono);font-size:.75rem;color:var(--ink)}
+
+/* per suite */
+.result-card{padding:16px 0;border-top:1px solid var(--line)}
+.result-card:first-child{padding-top:0;border-top:0}
+.result-card:last-child{padding-bottom:0}
+.result-card .meta{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);margin:6px 0 0}
+.bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin:12px 0 10px}
+.bar span{display:block;height:100%;width:0;background:var(--teal);transition:width .9s ease}
+
+/* environment */
+.env{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;margin:0;font-size:.8125rem}
+.env dt{font-family:var(--font-mono);font-size:.6875rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);padding-top:2px}
+.env dd{margin:0;color:var(--ink);word-break:break-word}
+
+/* history */
+.trend{display:flex;align-items:flex-end;gap:10px;height:150px;margin-top:auto}
+.trend-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px}
+.trend-bar{display:block;width:100%;border-radius:6px 6px 0 0;background:var(--teal);opacity:.85;transition:opacity .2s ease}
+.trend-col:hover .trend-bar{opacity:1}
+.trend-col.is-fail .trend-bar{background:var(--amber)}
+.trend-l{font-family:var(--font-mono);font-size:.6875rem;color:var(--ink-soft)}
+
+/* slowest tests */
+.slow{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.slow li{display:grid;grid-template-columns:minmax(0,1fr) 30% auto;align-items:center;gap:16px}
+.slow-name{font-size:.8125rem;color:var(--ink);line-height:1.45}
+.slow-bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}
+.slow-bar span{display:block;height:100%;width:0;background:var(--teal);opacity:.7;transition:width .9s ease}
+.slow-v{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft)}
+
+/* the report itself */
+.allure-embed{margin-top:26px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card)}
+.allure-embed .embed-bar{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--line);
+  font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);
+}
+.allure-embed .embed-bar a{margin-left:auto;padding:9px 17px;font-size:.8125rem}
+.allure-frame{display:block;width:100%;height:640px;border:0;background:#fff}
+
+@media (max-width:960px){
+  .dash-row-3,.dash-row-2{grid-template-columns:1fr}
+}
+@media (max-width:860px){
+  .runner{grid-template-columns:1fr}
+  .runner-suites{border-right:0;border-bottom:1px solid var(--line)}
+  .runner-stats{grid-template-columns:repeat(2,1fr)}
+  .runner-stats .stat:nth-child(2){border-right:0}
+  .runner-stats .stat:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .prov-link{margin-left:0}
+  .allure-frame{height:540px}
+}
+@media (max-width:640px){
+  .slow li{grid-template-columns:minmax(0,1fr) auto}
+  .slow-bar{display:none}
+}
+
 /* ---------- the CV, on paper ---------- */
 .print-head{display:none}
 

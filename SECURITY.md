@@ -15,6 +15,10 @@ message to the visitor's own email client through a `mailto:` link.
   `form-action` is set to `none` so nothing can be posted anywhere.
 - `default-src 'none'` is the starting point, so anything not listed above is
   refused rather than allowed by omission.
+- The QA suite page is the one page that reaches another origin: it reads the
+  Allure report published at `ella79.github.io/agentic-playwright-suite` and
+  frames it. Its policy names that origin in `connect-src` and `frame-src`, and
+  nothing else. The other pages still allow neither.
 - No third party analytics, trackers or advertising scripts.
 - No inline scripts or inline event handlers, so the policy needs no
   `unsafe-inline` escape hatch.

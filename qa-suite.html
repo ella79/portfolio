@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; connect-src https://ella79.github.io; frame-src https://ella79.github.io">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<title>QA suite runner, Agentic Playwright Suite</title>
+<meta name="description" content="Run through the Agentic Playwright Suite: two suites, forty Playwright tests in TypeScript, and the Allure report published by CI.">
+<link rel="canonical" href="https://ella79.github.io/portfolio/qa-suite.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Allura&family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css?v=20260908">
+<script src="assets/js/main.js?v=20260908" defer></script>
+<script src="assets/js/qa-suite.js?v=20260908" defer></script>
+</head>
+<body>
+
+<header class="site-header" id="siteHeader">
+  <div class="wrap header-inner">
+    <a class="monogram" href="index.html"><svg class="mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21 H8 V11 H13 V21 H17"/><path d="M17 21 L21 26 L29 8"/></svg><em>Portfolio</em></a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html#about">About</a>
+      <a href="index.html#experience">Experience</a>
+      <a href="index.html#projects">Projects</a>
+      <a href="index.html#contact">Contact</a>
+      <a class="nav-page" href="assets/cv/Emanuela-Telescu-CV.pdf" download="Emanuela-Telescu-CV.pdf" title="Download the CV, 2 page PDF" aria-label="Download the CV, 2 page PDF"><svg class="dl-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v10.5"/><path d="M7.7 10.2 12 14.5l4.3-4.3"/><path d="M4.5 19.5h15"/></svg>CV</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="page-head">
+    <div class="wrap">
+      <h1>Agentic Playwright suite</h1>
+      <p class="role">Playwright and TypeScript, two suites, an Allure report published by CI</p>
+      <p class="runner-intro">Every run of this suite in GitHub Actions publishes its results as an Allure report. This page reads that report: the suites and the areas on the left are the ones that ran, and the runner replays them test by test, with the statuses and the durations the run recorded. A browser cannot start Playwright itself, so what you watch here is that published run rather than a new one, and the report it came from is embedded at the bottom of the page.</p>
+      <div class="cv-actions">
+        <a class="btn btn-ghost" href="https://github.com/ella79/agentic-playwright-suite" target="_top" rel="noopener noreferrer"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.6a2 2 0 012-2h3.7a2 2 0 011.6.8l1.2 1.6H19a2 2 0 012 2v7.4a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>GitHub repository</a>
+        <a class="btn btn-ghost" href="index.html#projects"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6 5 12l6 6"/></svg>Back to the projects</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="runner-section">
+    <div class="wrap">
+
+      <!-- where the numbers on this page come from, named before they are shown -->
+      <div class="provenance reveal" id="provenance">
+        <div class="prov-item"><span class="prov-l">Run</span><span class="prov-v" id="provBuild">&mdash;</span></div>
+        <div class="prov-item"><span class="prov-l">Branch</span><span class="prov-v" id="provBranch">&mdash;</span></div>
+        <div class="prov-item"><span class="prov-l">Commit</span><span class="prov-v" id="provCommit">&mdash;</span></div>
+        <div class="prov-item"><span class="prov-l">Retries</span><span class="prov-v" id="provRetries">&mdash;</span></div>
+        <div class="prov-item"><span class="prov-l">Published</span><span class="prov-v" id="provWhen">&mdash;</span></div>
+        <a class="prov-link" id="provLink" href="https://github.com/ella79/agentic-playwright-suite/actions" target="_top" rel="noopener noreferrer">Open the CI run<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg></a>
+      </div>
+
+      <div class="runner-stats reveal">
+        <div class="stat"><div class="v" id="statTests">&mdash;</div><div class="l">Tests</div></div>
+        <div class="stat"><div class="v" id="statSuites">&mdash;</div><div class="l">Suites</div></div>
+        <div class="stat"><div class="v" id="statPassing">&mdash;</div><div class="l">Passing</div></div>
+        <div class="stat"><div class="v" id="statDuration">&mdash;</div><div class="l">Wall time</div></div>
+      </div>
+
+      <div class="runner reveal">
+        <div class="runner-suites" id="suiteList">
+          <div class="suite">
+            <div class="suite-head">
+              <span class="suite-mark" aria-hidden="true">&hellip;</span>
+              <span class="suite-name">Reading the published report</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="runner-console">
+          <div class="console-bar">
+            <span class="console-dot" aria-hidden="true"></span>
+            <span>Playwright runner</span>
+            <span class="browser">Chromium &middot; 1920 &times; 1080</span>
+            <span class="counter" id="consoleCount"></span>
+          </div>
+          <div class="console-progress" aria-hidden="true"><span id="runProgress"></span></div>
+          <pre class="console-log" id="consoleLog" role="log" aria-live="polite" aria-label="Test run output"><span class="muted">&gt; Waiting for a run.</span>
+<span class="muted">Run the QA suites replays the latest run published by CI, test by test.</span></pre>
+          <div class="console-actions">
+            <button class="btn btn-run" id="runSuites" type="button"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.5 17.5 12 9 17.5z"/></svg><span class="run-label">Run the QA suites</span></button>
+            <p class="hint" id="runHint">Replays the last run recorded in the Allure report, then opens that report below.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="runner-results" id="runnerResults">
+
+        <h2 class="dash-title">What that run says</h2>
+        <p class="section-intro">Five readings of the same forty tests: how many held, how the work is split, what the tests ran against, how the suite has behaved over its last runs, and which cases cost the most time.</p>
+
+        <div class="dash-row dash-row-3">
+          <div class="dash-card">
+            <h3>Pass rate</h3>
+            <div class="ring-wrap" id="ringWrap"></div>
+            <ul class="legend" id="ringLegend"></ul>
+          </div>
+
+          <div class="dash-card">
+            <h3>Suites</h3>
+            <div id="resultCards"></div>
+          </div>
+
+          <div class="dash-card">
+            <h3>Environment</h3>
+            <dl class="env" id="envList"></dl>
+          </div>
+        </div>
+
+        <div class="dash-row dash-row-2">
+          <div class="dash-card">
+            <h3>Run history</h3>
+            <p class="dash-note" id="trendNote">Wall time of each published run, newest on the right.</p>
+            <div class="trend" id="trend"></div>
+          </div>
+
+          <div class="dash-card">
+            <h3>Slowest tests</h3>
+            <p class="dash-note">The five cases that carry the most of the run. These are where a timeout would bite first.</p>
+            <ul class="slow" id="slowList"></ul>
+          </div>
+        </div>
+
+        <div class="allure-embed">
+          <div class="embed-bar">
+            <span id="embedMeta">Allure report, published by GitHub Actions</span>
+            <a class="btn btn-ghost" href="https://ella79.github.io/agentic-playwright-suite/#" target="_top" rel="noopener noreferrer">Open the full report</a>
+          </div>
+          <iframe class="allure-frame" id="allureFrame" title="Allure report for the Agentic Playwright Suite" loading="lazy" data-src="https://ella79.github.io/agentic-playwright-suite/#"></iframe>
+        </div>
+      </div>
+
+      <noscript>
+        <p class="runner-intro">This page reads the published Allure report with JavaScript. The report itself is at <a href="https://ella79.github.io/agentic-playwright-suite/">ella79.github.io/agentic-playwright-suite</a>, and the suite behind it is at <a href="https://github.com/ella79/agentic-playwright-suite">github.com/ella79/agentic-playwright-suite</a>.</p>
+      </noscript>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>Copyright &copy; 2026. Emanuela Telescu Portfolio.</span>
+    <span class="footer-mid"><svg class="footer-mark" viewBox="0 0 32 32" width="38" height="38" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21 H8 V11 H13 V21 H17"/><path d="M17 21 L21 26 L29 8"/></svg>All rights reserved.</span>
+    <div class="footer-links">
+      <a class="social" href="https://www.linkedin.com/in/emanuelatelescu" aria-label="LinkedIn" title="LinkedIn" target="_top" rel="noopener noreferrer"><span class="social-icon li" data-src="assets/img/linkedin.svg" aria-hidden="true"></span><span class="social-label">LinkedIn</span></a>
+      <a class="social" href="https://github.com/ella79" aria-label="GitHub" title="GitHub" target="_top" rel="noopener noreferrer"><span class="social-icon gh" data-src="assets/img/github.svg" aria-hidden="true"></span><span class="social-label">GitHub</span></a>
+      <a class="social has-icon" href="mailto:emanuela.telescu@yahoo.com" aria-label="Email" title="Email" target="_top" rel="noopener noreferrer"><svg class="mail-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="M3 7l9 6 9-6"/></svg></a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

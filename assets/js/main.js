@@ -3,7 +3,7 @@
   /* A hash never reaches the server, so a wrong one cannot answer 404 by itself.
      These two rules make the address bar behave the way a visitor expects:
      anchors that used to exist keep working, anything else is a wrong address. */
-  var legacyAnchors = { approach: "about", skills: "experience" };
+  var legacyAnchors = { approach: "about", skills: "experience", work: "projects" };
   (function checkHash(){
     var id = "";
     try { id = decodeURIComponent(location.hash.slice(1)); } catch(e){ id = location.hash.slice(1); }
@@ -32,7 +32,7 @@
   /* Projects is the last section before Contact, so by the time it is on screen
      the real contact details are one scroll away and the floating button is
      just noise in front of them. */
-  var ctaStop = document.getElementById("work") || document.getElementById("contact");
+  var ctaStop = document.getElementById("projects") || document.getElementById("contact");
   function ctaVisible(y){
     /* The floating button is only useful between the point where someone is
        reading about the work and the point where contact is already in reach.

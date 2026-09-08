@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Allura&family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/styles.css?v=20260906x">
+<link rel="stylesheet" href="assets/css/styles.css?v=20260908">
 </head>
 <body>
 
@@ -26,7 +26,7 @@
     <nav class="nav" aria-label="Main">
       <a href="#about">About</a>
       <a href="#experience">Experience</a>
-      <a href="#work">Projects</a>
+      <a href="#projects">Projects</a>
       <a href="#contact">Contact</a>
       <a class="nav-page" href="assets/cv/Emanuela-Telescu-CV.pdf" download="Emanuela-Telescu-CV.pdf" title="Download the CV, 2 page PDF" aria-label="Download the CV, 2 page PDF"><svg class="dl-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v10.5"/><path d="M7.7 10.2 12 14.5l4.3-4.3"/><path d="M4.5 19.5h15"/></svg>CV</a>
     </nav>
@@ -43,7 +43,7 @@
         <p class="role">Senior QA Automation Engineer / SDET, AI augmented and agentic testing</p>
         <p class="bio">I build test automation for products where a missed defect is expensive: safety critical embedded software, automotive and HIL platforms. Playwright and TypeScript for the framework, Claude Code and Playwright MCP for the maintenance that used to take most of the time.</p>
         <div class="hero-actions">
-          <a class="btn btn-solid" href="#work"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v14"/><path d="M6.5 13 12 18.5 17.5 13"/></svg>See my work</a>
+          <a class="btn btn-solid" href="#projects"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v14"/><path d="M6.5 13 12 18.5 17.5 13"/></svg>See my work</a>
           <a class="btn btn-ghost" href="#contact"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 12.4c0 3.9-3.8 7-8.5 7-.9 0-1.8-.1-2.6-.3L4 20.5l1.4-3.5C4 15.8 3.5 14.2 3.5 12.4c0-3.9 3.8-7 8.5-7s8.5 3.1 8.5 7z"/></svg>Get in touch</a>
         </div>
       </div>
@@ -275,20 +275,40 @@
   </section>
 
   <!-- PROJECTS -->
-  <section id="work">
+  <section id="projects">
     <div class="wrap">
       <div class="reveal">
         <h2>Projects</h2>
-        <p class="section-intro">Everything above was built for the companies I worked for, so the code and the products belong to them. This section is for my own work, and I am putting it together now.</p>
+        <p class="section-intro">Everything above was built for the companies I worked for, so the code and the products belong to them. This section is for my own work. Two projects are public and running today, both are improved as I go, and more will follow: the agents and skills I write with Claude Code and TypeScript, Playwright MCP experiments, and small tools that came out of real testing problems rather than tutorials.</p>
       </div>
 
-      <div class="empty-state reveal">
-        <h3>In progress</h3>
-        <p>What will land here: the agents and skills I write with Claude Code and TypeScript, Playwright MCP experiments, and small tools that came out of real testing problems rather than tutorials.</p>
-        <p>Until then, the fastest way to see how I work is the career history above, or a conversation.</p>
-        <div class="empty-actions">
-          <a class="btn btn-ghost" href="https://github.com/ella79" target="_top" rel="noopener noreferrer"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.6a2 2 0 012-2h3.7a2 2 0 011.6.8l1.2 1.6H19a2 2 0 012 2v7.4a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>My GitHub</a>
-        </div>
+      <div class="cards project-cards">
+
+        <article class="card project-card reveal">
+          <p class="card-domain">Portfolio and CV</p>
+          <div class="card-body">
+            <h3>This site</h3>
+            <p>The page you are reading, and the CV behind it. Written by hand, no framework and no build step, a strict content security policy, and its own Playwright smoke suite that runs on every push through GitHub Actions.</p>
+            <ul class="card-tags"><li>HTML</li><li>CSS</li><li>Playwright</li><li>GitHub Actions</li></ul>
+            <div class="card-actions">
+              <a class="btn btn-ghost" href="https://github.com/ella79/portfolio" target="_top" rel="noopener noreferrer"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.6a2 2 0 012-2h3.7a2 2 0 011.6.8l1.2 1.6H19a2 2 0 012 2v7.4a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>GitHub repository</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="card project-card reveal">
+          <p class="card-domain">Test automation</p>
+          <div class="card-body">
+            <h3>Agentic Playwright suite</h3>
+            <p>Forty end to end and visual regression tests against Automation Exercise, in Playwright and TypeScript, written through an agentic Claude Code workflow: a test plan first, tests generated from the plan, then the run. Every CI run publishes an Allure report with its own history.</p>
+            <ul class="card-tags"><li>Playwright</li><li>TypeScript</li><li>Allure</li><li>Claude Code</li></ul>
+            <div class="card-actions">
+              <a class="btn btn-ghost" href="https://github.com/ella79/agentic-playwright-suite" target="_top" rel="noopener noreferrer"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.6a2 2 0 012-2h3.7a2 2 0 011.6.8l1.2 1.6H19a2 2 0 012 2v7.4a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>GitHub repository</a>
+              <a class="btn btn-solid" href="qa-suite.html"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.5 17.5 12 9 17.5z"/></svg>Run the QA suites</a>
+            </div>
+          </div>
+        </article>
+
       </div>
     </div>
   </section>
@@ -377,6 +397,6 @@
 
 <a class="sticky-cta" id="stickyCta" href="#contact"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 12.4c0 3.9-3.8 7-8.5 7-.9 0-1.8-.1-2.6-.3L4 20.5l1.4-3.5C4 15.8 3.5 14.2 3.5 12.4c0-3.9 3.8-7 8.5-7s8.5 3.1 8.5 7z"/></svg>Get in touch</a>
 
-<script src="assets/js/main.js?v=20260906x" defer></script>
+<script src="assets/js/main.js?v=20260908" defer></script>
 </body>
 </html>

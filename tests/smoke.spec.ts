@@ -24,7 +24,7 @@ test.describe('home page', () => {
   });
 
   test('in page navigation reaches every section', async ({ page }) => {
-    for (const section of ['about', 'experience', 'work', 'contact']) {
+    for (const section of ['about', 'experience', 'projects', 'contact']) {
       await page.locator(`.nav a[href="#${section}"]`).click();
       await expect(page.locator(`#${section}`)).toBeInViewport();
     }
@@ -137,7 +137,7 @@ test.describe('home page', () => {
     // start at the bottom, where the last section reaches for the end of the page
     await page.locator('.nav a[href="#contact"]').click();
 
-    for (const id of ['work', 'about', 'experience', 'contact']) {
+    for (const id of ['projects', 'about', 'experience', 'contact']) {
       await page.locator(`.nav a[href="#${id}"]`).click();
       await expect
         .poll(() =>
@@ -179,7 +179,7 @@ test.describe('home page', () => {
     await page.locator('#experience').scrollIntoViewIfNeeded();
     await expect(cta).toHaveClass(/\bon\b/);
 
-    await page.locator('#work').scrollIntoViewIfNeeded();
+    await page.locator('#projects').scrollIntoViewIfNeeded();
     await expect(cta).not.toHaveClass(/\bon\b/);
   });
 
@@ -207,11 +207,14 @@ test.describe('asset versions', () => {
 
     const home = await versions('/');
     const cv = await versions('/cv.html');
+    const runner = await versions('/qa-suite.html');
 
     expect(home.css).toMatch(/\?v=/);
     expect(home.js).toMatch(/\?v=/);
     expect(cv.css).toBe(home.css);
     expect(cv.js).toBe(home.js);
+    expect(runner.css).toBe(home.css);
+    expect(runner.js).toBe(home.js);
   });
 });
 
@@ -242,5 +245,159 @@ test.describe('addresses', () => {
     await page.goto('/index.html#approach');
     await expect(page).toHaveURL(/#about$/);
     await expect(page.locator('#about')).toBeInViewport();
+  });
+
+  // Projects lived at #work until the section was given its own name. Links to
+  // the old anchor are already out in the world, so it has to keep landing.
+  test('the old projects anchor still reaches Projects', async ({ page }) => {
+    await page.goto('/index.html#work');
+    await expect(page).toHaveURL(/#projects$/);
+    await expect(page.locator('#projects')).toBeInViewport();
+  });
+});
+
+test.describe('projects', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#projects').scrollIntoViewIfNeeded();
+  });
+
+  test('every project card carries its repository', async ({ page }) => {
+    const cards = page.locator('#projects .project-card');
+    await expect(cards).toHaveCount(2);
+
+    await expect(cards.nth(0).locator('a[href="https://github.com/ella79/portfolio"]')).toBeVisible();
+    await expect(
+      cards.nth(1).locator('a[href="https://github.com/ella79/agentic-playwright-suite"]'),
+    ).toBeVisible();
+
+    // a card that names no stack is a link with a headline on it
+    for (const card of await cards.all()) {
+      expect(await card.locator('.card-tags li').count()).toBeGreaterThan(0);
+    }
+  });
+
+  test('the suite card opens the runner', async ({ page }) => {
+    await page.getByRole('link', { name: /run the qa suites/i }).click();
+
+    await expect(page).toHaveURL(/qa-suite\.html$/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Agentic Playwright suite');
+  });
+});
+
+test.describe('qa suite runner', () => {
+  // The page reads a report another repository publishes. Serving that report
+  // from the test keeps this suite hermetic: what is under test is what the
+  // page does with the numbers, not whether GitHub Pages answered today.
+  const REPORT = 'https://ella79.github.io/agentic-playwright-suite';
+
+  const passing = (name: string, duration: number) => ({
+    name,
+    status: 'passed',
+    time: { start: duration, stop: duration * 2, duration },
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await page.route(`${REPORT}/widgets/summary.json`, (route) =>
+      route.fulfill({
+        json: {
+          statistic: { failed: 0, broken: 0, skipped: 0, passed: 4, unknown: 0, total: 4 },
+          time: { start: 1, stop: 63256, duration: 63255 },
+        },
+      }),
+    );
+    await page.route(`${REPORT}/data/suites.json`, (route) =>
+      route.fulfill({
+        json: {
+          name: 'suites',
+          children: [
+            {
+              name: 'Functional E2E',
+              children: [
+                {
+                  name: 'Authentication',
+                  children: [
+                    {
+                      name: 'Authentication',
+                      children: [
+                        passing('TC-01: a new visitor can register', 7563),
+                        passing('TC-02: a registered user can sign in', 10375),
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'Visual regression',
+              children: [
+                {
+                  name: 'Home',
+                  children: [
+                    {
+                      name: 'Visual regression - home',
+                      children: [
+                        passing('VR-01: site header for an anonymous visitor', 4045),
+                        passing('VR-02: featured products grid', 3788),
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    );
+    await page.route(`${REPORT}/`, (route) =>
+      route.fulfill({ contentType: 'text/html', body: '<h1>Allure report</h1>' }),
+    );
+
+    await page.goto('/qa-suite.html');
+  });
+
+  test('the suites and the totals are the ones the report holds', async ({ page }) => {
+    await expect(page.locator('#statTests')).toHaveText('4');
+    await expect(page.locator('#statSuites')).toHaveText('2');
+    await expect(page.locator('#statPassing')).toHaveText('100%');
+    await expect(page.locator('#statDuration')).toHaveText('1m 3s');
+
+    const suites = page.locator('#suiteList .suite');
+    await expect(suites).toHaveCount(2);
+    await expect(suites.nth(0)).toContainText('Functional E2E');
+    await expect(suites.nth(1)).toContainText('Visual regression');
+  });
+
+  test('a suite opens on the areas it covers', async ({ page }) => {
+    const suite = page.locator('#suiteList .suite').first();
+    await expect(suite.locator('.suite-groups')).toBeHidden();
+
+    await suite.locator('.suite-head').click();
+
+    await expect(suite.locator('.suite-groups')).toBeVisible();
+    await expect(suite.locator('.suite-groups li').first()).toContainText('Authentication');
+  });
+
+  test('the run replays the report and then opens it', async ({ page }) => {
+    await expect(page.locator('#runnerResults')).toBeHidden();
+
+    await page.getByRole('button', { name: /run the qa suites/i }).click();
+
+    await expect(page.locator('#consoleLog')).toContainText('TC-01: a new visitor can register');
+    await expect(page.locator('#consoleLog')).toContainText('VR-02: featured products grid');
+    await expect(page.locator('#consoleLog')).toContainText('4 tests passed');
+
+    await expect(page.locator('#runnerResults')).toBeVisible();
+    await expect(page.locator('#resultCards .result-card')).toHaveCount(2);
+    await expect(page.locator('#allureFrame')).toHaveAttribute('src', `${REPORT}/#`);
+    await expect(page.getByRole('button', { name: /run again/i })).toBeEnabled();
+  });
+
+  test('an unreachable report says so instead of showing an empty runner', async ({ page }) => {
+    await page.route(`${REPORT}/data/suites.json`, (route) => route.abort());
+    await page.reload();
+
+    await expect(page.locator('#consoleLog')).toContainText('Could not read the published report');
+    await expect(page.locator('#consoleLog')).toContainText(REPORT);
   });
 });
