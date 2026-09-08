@@ -235,7 +235,9 @@
   wireToggle("moreCerts", "certPills", "Show all certifications listed here", "Show fewer certifications");
   wireToggle("moreForm", "formPanel", "Prefer to write here? Open the contact form", "Close the contact form");
 
-  /* contact form: validate, then hand off to the email client */
+  /* contact form: validate, then post straight to Formspree so the message
+     actually reaches an inbox without the visitor's own mail client. */
+  var FORM_ENDPOINT = "https://formspree.io/f/mqpkyrbk";
   var form = document.getElementById("contactForm");
   var status = document.getElementById("formStatus");
   if(!form){ return; }
@@ -253,8 +255,8 @@
   });
   form.addEventListener("submit", function(e){
     e.preventDefault();
-    /* One handover at a time. A double click, an Enter key held down or a second
-       tab submitting the same form cannot fire two mailto handovers at once. */
+    /* One submission at a time. A double click, an Enter key held down or a second
+       tab submitting the same form cannot fire two requests at once. */
     if(sending){ return; }
     var name = document.getElementById("name").value.trim();
     var email = document.getElementById("email").value.trim();
@@ -273,20 +275,29 @@
       return;
     }
 
-    var body = message + "\n\n" + name + "\n" + email;
-    var href = "mailto:emanuela.telescu@yahoo.com"
-      + "?subject=" + encodeURIComponent(subject + " enquiry from " + name)
-      + "&body=" + encodeURIComponent(body);
     sending = true;
     submitBtn.disabled = true;
-    submitBtn.textContent = "Opening your email app";
-    status.classList.add("on");
-    window.location.href = href;
+    submitBtn.textContent = "Sending...";
+    status.classList.remove("on");
 
-    setTimeout(function(){
+    fetch(FORM_ENDPOINT, {
+      method: "POST",
+      headers: { "Accept": "application/json" },
+      body: new FormData(form)
+    }).then(function(res){
+      if(res.ok){
+        status.textContent = "Message sent. I will get back to you soon.";
+        form.reset();
+      } else {
+        status.textContent = "Something went wrong. Please write to emanuela.telescu@yahoo.com directly.";
+      }
+    }).catch(function(){
+      status.textContent = "Something went wrong. Please write to emanuela.telescu@yahoo.com directly.";
+    }).finally(function(){
+      status.classList.add("on");
       sending = false;
       submitBtn.disabled = false;
       submitBtn.textContent = "Send message";
-    }, 4000);
+    });
   });
 })();

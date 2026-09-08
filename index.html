@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://formspree.io; object-src 'none'; frame-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta property="og:type" content="profile">
 <meta property="og:title" content="Emanuela Telescu, Senior QA Automation Engineer">
@@ -327,6 +327,7 @@
 
       <div class="form-panel" id="formPanel">
         <form id="contactForm" novalidate>
+          <input type="text" name="_gotcha" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="field">
             <label for="name">Your name</label>
             <input type="text" id="name" name="name" autocomplete="name">
@@ -353,8 +354,8 @@
             <span class="err" id="err-message">Please write at least a short message.</span>
           </div>
           <button class="btn btn-solid" type="submit">Send message</button>
-          <p class="form-note">This opens your own email app with the message ready to send. Nothing is stored on this page and nothing is posted to a server.</p>
-          <p class="form-status" id="formStatus">Your email app should be open now. If nothing happened, write to emanuela.telescu@yahoo.com directly.</p>
+          <p class="form-note">Sending this delivers your message straight to my inbox. Nothing else about you or your device is stored.</p>
+          <p class="form-status" id="formStatus">Sending delivers your message straight to my inbox.</p>
         </form>
       </div>
     </div>

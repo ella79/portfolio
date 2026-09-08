@@ -372,6 +372,7 @@ textarea{min-height:132px;resize:vertical}
 .field.invalid input,.field.invalid select,.field.invalid textarea{border-color:#a12b1e}
 .form-note{margin-top:16px;font-size:.8125rem;color:var(--ink-soft);max-width:46ch}
 .form-status{margin-top:16px;font-size:.9375rem;color:var(--teal-dark);display:none}
+.hp-field{display:none}
 .form-status.on{display:block}
 /* The last section shares the bottom of the page with the footer, and the
    footer brings its own breathing room. Full padding here pushed the pair past

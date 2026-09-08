@@ -85,6 +85,54 @@ test.describe('home page', () => {
     await expect(page.locator('.field.invalid')).toHaveCount(0);
   });
 
+  test('a valid submission posts to Formspree and confirms it was sent', async ({ page }) => {
+    let request: import('@playwright/test').Request | null = null;
+    await page.route('https://formspree.io/f/**', async (route) => {
+      request = route.request();
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
+    });
+
+    await page.locator('#contact').scrollIntoViewIfNeeded();
+    await page.getByRole('button', { name: /open the contact form/i }).click();
+    await page.fill('#name', 'Ana Popescu');
+    await page.fill('#email', 'ana@example.com');
+    await page.selectOption('#subject', 'Collaboration');
+    await page.fill('#message', 'We are hiring a senior SDET for a remote role.');
+
+    // the honeypot field ships empty and out of tab order -- a filled-in one is a bot's doing
+    await expect(page.locator('input[name="_gotcha"]')).toBeHidden();
+    await expect(page.locator('input[name="_gotcha"]')).toHaveValue('');
+
+    await page.getByRole('button', { name: 'Send message' }).click();
+    await expect(page.getByText('Message sent. I will get back to you soon.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Send message' })).toBeEnabled();
+
+    expect(request).not.toBeNull();
+    expect(request!.method()).toBe('POST');
+    // fetch() sends the FormData body as multipart, not urlencoded, so this checks
+    // for each field's value inside its part rather than parsing it as a query string.
+    const body = request!.postData() ?? '';
+    expect(body).toMatch(/name="name"[\s\S]*?Ana Popescu/);
+    expect(body).toMatch(/name="email"[\s\S]*?ana@example\.com/);
+    expect(body).toMatch(/name="subject"[\s\S]*?Collaboration/);
+    expect(body).toMatch(/name="_gotcha"[\s\S]*?----/);
+  });
+
+  test('a failed submission tells the visitor to email directly instead', async ({ page }) => {
+    await page.route('https://formspree.io/f/**', (route) => route.fulfill({ status: 500 }));
+
+    await page.locator('#contact').scrollIntoViewIfNeeded();
+    await page.getByRole('button', { name: /open the contact form/i }).click();
+    await page.fill('#name', 'Ana Popescu');
+    await page.fill('#email', 'ana@example.com');
+    await page.selectOption('#subject', 'Collaboration');
+    await page.fill('#message', 'We are hiring a senior SDET for a remote role.');
+    await page.getByRole('button', { name: 'Send message' }).click();
+
+    await expect(page.getByText('Something went wrong. Please write to emanuela.telescu@yahoo.com directly.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Send message' })).toBeEnabled();
+  });
+
   test('a nav click stops on its own section, never past it', async ({ page }) => {
     // start at the bottom, where the last section reaches for the end of the page
     await page.locator('.nav a[href="#contact"]').click();
