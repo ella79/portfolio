@@ -32,7 +32,14 @@
   var SVG_NS = "http://www.w3.org/2000/svg";
   var CHECK = "✓";
   var CROSS = "×";
+  /* the verdict on a suite that did not come back clean. A cross in a circle at
+     the head of a row that also expands is read as a close button, and this one
+     never changed when the row opened, so it looked like a broken one. */
+  var ALERT = "!";
   var ARROW = "▾";
+  /* the order a run is summarised in, so the console line, the card and the bar
+     all name the statuses the same way round */
+  var STATUSES = ["passed", "failed", "broken", "skipped", "unknown"];
 
   /* ---------- formatting ---------- */
 
@@ -141,8 +148,20 @@
         });
       });
 
+      /* the whole verdict, not just the passing half. A suite bar drawn from
+         the pass rate alone leaves the rest of the track grey, and grey is
+         skipped on this page, so twenty failures were being shown in the
+         colour of tests that never ran. */
+      var counts = {};
+      STATUSES.forEach(function (status) { counts[status] = 0; });
+      tests.forEach(function (test) {
+        var status = counts[test.status] === undefined ? "unknown" : test.status;
+        counts[status] += 1;
+      });
+
       return {
         name: suite.name,
+        counts: counts,
         engines: engines.map(function (branch) {
           var inBranch = leaves(branch, []);
           return {
@@ -221,8 +240,17 @@
       head.type = "button";
       head.setAttribute("aria-expanded", "false");
 
-      var mark = el("span", "suite-mark", suite.passed === suite.total ? CHECK : CROSS);
-      mark.setAttribute("aria-hidden", "true");
+      /* a verdict rather than a control: a tick when every result held, an
+         exclamation when one did not. Both are readable at a glance and
+         neither can be mistaken for the thing that opens the row. */
+      var clean = suite.passed === suite.total;
+      var mark = el("span", clean ? "suite-mark" : "suite-mark is-off", clean ? CHECK : ALERT);
+      mark.setAttribute("role", "img");
+      mark.setAttribute(
+        "aria-label",
+        clean ? "Every result passed" : suite.total - suite.passed + " of " + suite.total + " results did not pass"
+      );
+      mark.title = mark.getAttribute("aria-label");
       var count = el("span", "suite-count", plural(suite.total, "test"));
       var arrow = el("span", "suite-arrow", ARROW);
       arrow.setAttribute("aria-hidden", "true");
@@ -250,9 +278,25 @@
           var chip = el("button", engine.passed === engine.total ? "cb-engines-chip" : "cb-engines-chip is-off");
           chip.type = "button";
           chip.setAttribute("aria-pressed", "false");
-          chip.title = "Replay only what ran on " + engine.name;
+          /* The number counts results that passed, and without the word it was
+             read as results that ran: 0/20 next to 20/20 said Chromium never
+             started, when in fact it started twenty times and held none. Both
+             engines are under "Ran on", so both ran; what differs is how they
+             came out. */
+          var ran = el("span", "cb-ran", CHECK);
+          ran.setAttribute("aria-hidden", "true");
+          chip.appendChild(ran);
           chip.appendChild(el("span", "cb-engine", engine.name));
           chip.appendChild(el("span", "cb-n", engine.passed + "/" + engine.total));
+          chip.appendChild(el("span", "cb-unit", "passed"));
+          chip.dataset.title =
+            engine.name + ": " + engine.passed + " of " + plural(engine.total, "result") +
+            " passed. Press to replay only this browser.";
+          chip.title = chip.dataset.title;
+          chip.setAttribute(
+            "aria-label",
+            engine.name + ", " + engine.passed + " of " + plural(engine.total, "result") + " passed"
+          );
           chip.addEventListener("click", function () { toggleEngine(engine.name); });
           chip.dataset.engine = engine.name;
           browsers.appendChild(chip);
@@ -313,12 +357,16 @@
     consoleBrowser.textContent = [who, viewport].filter(Boolean).join(" · ");
   }
 
+  function chips() {
+    return [].slice.call(document.querySelectorAll(".cb-engines-chip"));
+  }
+
   function toggleEngine(name) {
     if (running) { return; }
     engineFilter = engineFilter === name ? null : name;
     describeBrowsers();
 
-    [].slice.call(document.querySelectorAll(".cb-engines-chip")).forEach(function (chip) {
+    chips().forEach(function (chip) {
       var on = chip.dataset.engine === engineFilter;
       chip.classList.toggle("is-on", on);
       chip.setAttribute("aria-pressed", on ? "true" : "false");
@@ -351,6 +399,11 @@
     runButton.disabled = true;
     runLabel.textContent = "Running";
     log.innerHTML = "";
+    /* the ticks belong to the replay that is starting, not the one before it */
+    chips().forEach(function (chip) {
+      chip.classList.remove("is-ran");
+      if (chip.dataset.title) { chip.title = chip.dataset.title; }
+    });
 
     /* a filtered replay plays a subset, and a suite that has nothing left in it
        is skipped rather than announced and then left empty */
@@ -418,6 +471,14 @@
       });
       write(parts.join(", ") + "  (" + wall(time.duration || 0) + " wall time)", "head");
       write("Report published to ella79.github.io/agentic-playwright-suite", "muted");
+      /* the console scrolls away, so the browsers that were replayed keep a
+         tick: which engine the run covered is still on screen afterwards */
+      chips().forEach(function (chip) {
+        if (!engineFilter || chip.dataset.engine === engineFilter) {
+          chip.classList.add("is-ran");
+          chip.title = "Replayed in this run. " + chip.dataset.title;
+        }
+      });
       runButton.disabled = false;
       runLabel.textContent = "Run again";
       running = false;
@@ -470,10 +531,14 @@
 
     var legend = document.getElementById("ringLegend");
     if (!legend) { return; }
+    /* Failed and broken had the same amber dot, which put two different
+       findings behind one colour in the only place the page explains them.
+       A failed test is the application; a broken one is the suite or the box it
+       ran in, and the legend has to be able to say so. */
     var rows = [
       { key: "passed", label: "Passed", tone: "is-pass" },
       { key: "failed", label: "Failed", tone: "is-fail" },
-      { key: "broken", label: "Broken", tone: "is-fail" },
+      { key: "broken", label: "Broken", tone: "is-broken" },
       { key: "skipped", label: "Skipped", tone: "is-skip" }
     ];
     fill(
@@ -558,10 +623,35 @@
         card.appendChild(el("h4", null, suite.name));
         card.appendChild(el("p", "meta", suite.passed + " of " + suite.total + " passed"));
 
+        /* One segment per status the run recorded, in the colours the legend
+           beside it names. The bar used to stop at the pass rate and leave the
+           rest as track, and the track is grey, so a suite with twenty failures
+           was drawing them in the colour this page uses for skipped. */
+        var counts = suite.counts || {};
         var bar = el("div", "bar");
-        var span = el("span");
-        bar.appendChild(span);
+        var segments = [];
+        STATUSES.forEach(function (status) {
+          var n = counts[status] || 0;
+          if (!n) { return; }
+          var span = el("span", "seg-" + status);
+          span.title = n + " " + status;
+          bar.appendChild(span);
+          segments.push({ node: span, share: suite.total ? (n / suite.total) * 100 : 0 });
+        });
         card.appendChild(bar);
+
+        /* the segments are named rather than left to the colour alone, so the
+           card still reads without the legend and without colour at all */
+        var key = el("ul", "bar-key");
+        STATUSES.forEach(function (status) {
+          var n = counts[status] || 0;
+          if (!n) { return; }
+          var item = el("li");
+          item.appendChild(el("span", "swatch seg-" + status));
+          item.appendChild(el("span", null, n + " " + status));
+          key.appendChild(item);
+        });
+        if (key.childNodes.length > 1) { card.appendChild(key); }
         /* naming the browsers here matters: forty results out of twenty cases
            reads as twice the coverage unless the card says where the doubling
            came from */
@@ -577,7 +667,7 @@
         );
 
         window.setTimeout(function () {
-          span.style.width = (suite.total ? (suite.passed / suite.total) * 100 : 0) + "%";
+          segments.forEach(function (segment) { segment.node.style.width = segment.share + "%"; });
         }, 80);
         return card;
       })

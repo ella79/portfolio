@@ -317,7 +317,7 @@ test.describe('qa suite runner', () => {
   // the shape the suite publishes now: the engine is the branch, and the same
   // engine name is on every result underneath it, which is how the page tells
   // an engine apart from an area without reading tree position
-  const engineBranch = (engine: string, project: string) => ({
+  const engineBranch = (engine: string, project: string, status = 'passed') => ({
     name: engine,
     children: [
       {
@@ -326,8 +326,8 @@ test.describe('qa suite runner', () => {
           {
             name: 'Checkout',
             children: [
-              result('TC-17: order end to end', 15800, 'passed', [project, engine]),
-              result('TC-16: checkout guard', 4600, 'passed', [project, engine]),
+              result('TC-17: order end to end', 15800, status, [project, engine]),
+              result('TC-16: checkout guard', 4600, status, [project, engine]),
             ],
           },
         ],
@@ -341,6 +341,21 @@ test.describe('qa suite runner', () => {
       {
         name: 'Functional E2E',
         children: [engineBranch('Chromium', 'e2e-playwright'), engineBranch('WebKit', 'webkit')],
+      },
+    ],
+  };
+
+  // the shape that made the chips unreadable: one engine green, the other red.
+  // Both ran; only one of them held.
+  const splitEngineTree = {
+    name: 'suites',
+    children: [
+      {
+        name: 'Functional E2E',
+        children: [
+          engineBranch('Chromium', 'e2e-playwright', 'failed'),
+          engineBranch('WebKit', 'webkit'),
+        ],
       },
     ],
   };
@@ -575,7 +590,7 @@ test.describe('qa suite runner', () => {
 
     // the suite that carries them is marked, the clean one is not
     const suites = page.locator('#suiteList .suite');
-    await expect(suites.nth(0).locator('.suite-mark')).toHaveText('×');
+    await expect(suites.nth(0).locator('.suite-mark')).toHaveText('!');
     await expect(suites.nth(1).locator('.suite-mark')).toHaveText('✓');
 
     await page.getByRole('button', { name: /run the qa suites/i }).click();
@@ -593,6 +608,118 @@ test.describe('qa suite runner', () => {
     await expect(callout).toBeVisible();
     await expect(callout).toContainText('did not come back clean');
     await expect(callout.locator(`a[href="${REPORT}/playwright-report/"]`)).toBeVisible();
+  });
+
+  // A cross in a circle at the head of a row that also expands is read as a
+  // close button, and this one said the same thing whether the row was open or
+  // shut, so it looked like one that had stopped working. The mark is a verdict
+  // and nothing else opens or closes with it.
+  test('the suite mark is a verdict rather than a control', async ({ page }) => {
+    await reportWithFailures(page);
+    await page.reload();
+
+    const failing = page.locator('#suiteList .suite').nth(0);
+    const clean = page.locator('#suiteList .suite').nth(1);
+
+    await expect(failing.locator('.suite-mark')).toHaveText('!');
+    await expect(failing.locator('.suite-mark')).toHaveClass(/is-off/);
+    await expect(failing.locator('.suite-mark')).toHaveAttribute('aria-label', /did not pass/);
+    await expect(clean.locator('.suite-mark')).toHaveText('✓');
+    await expect(clean.locator('.suite-mark')).not.toHaveClass(/is-off/);
+
+    // opening the row is the chevron's job, and the verdict does not move for it
+    await failing.locator('.suite-head').click();
+    await expect(failing.locator('.suite-groups')).toBeVisible();
+    await expect(failing.locator('.suite-mark')).toHaveText('!');
+  });
+
+  // The number on a chip counts results that passed. Without the word, 0/2 next
+  // to 2/2 was read as a browser that never started, which is the opposite of
+  // what the row above them says.
+  test('a browser chip says what its number counts', async ({ page }) => {
+    await page.route(`${REPORT}/data/suites.json`, (route) =>
+      route.fulfill({ json: splitEngineTree }),
+    );
+    await page.reload();
+
+    const chromium = page.locator('.cb-engines-chip', { hasText: 'Chromium' });
+    await expect(chromium).toContainText('0/2');
+    await expect(chromium).toContainText('passed');
+    await expect(chromium).toHaveAttribute('aria-label', 'Chromium, 0 of 2 results passed');
+  });
+
+  // Selecting a browser that had failures used to leave its pale background in
+  // place under white text, so the label disappeared at the moment it mattered.
+  test('the chosen browser stays legible and keeps its tick after the replay', async ({ page }) => {
+    await page.route(`${REPORT}/data/suites.json`, (route) =>
+      route.fulfill({ json: splitEngineTree }),
+    );
+    await page.reload();
+
+    const chromium = page.locator('.cb-engines-chip', { hasText: 'Chromium' });
+    const webkit = page.locator('.cb-engines-chip', { hasText: 'WebKit' });
+    await chromium.click();
+
+    // polled rather than read once: the chip fades into its selected colours,
+    // and a single sample lands somewhere in the middle of that
+    await expect
+      .poll(() =>
+        chromium.evaluate((node) => {
+          const style = getComputedStyle(node);
+          return [style.color, style.backgroundColor].join(' on ');
+        }),
+      )
+      .toBe('rgb(255, 255, 255) on rgb(10, 85, 76)');
+
+    // which browser was replayed has to survive the console scrolling on
+    await expect(chromium.locator('.cb-ran')).toBeHidden();
+    await page.getByRole('button', { name: /run Chromium only/i }).click();
+    await expect(page.locator('#runnerResults')).toBeVisible();
+
+    await expect(chromium.locator('.cb-ran')).toBeVisible();
+    await expect(webkit.locator('.cb-ran')).toBeHidden();
+  });
+
+  // The bar stopped at the pass rate and left the rest as track. The track is
+  // grey and grey is skipped on this page, so twenty failures were being drawn
+  // in the colour of tests that never ran.
+  test('a suite bar carries every status the run recorded', async ({ page }) => {
+    await reportWithFailures(page);
+    await page.reload();
+    await page.getByRole('button', { name: /run the qa suites/i }).click();
+    await expect(page.locator('#runnerResults')).toBeVisible();
+
+    const functional = page.locator('#resultCards .result-card').first();
+    await expect(functional.locator('.bar .seg-failed')).toHaveCount(1);
+    await expect(functional.locator('.bar .seg-broken')).toHaveCount(1);
+    await expect(functional.locator('.bar .seg-passed')).toHaveCount(0);
+    await expect(functional.locator('.bar-key')).toContainText('1 failed');
+    await expect(functional.locator('.bar-key')).toContainText('1 broken');
+
+    const segments = await functional.evaluate((card) =>
+      [...card.querySelectorAll('.bar span')].map((span) => getComputedStyle(span).backgroundColor),
+    );
+    expect(segments.length).toBe(2);
+    expect(new Set(segments).size).toBe(segments.length);
+  });
+
+  // Failed and broken shared one amber dot in the only place the page explains
+  // the difference between them.
+  test('every status in the legend is drawn differently', async ({ page }) => {
+    await reportWithFailures(page);
+    await page.reload();
+    await page.getByRole('button', { name: /run the qa suites/i }).click();
+    await expect(page.locator('#runnerResults')).toBeVisible();
+
+    const dots = await page.locator('#ringLegend li .dot').evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const style = getComputedStyle(node);
+        return [style.backgroundColor, style.borderColor, style.borderWidth].join('|');
+      }),
+    );
+
+    expect(dots.length).toBe(4);
+    expect(new Set(dots).size).toBe(dots.length);
   });
 
   test('a clean run says nothing about traces', async ({ page }) => {
