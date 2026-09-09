@@ -9,11 +9,16 @@
   --teal-dark:#0a554c;
   --teal-wash:#e6f0ee;
   --amber:#b4620f;
-  /* failed and broken are different findings, so they cannot share a colour:
-     amber alone made the two rows of the pass rate legend read as one. Amber
-     stays with broken, where the suite or the environment is at fault, and the
-     red belongs to failed, where the application is. */
+  /* Failed and broken are different findings and cannot share a colour: one
+     amber for both made the two rows of the pass rate legend read as one.
+     Red and amber were the first attempt and still sat twenty degrees apart on
+     the hue wheel, which is not a difference at the size of a legend dot. The
+     violet is nowhere near either, and nowhere near the teal, so the three
+     outcomes separate at a glance and stay separated for a red-green reader.
+     Red is failed, where the application is at fault; violet is broken, where
+     the suite or the box it ran in is. */
   --red:#a3271b;
+  --violet:#6a4a9c;
   --grey:#a9b8b4;
   --panel:#0e1e26;
   --panel-line:#223a45;
@@ -708,7 +713,10 @@ textarea{min-height:132px;resize:vertical}
    of their own repeating the same fact further down the page */
 /* outside the collapsible list on purpose: they filter the runner, so they have
    to be visible without opening anything first */
-.suite-browsers{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 22px 18px;margin-top:-4px}
+/* the negative margin pulled this row up under the suite name, where at some
+   text sizes the two touched. The chips are a control of their own and need
+   the space to read as one. */
+.suite-browsers{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:4px 22px 20px}
 .sb-label{
   font-family:var(--font-mono);font-size:.625rem;letter-spacing:.09em;
   text-transform:uppercase;color:var(--ink-soft);margin-right:2px;
@@ -841,7 +849,7 @@ textarea{min-height:132px;resize:vertical}
    broken, so the two also differ in fill: failed is solid, broken is a ring. */
 .legend .dot{width:10px;height:10px;border-radius:50%;background:var(--teal);flex:none}
 .legend .is-fail .dot{background:var(--red)}
-.legend .is-broken .dot{background:transparent;border:2.5px solid var(--amber)}
+.legend .is-broken .dot{background:transparent;border:2.5px solid var(--violet)}
 .legend .is-skip .dot{background:transparent;border:2.5px solid var(--grey)}
 .legend .label{flex:1}
 .legend .n{font-family:var(--font-mono);font-size:.75rem;color:var(--ink)}
@@ -857,7 +865,7 @@ textarea{min-height:132px;resize:vertical}
 .bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin:12px 0 10px;display:flex}
 .bar span{display:block;height:100%;width:0;background:var(--teal);transition:width .9s ease}
 .bar .seg-failed{background:var(--red)}
-.bar .seg-broken{background:var(--amber)}
+.bar .seg-broken{background:var(--violet)}
 .bar .seg-skipped{background:var(--grey)}
 .bar .seg-unknown{background:#7d8f8b}
 /* the counts under the bar, in the words the report uses for them */
@@ -868,7 +876,7 @@ textarea{min-height:132px;resize:vertical}
 }
 .bar-key .swatch{width:10px;height:10px;border-radius:2px;background:var(--teal);flex:none}
 .bar-key .swatch.seg-failed{background:var(--red)}
-.bar-key .swatch.seg-broken{background:var(--amber)}
+.bar-key .swatch.seg-broken{background:var(--violet)}
 .bar-key .swatch.seg-skipped{background:var(--grey)}
 .bar-key .swatch.seg-unknown{background:#7d8f8b}
 

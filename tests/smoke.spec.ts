@@ -319,6 +319,9 @@ test.describe('qa suite runner', () => {
   // an engine apart from an area without reading tree position
   const engineBranch = (engine: string, project: string, status = 'passed') => ({
     name: engine,
+    // Allure gives every branch an address, and the page uses it to open the
+    // report on the branch a filtered replay just played.
+    uid: `uid-${engine.toLowerCase()}`,
     children: [
       {
         name: 'Checkout',
@@ -335,14 +338,45 @@ test.describe('qa suite runner', () => {
     ],
   });
 
+  // The visual suite forks on area rather than on engine, so it has no engine
+  // branch to read. Its engine is on every result all the same, which is what
+  // gives it a chip of its own.
+  const visualSuite = {
+    name: 'Visual regression',
+    uid: 'uid-visual',
+    children: [
+      {
+        name: 'Home',
+        children: [
+          {
+            name: 'Visual regression - home',
+            children: [
+              result('VR-01: site header', 4045, 'passed', ['visual-regression', 'Chromium']),
+              result('VR-02: featured grid', 3788, 'passed', ['visual-regression', 'Chromium']),
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
   const twoEngineTree = {
     name: 'suites',
     children: [
       {
         name: 'Functional E2E',
+        uid: 'uid-functional',
         children: [engineBranch('Chromium', 'e2e-playwright'), engineBranch('WebKit', 'webkit')],
       },
     ],
+  };
+
+  // Both shapes at once: a suite that forks on engine beside one that does not.
+  // This is the report as it is actually published, and the only shape in which
+  // a filter can get the two suites confused.
+  const bothShapesTree = {
+    name: 'suites',
+    children: [twoEngineTree.children[0], visualSuite],
   };
 
   // the shape that made the chips unreadable: one engine green, the other red.
@@ -352,6 +386,7 @@ test.describe('qa suite runner', () => {
     children: [
       {
         name: 'Functional E2E',
+        uid: 'uid-functional',
         children: [
           engineBranch('Chromium', 'e2e-playwright', 'failed'),
           engineBranch('WebKit', 'webkit'),
@@ -543,13 +578,20 @@ test.describe('qa suite runner', () => {
 
   // Showing two browsers and then replaying both together leaves the obvious
   // question unanswered, so the chip is a filter rather than a label.
-  test('a browser chip filters the replay to that browser', async ({ page }) => {
+  //
+  // A filter is a suite and a browser together, not a browser alone. While it
+  // was a browser alone it was wrong in both directions: the visual cases record
+  // Chromium too, so choosing Chromium under the functional suite replayed the
+  // visual one as well, and the visual suite had no chip at all so it could
+  // never be replayed on its own.
+  test('a chip filters the replay to one suite on one browser', async ({ page }) => {
     await page.route(`${REPORT}/data/suites.json`, (route) =>
-      route.fulfill({ json: twoEngineTree }),
+      route.fulfill({ json: bothShapesTree }),
     );
     await page.reload();
 
     const functional = page.locator('#suiteList .suite').first();
+    const visual = page.locator('#suiteList .suite').nth(1);
     const webkit = functional.locator('.cb-engines-chip', { hasText: 'WebKit' });
     await expect(webkit).toBeVisible();
 
@@ -558,14 +600,34 @@ test.describe('qa suite runner', () => {
     await expect(page.locator('#consoleBrowser')).toContainText('WebKit');
     await expect(webkit).toHaveAttribute('aria-pressed', 'true');
 
-    await page.getByRole('button', { name: /run WebKit only/i }).click();
+    await page.getByRole('button', { name: /run Functional E2E on WebKit/i }).click();
     await expect(page.locator('#consoleLog')).toContainText('2 tests passed');
     await expect(page.locator('#consoleLog')).toContainText('on WebKit');
+    // no Chromium, and no visual case that never ran on WebKit
+    await expect(page.locator('#consoleLog')).not.toContainText('VR-01');
+
+    // the report follows the selection rather than opening at the top of a run
+    // the reader did not ask to see
+    await expect(page.locator('#allureFrame')).toHaveAttribute('src', `${REPORT}/#suites/uid-webkit`);
+    await expect(page.locator('#reportLink')).toHaveAttribute('href', `${REPORT}/#suites/uid-webkit`);
+
+    // the visual suite forks on area, so it has no engine branch. Its engine is
+    // on every result all the same, which is what gives it a chip of its own.
+    const chromium = visual.locator('.cb-engines-chip', { hasText: 'Chromium' });
+    await expect(chromium).toContainText('2/2');
+    await chromium.click();
+    await expect(webkit).toHaveAttribute('aria-pressed', 'false');
+
+    await page.getByRole('button', { name: /run Visual regression/i }).click();
+    await expect(page.locator('#consoleLog')).toContainText('VR-01: site header');
+    await expect(page.locator('#consoleLog')).not.toContainText('TC-17');
+    await expect(page.locator('#allureFrame')).toHaveAttribute('src', `${REPORT}/#suites/uid-visual`);
 
     // pressing it again gives the whole run back
-    await webkit.click();
-    await expect(webkit).toHaveAttribute('aria-pressed', 'false');
+    await chromium.click();
+    await expect(chromium).toHaveAttribute('aria-pressed', 'false');
     await expect(page.getByRole('button', { name: /run the qa suites/i })).toBeEnabled();
+    await expect(page.locator('#allureFrame')).toHaveAttribute('src', `${REPORT}/#`);
   });
 
   // A case that runs on two browsers is two results and one case. Showing only
@@ -655,7 +717,7 @@ test.describe('qa suite runner', () => {
     const chromium = page.locator('.cb-engines-chip', { hasText: 'Chromium' });
     await expect(chromium).toContainText('0/2');
     await expect(chromium).toContainText('passed');
-    await expect(chromium).toHaveAttribute('aria-label', 'Chromium, 0 of 2 results passed');
+    await expect(chromium).toHaveAttribute('aria-label', 'Functional E2E on Chromium, 0 of 2 results passed');
   });
 
   // Selecting a browser that had failures used to leave its pale background in
@@ -683,7 +745,7 @@ test.describe('qa suite runner', () => {
 
     // which browser was replayed has to survive the console scrolling on
     await expect(chromium.locator('.cb-ran')).toBeHidden();
-    await page.getByRole('button', { name: /run Chromium only/i }).click();
+    await page.getByRole('button', { name: /run Functional E2E on Chromium/i }).click();
     await expect(page.locator('#runnerResults')).toBeVisible();
 
     await expect(chromium.locator('.cb-ran')).toBeVisible();

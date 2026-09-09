@@ -21,6 +21,7 @@
   var counter = document.getElementById("consoleCount");
   var results = document.getElementById("runnerResults");
   var frame = document.getElementById("allureFrame");
+  var reportLink = document.getElementById("reportLink");
   var embedMeta = document.getElementById("embedMeta");
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -193,11 +194,16 @@
 
       return {
         name: suite.name,
+        /* Allure gives every branch an address of its own. Carrying it lets a
+           filtered replay open the report on the same branch it just played,
+           instead of dropping the reader at the top of the whole run. */
+        uid: suite.uid,
         counts: tally(tests),
         engines: engines.map(function (branch) {
           var inBranch = leaves(branch, []);
           return {
             name: branch.name,
+            uid: branch.uid,
             total: inBranch.length,
             passed: inBranch.filter(function (test) { return test.status === "passed"; }).length,
             counts: tally(inBranch)
@@ -214,6 +220,45 @@
         sum: sum
       };
     });
+  }
+
+  /* A suite that ran on a single engine has no engine branch to read: its tree
+     forks on area instead, so the column had chips for the functional suite and
+     nothing at all for the visual one, and there was no way to replay the
+     visual suite on its own. The engine is still recorded on every result, so a
+     name that every test in the suite carries, and that another suite has
+     already proved is an engine rather than an area, is this suite's engine.
+     Guessing from the environment note instead would be guessing: that field is
+     written by hand and has been wrong before. */
+  function deriveEngines(list) {
+    var vocabulary = [];
+    list.forEach(function (suite) {
+      suite.engines.forEach(function (engine) {
+        if (vocabulary.indexOf(engine.name) === -1) { vocabulary.push(engine.name); }
+      });
+    });
+
+    list.forEach(function (suite) {
+      if (suite.engines.length || !suite.tests.length) { return; }
+      var found = vocabulary.filter(function (name) {
+        return suite.tests.every(function (test) {
+          return (test.parameters || []).indexOf(name) !== -1;
+        });
+      });
+      /* one name, or none: two would mean the tests are not split by engine
+         after all, and a chip that claims otherwise is worse than no chip */
+      if (found.length !== 1) { return; }
+      suite.engines = [{
+        name: found[0],
+        /* the whole suite is the branch here, so it is the suite's own address
+           the report should open on */
+        uid: suite.uid,
+        total: suite.total,
+        passed: suite.passed,
+        counts: suite.counts
+      }];
+    });
+    return list;
   }
 
   function value(list, name) {
@@ -324,14 +369,16 @@
           chip.appendChild(el("span", "cb-unit", "passed"));
           chip.dataset.title =
             engine.name + ": " + engine.passed + " of " + plural(engine.total, "result") +
-            " passed. Press to replay only this browser.";
+            " passed. Press to replay " + suite.name + " on this browser alone.";
           chip.title = chip.dataset.title;
           chip.setAttribute(
             "aria-label",
-            engine.name + ", " + engine.passed + " of " + plural(engine.total, "result") + " passed"
+            suite.name + " on " + engine.name + ", " + engine.passed + " of " +
+              plural(engine.total, "result") + " passed"
           );
-          chip.addEventListener("click", function () { toggleEngine(engine.name); });
+          chip.addEventListener("click", function () { toggleFilter(suite, engine); });
           chip.dataset.engine = engine.name;
+          chip.dataset.suite = suite.name;
           browsers.appendChild(chip);
         });
       }
@@ -371,16 +418,38 @@
     });
   }
 
-  /* One browser at a time, or all of them. The filter changes what the runner
-     replays and what the counter counts; it does not change the report, which
-     is why the numbers in the panels above stay where they are. */
-  var engineFilter = null;
+  /* One suite on one browser, or the whole run. The filter used to be an engine
+     name and nothing else, which made it lie in both directions: choosing
+     Chromium under the functional suite also replayed the visual suite, because
+     the visual cases record Chromium too, and the visual suite could not be
+     replayed on its own at all because it had no chip to press.
+     A filter is a suite and an engine together, and it now scopes the embedded
+     report as well: replaying one branch and then opening the report at the top
+     of everything is half an answer. It does not touch the panels above, which
+     describe the published run rather than the selection. */
+  var filter = null;
 
   function testsOf(suite) {
-    if (!engineFilter) { return suite.tests; }
+    if (!filter) { return suite.tests; }
+    if (filter.suite !== suite.name) { return []; }
     return suite.tests.filter(function (test) {
-      return (test.parameters || []).indexOf(engineFilter) !== -1;
+      return (test.parameters || []).indexOf(filter.engine) !== -1;
     });
+  }
+
+  /* The address the report should open on: the filtered branch when there is
+     one, the whole run otherwise. A report without the branch addresses falls
+     back to the top rather than to a link that goes nowhere. */
+  function reportUrl() {
+    return REPORT + (filter && filter.uid ? "#suites/" + filter.uid : "#");
+  }
+
+  /* "Functional E2E on WebKit" where the suite forked, "Visual regression"
+     where it did not: naming an engine the suite only ever ran on adds a word
+     and no information. */
+  function filterLabel() {
+    if (!filter) { return ""; }
+    return filter.suite + (filter.multi ? " on " + filter.display : "");
   }
 
   /* The console bar used to say Chromium whatever was selected, which is the
@@ -391,7 +460,9 @@
     if (!consoleBrowser) { return; }
     var engines = fromEngineBranches().map(function (row) { return row.name; });
     var viewport = value(report.environment, "viewport");
-    var who = engineFilter || (engines.length ? engines.join(" and ") : value(report.environment, "browser"));
+    var who = filter
+      ? filter.display
+      : engines.length ? engines.join(" and ") : value(report.environment, "browser");
     consoleBrowser.textContent = [who, viewport].filter(Boolean).join(" · ");
   }
 
@@ -399,23 +470,47 @@
     return [].slice.call(document.querySelectorAll(".cb-engines-chip"));
   }
 
-  function toggleEngine(name) {
+  function toggleFilter(suite, engine) {
     if (running) { return; }
-    engineFilter = engineFilter === name ? null : name;
+    var same = filter && filter.suite === suite.name && filter.engine === engine.name;
+    filter = same
+      ? null
+      : {
+        suite: suite.name,
+        engine: engine.name,
+        display: engineName(engine.name),
+        uid: engine.uid,
+        /* whether naming the engine adds anything, or only length */
+        multi: suite.engines.length > 1
+      };
     describeBrowsers();
 
     chips().forEach(function (chip) {
-      var on = chip.dataset.engine === engineFilter;
+      var on = !!filter && chip.dataset.suite === filter.suite && chip.dataset.engine === filter.engine;
       chip.classList.toggle("is-on", on);
       chip.setAttribute("aria-pressed", on ? "true" : "false");
     });
 
-    runLabel.textContent = engineFilter ? "Run " + engineFilter + " only" : "Run the QA suites";
+    runLabel.textContent = filter ? "Run " + filterLabel() : "Run the QA suites";
     if (hint) {
-      hint.textContent = engineFilter
-        ? "Replays only what ran on " + engineFilter + ". Press the browser again for the whole run."
+      hint.textContent = filter
+        ? "Replays " + filterLabel() + " alone, then opens the report on that branch. Press the chip again for the whole run."
         : "Replays the last run recorded in the Allure report, then opens that report below.";
     }
+    /* the embed follows the selection, and a report already on screen is moved
+       rather than left showing the branch that was chosen before */
+    pointReport();
+  }
+
+  /* Both the frame and the link beside it, so opening the report in a tab lands
+     where the embedded one is. */
+  function pointReport() {
+    var url = reportUrl();
+    if (frame) {
+      frame.setAttribute("data-src", url);
+      if (frame.getAttribute("src")) { frame.setAttribute("src", url); }
+    }
+    if (reportLink) { reportLink.setAttribute("href", url); }
   }
 
   /* ---------- the console ---------- */
@@ -463,7 +558,7 @@
         write("> yarn playwright test --project=" + (PROJECT[suite.name] || suite.name), "head");
         write(
           "Running " + plural(row.tests.length, "test") +
-            (engineFilter ? " on " + engineFilter : " on every browser this suite covers"),
+            (filter ? " on " + filter.display : " on every browser this suite covers"),
           "muted"
         );
         return wait(420);
@@ -512,7 +607,7 @@
       /* the console scrolls away, so the browsers that were replayed keep a
          tick: which engine the run covered is still on screen afterwards */
       chips().forEach(function (chip) {
-        if (!engineFilter || chip.dataset.engine === engineFilter) {
+        if (!filter || (chip.dataset.suite === filter.suite && chip.dataset.engine === filter.engine)) {
           chip.classList.add("is-ran");
           chip.title = "Replayed in this run. " + chip.dataset.title;
         }
@@ -856,11 +951,16 @@
     }
     /* the report is a full application of its own, so it is fetched when it is
        asked for rather than on every visit to this page */
+    pointReport();
     if (frame && !frame.getAttribute("src")) {
       frame.setAttribute("src", frame.getAttribute("data-src"));
     }
     results.classList.add("is-ready");
-    if (hint) { hint.textContent = "That is the published run. What it says is below, report included."; }
+    if (hint) {
+      hint.textContent = filter
+        ? "That is " + filterLabel() + " out of the published run, and the report below opens on it."
+        : "That is the published run. What it says is below, report included.";
+    }
     results.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   }
 
@@ -929,7 +1029,7 @@
         durations: payload[5],
         retries: payload[6]
       };
-      suites = readSuites(payload[1] || {});
+      suites = deriveEngines(readSuites(payload[1] || {}));
       if (!suites.length) { throw new Error("The report holds no suites."); }
       renderSuites();
       renderStats();
