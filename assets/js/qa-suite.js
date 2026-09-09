@@ -382,12 +382,19 @@
     return /^[a-z0-9][a-z0-9-]*$/.test(value);
   }
 
+  /* The band is about engines, not about every project the suite defines.
+     "WebKit on iPhone 15" is WebKit at a phone viewport, so counting it as a
+     second browser overstates the coverage, and a label of the form "X on Y"
+     is the suite saying exactly that. Engine is the part before the "on"; the
+     per project split belongs in the report, the trend and the health page,
+     which are all linked from here. */
   function engineOf(parameters) {
     var list = (parameters || []).filter(Boolean);
     if (!list.length) { return null; }
     var id = list.filter(isSlug)[0] || list[0];
     var label = list.filter(function (value) { return !isSlug(value); })[0];
-    return { id: id, name: label || ENGINES[id] || id.replace(/-/g, " ") };
+    var name = label || ENGINES[id] || id.replace(/-/g, " ");
+    return { name: name.split(/\s+on\s+/i)[0].trim() };
   }
 
   function crossBrowser(summary, tree) {
@@ -409,12 +416,12 @@
       cases[test.name] = true;
       var engine = engineOf(test.parameters);
       if (!engine) { return; }
-      if (!byEngine[engine.id]) {
-        byEngine[engine.id] = { name: engine.name, total: 0, passed: 0 };
-        order.push(engine.id);
+      if (!byEngine[engine.name]) {
+        byEngine[engine.name] = { name: engine.name, total: 0, passed: 0 };
+        order.push(engine.name);
       }
-      byEngine[engine.id].total += 1;
-      if (test.status === "passed") { byEngine[engine.id].passed += 1; }
+      byEngine[engine.name].total += 1;
+      if (test.status === "passed") { byEngine[engine.name].passed += 1; }
     });
 
     if (!order.length) { return; }

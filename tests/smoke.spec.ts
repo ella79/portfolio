@@ -564,13 +564,15 @@ test.describe('qa suite runner', () => {
     );
     await page.reload();
 
+    // "WebKit on iPhone 15" is WebKit at a phone viewport, not a second
+    // browser. Counting it separately overstated the coverage, and the per
+    // project split belongs in the report this page links to.
     const engines = page.locator('#cbEngines li');
-    await expect(engines).toHaveCount(2);
-    // the label the suite wrote wins over the id it ran under
+    await expect(engines).toHaveCount(1);
     await expect(engines.nth(0)).toContainText('WebKit');
-    await expect(engines.nth(1)).toContainText('WebKit on iPhone 15');
-    await expect(engines.nth(0)).toContainText('2/2');
-    await expect(page.locator('#cbNote')).toContainText('2 other browsers');
+    await expect(engines.nth(0)).not.toContainText('iPhone');
+    await expect(engines.nth(0)).toContainText('4/4');
+    await expect(page.locator('#cbNote')).toContainText('1 other browser');
   });
 
   test('the page says nothing about cross browser when that report is absent', async ({ page }) => {
