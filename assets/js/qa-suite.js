@@ -18,6 +18,7 @@
   var hint = document.getElementById("runHint");
   var progress = document.getElementById("runProgress");
   var counter = document.getElementById("consoleCount");
+  var browserLabel = document.getElementById("consoleBrowser");
   var results = document.getElementById("runnerResults");
   var frame = document.getElementById("allureFrame");
   var embedMeta = document.getElementById("embedMeta");
@@ -295,6 +296,19 @@
     });
   }
 
+  /* The header said Chromium while a chip filtered the run to WebKit, because
+     the label was written once in the markup and never again. It is derived
+     from the report now, and follows the filter. */
+  function paintBrowserLabel() {
+    if (!browserLabel) { return; }
+    var env = report.environment || [];
+    var engines = fromEngineBranches().map(function (row) { return row.name; });
+    var name = engineFilter || (engines.length ? engines.join(" and ") : value(env, "browser"));
+    var viewport = value(env, "viewport");
+    if (!name) { return; }
+    browserLabel.textContent = viewport ? name + " · " + viewport : name;
+  }
+
   function toggleEngine(name) {
     if (running) { return; }
     engineFilter = engineFilter === name ? null : name;
@@ -305,6 +319,7 @@
       chip.setAttribute("aria-pressed", on ? "true" : "false");
     });
 
+    paintBrowserLabel();
     runLabel.textContent = engineFilter ? "Run " + engineFilter + " only" : "Run the QA suites";
     if (hint) {
       hint.textContent = engineFilter
@@ -350,7 +365,7 @@
       var suite = row.suite;
       chain = chain.then(function () {
         suite.node.classList.add("is-running");
-        write("> npx playwright test --project=" + (PROJECT[suite.name] || suite.name), "head");
+        write("> yarn playwright test --project=" + (PROJECT[suite.name] || suite.name), "head");
         write(
           "Running " + plural(row.tests.length, "test") +
             (engineFilter ? " on " + engineFilter : " on every browser this suite covers"),
@@ -714,6 +729,7 @@
       ring();
       suiteBars();
       environment();
+      paintBrowserLabel();
       trend();
       slowest();
       drawn = true;

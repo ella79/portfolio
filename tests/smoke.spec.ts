@@ -577,6 +577,8 @@ test.describe('qa suite runner', () => {
 
     await webkit.click();
     await expect(webkit).toHaveAttribute('aria-pressed', 'true');
+    // the console header used to stay on Chromium while the chip said WebKit
+    await expect(page.locator('#consoleBrowser')).toContainText('WebKit');
 
     await page.getByRole('button', { name: /run WebKit only/i }).click();
     await expect(page.locator('#consoleLog')).toContainText('2 tests passed');
@@ -585,6 +587,7 @@ test.describe('qa suite runner', () => {
     // pressing it again gives the whole run back
     await webkit.click();
     await expect(webkit).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('#consoleBrowser')).toContainText('Chromium and WebKit');
     await expect(page.getByRole('button', { name: /run the qa suites/i })).toBeEnabled();
   });
 
