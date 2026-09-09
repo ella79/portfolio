@@ -59,9 +59,13 @@
         <a class="prov-link" id="provLink" href="https://github.com/ella79/agentic-playwright-suite/actions" target="_top" rel="noopener noreferrer">Open the CI run<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg></a>
       </div>
 
+      <!-- Results and cases are different numbers once a case runs on more than
+           one browser, and showing only the larger one would claim twice the
+           coverage that exists. The suite count used to sit here and no longer
+           does: the column underneath already lists them. -->
       <div class="runner-stats reveal">
-        <div class="stat"><div class="v" id="statTests">&mdash;</div><div class="l">Tests</div></div>
-        <div class="stat"><div class="v" id="statSuites">&mdash;</div><div class="l">Suites</div></div>
+        <div class="stat"><div class="v" id="statTests">&mdash;</div><div class="l">Results</div></div>
+        <div class="stat"><div class="v" id="statCases">&mdash;</div><div class="l">Distinct cases</div></div>
         <div class="stat"><div class="v" id="statPassing">&mdash;</div><div class="l">Passing</div></div>
         <div class="stat"><div class="v" id="statDuration">&mdash;</div><div class="l">Wall time</div></div>
       </div>
@@ -93,18 +97,6 @@
         </div>
       </div>
 
-      <!-- The run above is the canonical one, on Chromium. The same functional
-           cases also run on other engines, published as their own report so
-           that one case does not appear three times in the totals. -->
-      <div class="crossbrowser reveal" id="crossBrowser" hidden>
-        <div class="cb-text">
-          <h3>Cross browser</h3>
-          <p class="cb-note" id="cbNote">&mdash;</p>
-        </div>
-        <ul class="cb-engines" id="cbEngines"></ul>
-        <a class="prov-link" href="https://ella79.github.io/agentic-playwright-suite/cross-browser/" target="_top" rel="noopener noreferrer">Open the cross browser report<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg></a>
-      </div>
-
       <!-- the addresses CI republishes on every push to main, so a visitor can
            reach the raw reports without waiting for the replay -->
       <div class="published reveal">
@@ -112,7 +104,6 @@
         <a href="https://ella79.github.io/agentic-playwright-suite/" target="_top" rel="noopener noreferrer">Results dashboard</a>
         <a href="https://ella79.github.io/agentic-playwright-suite/functional/" target="_top" rel="noopener noreferrer">Functional trend</a>
         <a href="https://ella79.github.io/agentic-playwright-suite/visual/" target="_top" rel="noopener noreferrer">Visual trend</a>
-        <a href="https://ella79.github.io/agentic-playwright-suite/cross-browser/" target="_top" rel="noopener noreferrer">Cross browser</a>
         <a href="https://ella79.github.io/agentic-playwright-suite/playwright-report/" target="_top" rel="noopener noreferrer">Trace viewer</a>
         <a href="https://ella79.github.io/agentic-playwright-suite/metrics/" target="_top" rel="noopener noreferrer">Suite health</a>
       </div>

@@ -98,19 +98,59 @@
     return (test.time && test.time.duration) || 0;
   }
 
+  /* A branch directly under a suite is either an engine or an area, and the
+     tree alone does not say which: both are just names with tests underneath.
+     The suite writes the engine twice, as the branch name and as a parameter on
+     each of its results, so that is what tells them apart. Reading the tree
+     position instead would break the next time a display grouping moves, which
+     is exactly what happened when the cross browser results came home. */
+  function isEngineBranch(branch) {
+    var tests = leaves(branch, []);
+    return (
+      tests.length > 0 &&
+      tests.every(function (test) { return (test.parameters || []).indexOf(branch.name) !== -1; })
+    );
+  }
+
   function readSuites(tree) {
     return (tree.children || []).map(function (suite) {
       var tests = leaves(suite, []);
       var sum = 0;
       tests.forEach(function (test) { sum += duration(test); });
+      var branches = suite.children || [];
+      var engines = branches.filter(isEngineBranch);
+      var byEngine = engines.length === branches.length && engines.length > 0;
+
+      /* When the branches are engines, the areas sit one level further down and
+         the same area appears under every engine. Summing them by name keeps
+         the column honest: Authentication has to read as all of its runs, not
+         as the ones that happened to run first. */
+      var areaTotals = {};
+      var areaOrder = [];
+      (byEngine ? branches : [suite]).forEach(function (holder) {
+        (byEngine ? holder.children || [] : branches).forEach(function (area) {
+          if (!areaTotals[area.name]) {
+            areaTotals[area.name] = { name: area.name, count: 0, sum: 0 };
+            areaOrder.push(area.name);
+          }
+          leaves(area, []).forEach(function (test) {
+            areaTotals[area.name].count += 1;
+            areaTotals[area.name].sum += duration(test);
+          });
+        });
+      });
+
       return {
         name: suite.name,
-        areas: (suite.children || []).map(function (area) {
-          var inArea = leaves(area, []);
-          var areaSum = 0;
-          inArea.forEach(function (test) { areaSum += duration(test); });
-          return { name: area.name, count: inArea.length, sum: areaSum };
+        engines: engines.map(function (branch) {
+          var inBranch = leaves(branch, []);
+          return {
+            name: branch.name,
+            total: inBranch.length,
+            passed: inBranch.filter(function (test) { return test.status === "passed"; }).length
+          };
         }),
+        areas: areaOrder.map(function (name) { return areaTotals[name]; }),
         /* start order is the order the run happened in, and a replay that loses
            it is an animation rather than a record of anything */
         tests: tests.sort(function (a, b) {
@@ -150,7 +190,15 @@
     var stat = report.summary.statistic || {};
     var time = report.summary.time || {};
     var clean = stat.total && stat.passed === stat.total;
+    /* Results, not tests. A case that runs on two browsers is two results and
+       one case, so calling the total "tests" would claim twice the coverage
+       that exists. The distinct count sits beside it and says what is really
+       there. */
+    var cases = distinctNames(
+      suites.reduce(function (all, suite) { return all.concat(suite.tests); }, [])
+    );
     set("statTests", stat.total || 0);
+    set("statCases", cases);
     set("statSuites", suites.length);
     set("statPassing", (stat.total ? Math.round((stat.passed / stat.total) * 100) : 0) + "%");
     set("statDuration", wall(time.duration || 0));
@@ -185,6 +233,26 @@
 
       var groups = el("ul", "suite-groups");
       groups.id = "suite-areas-" + index;
+
+      /* A suite that ran on more than one browser says so in its own row. The
+         same case on two browsers is two results and one case, so the chips
+         count results and the areas below count them once per browser too. */
+      if (suite.engines.length) {
+        var browsers = el("li", "suite-engines");
+        suite.engines.forEach(function (engine) {
+          /* the chip is a filter, not a label: showing two browsers and then
+             replaying both together is the obvious question left unanswered */
+          var chip = el("button", engine.passed === engine.total ? "cb-engines-chip" : "cb-engines-chip is-off");
+          chip.type = "button";
+          chip.setAttribute("aria-pressed", "false");
+          chip.appendChild(el("span", "cb-engine", engine.name));
+          chip.appendChild(el("span", "cb-n", engine.passed + "/" + engine.total));
+          chip.addEventListener("click", function () { toggleEngine(engine.name); });
+          chip.dataset.engine = engine.name;
+          browsers.appendChild(chip);
+        });
+        groups.appendChild(browsers);
+      }
       var widest = suite.areas.reduce(function (most, area) { return Math.max(most, area.sum); }, 1);
       suite.areas.forEach(function (area) {
         var row = el("li");
@@ -215,6 +283,36 @@
     });
   }
 
+  /* One browser at a time, or all of them. The filter changes what the runner
+     replays and what the counter counts; it does not change the report, which
+     is why the numbers in the panels above stay where they are. */
+  var engineFilter = null;
+
+  function testsOf(suite) {
+    if (!engineFilter) { return suite.tests; }
+    return suite.tests.filter(function (test) {
+      return (test.parameters || []).indexOf(engineFilter) !== -1;
+    });
+  }
+
+  function toggleEngine(name) {
+    if (running) { return; }
+    engineFilter = engineFilter === name ? null : name;
+
+    [].slice.call(document.querySelectorAll(".cb-engines-chip")).forEach(function (chip) {
+      var on = chip.dataset.engine === engineFilter;
+      chip.classList.toggle("is-on", on);
+      chip.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+
+    runLabel.textContent = engineFilter ? "Run " + engineFilter + " only" : "Run the QA suites";
+    if (hint) {
+      hint.textContent = engineFilter
+        ? "Replays only what ran on " + engineFilter + ". Press the browser again for the whole run."
+        : "Replays the last run recorded in the Allure report, then opens that report below.";
+    }
+  }
+
   /* ---------- the console ---------- */
 
   function write(value, tone) {
@@ -235,7 +333,12 @@
     runLabel.textContent = "Running";
     log.innerHTML = "";
 
-    var total = suites.reduce(function (sum, suite) { return sum + suite.total; }, 0);
+    /* a filtered replay plays a subset, and a suite that has nothing left in it
+       is skipped rather than announced and then left empty */
+    var playing = suites
+      .map(function (suite) { return { suite: suite, tests: testsOf(suite) }; })
+      .filter(function (row) { return row.tests.length; });
+    var total = playing.reduce(function (sum, row) { return sum + row.tests.length; }, 0);
     var done = 0;
     var passed = 0;
     /* counted by the status Allure recorded, not lumped together: failed and
@@ -243,15 +346,20 @@
     var failures = {};
     var chain = Promise.resolve();
 
-    suites.forEach(function (suite) {
+    playing.forEach(function (row) {
+      var suite = row.suite;
       chain = chain.then(function () {
         suite.node.classList.add("is-running");
-        write("> yarn playwright test --project=" + (PROJECT[suite.name] || suite.name), "head");
-        write("Running " + plural(suite.total, "test") + " on Chromium 1920 x 1080", "muted");
+        write("> npx playwright test --project=" + (PROJECT[suite.name] || suite.name), "head");
+        write(
+          "Running " + plural(row.tests.length, "test") +
+            (engineFilter ? " on " + engineFilter : " on every browser this suite covers"),
+          "muted"
+        );
         return wait(420);
       });
 
-      suite.tests.forEach(function (test, index) {
+      row.tests.forEach(function (test, index) {
         chain = chain.then(function () {
           var ok = test.status === "passed";
           if (ok) { passed += 1; } else { failures[test.status] = (failures[test.status] || 0) + 1; }
@@ -261,7 +369,7 @@
               (ok ? "" : "  " + test.status),
             ok ? "ok" : "warn"
           );
-          suite.countNode.textContent = index + 1 + " / " + suite.total;
+          suite.countNode.textContent = index + 1 + " / " + row.tests.length;
           if (progress) { progress.style.width = (done / total) * 100 + "%"; }
           if (counter) { counter.textContent = done + " / " + total + " tests"; }
           return wait(70);
@@ -397,56 +505,37 @@
     return { name: name.split(/\s+on\s+/i)[0].trim() };
   }
 
-  function crossBrowser(summary, tree) {
-    var box = document.getElementById("crossBrowser");
-    var note = document.getElementById("cbNote");
-    var host = document.getElementById("cbEngines");
-    if (!box || !note || !host) { return; }
-
-    var stat = (summary || {}).statistic || {};
-    var tests = leaves(tree || {}, []);
-    if (!stat.total || !tests.length) { return; }
-
-    /* which engine a result came from is in the Allure parameters, the same
-       place the project name sits in the canonical report */
-    var byEngine = {};
-    var order = [];
-    var cases = {};
-    tests.forEach(function (test) {
-      cases[test.name] = true;
-      var engine = engineOf(test.parameters);
-      if (!engine) { return; }
-      if (!byEngine[engine.name]) {
-        byEngine[engine.name] = { name: engine.name, total: 0, passed: 0 };
-        order.push(engine.name);
-      }
-      byEngine[engine.name].total += 1;
-      if (test.status === "passed") { byEngine[engine.name].passed += 1; }
+  /* Where the browsers are read from moved once already: they used to be a
+     report of their own at /cross-browser/, and they are now engine branches
+     inside the main report. The band takes whichever it finds, so it survived
+     that move and will survive the next one, and it hides itself when neither
+     is there rather than leaving an empty frame. */
+  function fromEngineBranches() {
+    var rows = [];
+    suites.forEach(function (suite) {
+      suite.engines.forEach(function (engine) {
+        rows.push({ name: engineOf([engine.name]).name, total: engine.total, passed: engine.passed });
+      });
     });
+    /* two projects on one engine collapse into that engine, so a device profile
+       is not counted as a second browser */
+    var merged = {};
+    var order = [];
+    rows.forEach(function (row) {
+      if (!merged[row.name]) {
+        merged[row.name] = { name: row.name, total: 0, passed: 0 };
+        order.push(row.name);
+      }
+      merged[row.name].total += row.total;
+      merged[row.name].passed += row.passed;
+    });
+    return order.map(function (name) { return merged[name]; });
+  }
 
-    if (!order.length) { return; }
-
-    /* "browser" rather than "engine": WebKit and mobile Safari are two browsers
-       on one engine, so counting them as engines overstates the coverage. The
-       word has to stay true whether the next project added is another engine or
-       another device profile. */
-    note.textContent =
-      "The same " + plural(Object.keys(cases).length, "functional case") + ", run again on " +
-      plural(order.length, "other browser") + ". " + stat.passed + " of " + stat.total +
-      " results passed, in a report of their own so one case is not counted twice above.";
-
-    fill(
-      host,
-      order.map(function (id) {
-        var seen = byEngine[id];
-        var clean = seen.passed === seen.total;
-        var item = el("li", clean ? null : "is-off");
-        item.appendChild(el("span", "cb-engine", seen.name));
-        item.appendChild(el("span", "cb-n", seen.passed + "/" + seen.total));
-        return item;
-      })
-    );
-    box.hidden = false;
+  function distinctNames(tests) {
+    var seen = {};
+    tests.forEach(function (test) { seen[test.name] = true; });
+    return Object.keys(seen).length;
   }
 
   /* A published run can legitimately carry failures. That is a result, not an
@@ -485,8 +574,18 @@
         var span = el("span");
         bar.appendChild(span);
         card.appendChild(bar);
+        /* naming the browsers here matters: forty results out of twenty cases
+           reads as twice the coverage unless the card says where the doubling
+           came from */
+        var where = suite.engines.length
+          ? " on " + suite.engines.map(function (engine) { return engineOf([engine.name]).name; }).join(" and ")
+          : "";
         card.appendChild(
-          el("p", "meta", secs(suite.sum) + " of test time across " + plural(suite.areas.length, "area"))
+          el(
+            "p",
+            "meta",
+            secs(suite.sum) + " of test time across " + plural(suite.areas.length, "area") + where
+          )
         );
 
         window.setTimeout(function () {
@@ -502,9 +601,14 @@
     if (!host) { return; }
     var env = report.environment || [];
     var runner = value(env, "os") + (value(env, "node") ? ", node " + value(env, "node") : "");
+    /* The browser field is written by hand into the report's environment, and
+       it said Chromium on a run that also covered WebKit. The engines derived
+       from the results are the run itself rather than a note about it, so they
+       win when there are any. */
+    var engines = fromEngineBranches().map(function (row) { return row.name; });
     var rows = [
       ["Target", value(env, "base_url")],
-      ["Browser", value(env, "browser")],
+      ["Browser", engines.length ? engines.join(" and ") : value(env, "browser")],
       ["Viewport", value(env, "viewport")],
       ["Runner", runner],
       ["Pipeline", value(env, "ci")]
@@ -678,9 +782,7 @@
     json("widgets/environment.json", []),
     json("widgets/history-trend.json", []),
     json("widgets/duration-trend.json", []),
-    json("widgets/retry-trend.json", []),
-    json("cross-browser/widgets/summary.json", null),
-    json("cross-browser/data/suites.json", null)
+    json("widgets/retry-trend.json", [])
   ])
     .then(function (payload) {
       report = {
@@ -696,9 +798,6 @@
       renderSuites();
       renderStats();
       renderProvenance();
-      /* optional: the cross browser report is published beside the canonical
-         one, and the page simply says nothing about it when it is not there */
-      crossBrowser(payload[7], payload[8]);
       /* the button waits for the report rather than pretending to be ready:
          until the numbers are in there is nothing for it to replay */
       runButton.addEventListener("click", replay);

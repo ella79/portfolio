@@ -692,6 +692,23 @@ textarea{min-height:132px;resize:vertical}
   font-size:.875rem;color:var(--ink-soft);
 }
 .suite-groups li b{font-weight:500;color:var(--ink)}
+/* the browsers a suite ran on, in the row that owns them rather than in a band
+   of their own repeating the same fact further down the page */
+.suite-groups li.suite-engines{display:flex;flex-wrap:wrap;gap:8px;border-top:0;padding:0 0 12px}
+.cb-engines-chip{
+  display:inline-flex;align-items:baseline;gap:8px;
+  padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card-wash);
+  font:inherit;color:var(--ink);cursor:pointer;
+  transition:border-color .2s ease,background .2s ease,color .2s ease;
+}
+.cb-engines-chip:hover{border-color:var(--teal)}
+/* the chosen browser is the one the runner will replay, so it carries the
+   colour the page uses for a result rather than a hover */
+.cb-engines-chip.is-on{background:var(--teal-dark);border-color:var(--teal-dark);color:#fff}
+.cb-engines-chip.is-on .cb-n{color:#bfe6df}
+.cb-engines-chip.is-off{border-color:#e6c9a4;background:#fdf6ec}
+.cb-engines-chip.is-off .cb-n{color:var(--amber)}
+
 .area-bar{height:5px;border-radius:999px;background:var(--line);overflow:hidden}
 .area-bar span{display:block;height:100%;background:var(--teal);opacity:.55}
 .suite-groups .n{font-family:var(--font-mono);font-size:.75rem;white-space:nowrap}
@@ -743,27 +760,6 @@ textarea{min-height:132px;resize:vertical}
 .card-links{font-size:.8125rem;color:var(--ink-soft);margin:0 0 22px}
 .card-links a{color:var(--teal-dark);text-decoration:none;border-bottom:1px solid var(--teal-wash);transition:border-color .2s ease}
 .card-links a:hover{border-bottom-color:var(--teal)}
-
-/* cross browser: published as its own report, so it is shown as its own band
-   rather than folded into the totals of the canonical Chromium run */
-.crossbrowser{
-  display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px;
-  margin-top:20px;padding:18px 22px;
-  border:1px solid var(--line);border-radius:14px;background:var(--card);
-}
-.crossbrowser[hidden]{display:none}
-.cb-text{flex:1 1 320px;min-width:0}
-.cb-text h3{font-family:var(--font-display);font-size:1rem;margin:0 0 6px}
-.cb-note{font-size:.8125rem;color:var(--ink-soft);margin:0;line-height:1.55}
-.cb-engines{list-style:none;display:flex;flex-wrap:wrap;gap:10px;margin:0;padding:0}
-.cb-engines li{
-  display:inline-flex;align-items:baseline;gap:9px;
-  padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card-wash);
-}
-.cb-engine{font-size:.8125rem;color:var(--ink)}
-.cb-n{font-family:var(--font-mono);font-size:.75rem;color:var(--teal-dark)}
-.cb-engines li.is-off{border-color:#e6c9a4;background:#fdf6ec}
-.cb-engines li.is-off .cb-n{color:var(--amber)}
 
 /* a run that did not come back clean says so, in the colour this site keeps for
    a number worth stopping on */

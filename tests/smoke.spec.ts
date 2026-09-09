@@ -314,6 +314,38 @@ test.describe('qa suite runner', () => {
 
   const passing = (name: string, duration: number) => result(name, duration);
 
+  // the shape the suite publishes now: the engine is the branch, and the same
+  // engine name is on every result underneath it, which is how the page tells
+  // an engine apart from an area without reading tree position
+  const engineBranch = (engine: string, project: string) => ({
+    name: engine,
+    children: [
+      {
+        name: 'Checkout',
+        children: [
+          {
+            name: 'Checkout',
+            children: [
+              result('TC-17: order end to end', 15800, 'passed', [project, engine]),
+              result('TC-16: checkout guard', 4600, 'passed', [project, engine]),
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  const twoEngineTree = {
+    name: 'suites',
+    children: [
+      {
+        name: 'Functional E2E',
+        children: [engineBranch('Chromium', 'e2e-playwright'), engineBranch('WebKit', 'webkit')],
+      },
+    ],
+  };
+
+
   // The published report is green almost all of the time, so the code that
   // renders a run which is not green would otherwise never be executed, here or
   // in a browser, until the day it matters. These reports are served by the
@@ -498,89 +530,74 @@ test.describe('qa suite runner', () => {
     const strip = page.locator('.published');
     await expect(strip).toBeVisible();
 
-    for (const path of ['', 'functional/', 'visual/', 'cross-browser/', 'playwright-report/', 'metrics/']) {
+    for (const path of ['', 'functional/', 'visual/', 'playwright-report/', 'metrics/']) {
       await expect(strip.locator(`a[href="${REPORT}/${path}"]`)).toBeVisible();
     }
   });
 
-  // Cross browser coverage is a question every senior QA posting asks, so it
-  // belongs on the page. It stays out of the totals above because it reruns the
-  // same cases: folding it in would count one case several times.
-  test('cross browser is shown as its own coverage, not folded into the totals', async ({ page }) => {
-    const band = page.locator('#crossBrowser');
-    await expect(band).toBeVisible();
-    await expect(page.locator('#cbNote')).toContainText('2 functional cases');
-    await expect(page.locator('#cbNote')).toContainText('2 other browsers');
-
-    const engines = page.locator('#cbEngines li');
-    await expect(engines).toHaveCount(2);
-    await expect(engines.nth(0)).toContainText('WebKit');
-    await expect(engines.nth(1)).toContainText('Mobile Safari');
-    await expect(engines.nth(0)).toContainText('2/2');
-
-    // the canonical totals stay untouched by it
-    await expect(page.locator('#statTests')).toHaveText('4');
-    await expect(band.locator(`a[href="${REPORT}/cross-browser/"]`)).toBeVisible();
-  });
-
-  // A result carries however many parameters the suite decides to attach, and
-  // it went from one to two without warning: the project id it ran under, plus
-  // a label written for a reader. Counting every parameter turned two engines
-  // into four chips, two of them duplicates, and it shipped that way.
-  test('an engine is counted once however many parameters a result carries', async ({ page }) => {
-    await page.route(`${REPORT}/cross-browser/data/suites.json`, (route) =>
-      route.fulfill({
-        json: {
-          name: 'suites',
-          children: [
-            {
-              name: 'Functional E2E',
-              children: [
-                {
-                  name: 'Checkout',
-                  children: [
-                    {
-                      name: 'Checkout',
-                      children: [
-                        result('TC-17: order end to end', 15800, 'passed', ['webkit', 'WebKit']),
-                        result('TC-16: checkout guard', 4600, 'passed', ['webkit', 'WebKit']),
-                        result('TC-17: order end to end', 16200, 'passed', [
-                          'mobile-safari',
-                          'WebKit on iPhone 15',
-                        ]),
-                        result('TC-16: checkout guard', 4900, 'passed', [
-                          'mobile-safari',
-                          'WebKit on iPhone 15',
-                        ]),
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      }),
+  // The browsers used to be a report of their own and are now branches inside
+  // the main one, so they are shown in the suite row that owns them. The band
+  // that used to carry them is gone rather than left hidden: a page that can
+  // never render a thing should not still describe it.
+  test('a suite that ran on two browsers says so in its own row', async ({ page }) => {
+    await page.route(`${REPORT}/data/suites.json`, (route) =>
+      route.fulfill({ json: twoEngineTree }),
     );
     await page.reload();
 
-    // "WebKit on iPhone 15" is WebKit at a phone viewport, not a second
-    // browser. Counting it separately overstated the coverage, and the per
-    // project split belongs in the report this page links to.
-    const engines = page.locator('#cbEngines li');
-    await expect(engines).toHaveCount(1);
-    await expect(engines.nth(0)).toContainText('WebKit');
-    await expect(engines.nth(0)).not.toContainText('iPhone');
-    await expect(engines.nth(0)).toContainText('4/4');
-    await expect(page.locator('#cbNote')).toContainText('1 other browser');
+    const functional = page.locator('#suiteList .suite').first();
+    await functional.locator('.suite-head').click();
+
+    const chips = functional.locator('.cb-engines-chip');
+    await expect(chips).toHaveCount(2);
+    await expect(chips.nth(0)).toContainText('Chromium');
+    await expect(chips.nth(0)).toContainText('2/2');
+    await expect(chips.nth(1)).toContainText('WebKit');
+
+    // an area is the sum of its runs on every browser, not the first one only:
+    // two cases under Checkout, run on two browsers, is four
+    const areas = functional.locator('.suite-groups li:not(.suite-engines)');
+    await expect(areas.filter({ hasText: 'Checkout' })).toContainText('4 tests');
+
+    // and the retired band is not in the page at all
+    await expect(page.locator('#crossBrowser')).toHaveCount(0);
   });
 
-  test('the page says nothing about cross browser when that report is absent', async ({ page }) => {
-    await page.route(`${REPORT}/cross-browser/widgets/summary.json`, (route) => route.abort());
+  // Showing two browsers and then replaying both together leaves the obvious
+  // question unanswered, so the chip is a filter rather than a label.
+  test('a browser chip filters the replay to that browser', async ({ page }) => {
+    await page.route(`${REPORT}/data/suites.json`, (route) =>
+      route.fulfill({ json: twoEngineTree }),
+    );
+    await page.reload();
+
+    const functional = page.locator('#suiteList .suite').first();
+    await functional.locator('.suite-head').click();
+    const webkit = functional.locator('.cb-engines-chip', { hasText: 'WebKit' });
+
+    await webkit.click();
+    await expect(webkit).toHaveAttribute('aria-pressed', 'true');
+
+    await page.getByRole('button', { name: /run WebKit only/i }).click();
+    await expect(page.locator('#consoleLog')).toContainText('2 tests passed');
+    await expect(page.locator('#consoleLog')).toContainText('on WebKit');
+
+    // pressing it again gives the whole run back
+    await webkit.click();
+    await expect(webkit).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.getByRole('button', { name: /run the qa suites/i })).toBeEnabled();
+  });
+
+  // A case that runs on two browsers is two results and one case. Showing only
+  // the larger number would claim twice the coverage that exists.
+  test('results and distinct cases are counted as different numbers', async ({ page }) => {
+    await page.route(`${REPORT}/data/suites.json`, (route) =>
+      route.fulfill({ json: twoEngineTree }),
+    );
     await page.reload();
 
     await expect(page.locator('#statTests')).toHaveText('4');
-    await expect(page.locator('#crossBrowser')).toBeHidden();
+    await expect(page.locator('#statCases')).toHaveText('2');
   });
 
   test('a run with failures is not rendered as a clean one', async ({ page }) => {
@@ -624,7 +641,7 @@ test.describe('qa suite runner', () => {
 
   test('the suites and the totals are the ones the report holds', async ({ page }) => {
     await expect(page.locator('#statTests')).toHaveText('4');
-    await expect(page.locator('#statSuites')).toHaveText('2');
+    await expect(page.locator('#statCases')).toHaveText('4');
     await expect(page.locator('#statPassing')).toHaveText('100%');
     await expect(page.locator('#statDuration')).toHaveText('1m 3s');
 

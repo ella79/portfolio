@@ -1,0 +1,139 @@
+{
+  "name": "suites",
+  "children": [
+    {
+      "name": "Functional E2E",
+      "children": [
+        {
+          "name": "Chromium",
+          "children": [
+            {
+              "name": "Authentication",
+              "children": [
+                {
+                  "name": "Authentication",
+                  "children": [
+                    {
+                      "name": "TC-01: a new visitor can register and lands in the signed-in state",
+                      "status": "passed",
+                      "parameters": [
+                        "e2e-playwright",
+                        "Chromium"
+                      ],
+                      "time": {
+                        "start": 1788877248310,
+                        "stop": 1788877255873,
+                        "duration": 7563
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Checkout",
+              "children": [
+                {
+                  "name": "Checkout",
+                  "children": [
+                    {
+                      "name": "TC-17: a signed-in user can complete an order end to end",
+                      "status": "passed",
+                      "parameters": [
+                        "e2e-playwright",
+                        "Chromium"
+                      ],
+                      "time": {
+                        "start": 1788877248297,
+                        "stop": 1788877259061,
+                        "duration": 10764
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "WebKit",
+          "children": [
+            {
+              "name": "Authentication",
+              "children": [
+                {
+                  "name": "Authentication",
+                  "children": [
+                    {
+                      "name": "TC-01: a new visitor can register and lands in the signed-in state",
+                      "status": "passed",
+                      "parameters": [
+                        "webkit"
+                      ],
+                      "time": {
+                        "start": 1788877248320,
+                        "stop": 1788877257001,
+                        "duration": 8681
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Checkout",
+              "children": [
+                {
+                  "name": "Checkout",
+                  "children": [
+                    {
+                      "name": "TC-17: a signed-in user can complete an order end to end",
+                      "status": "passed",
+                      "parameters": [
+                        "webkit",
+                        "WebKit"
+                      ],
+                      "time": {
+                        "start": 1788877248301,
+                        "stop": 1788877260500,
+                        "duration": 12199
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Visual regression",
+      "children": [
+        {
+          "name": "Home",
+          "children": [
+            {
+              "name": "Visual regression - home",
+              "children": [
+                {
+                  "name": "VR-01: site header for an anonymous visitor",
+                  "status": "passed",
+                  "parameters": [
+                    "visual-regression",
+                    "Chromium"
+                  ],
+                  "time": {
+                    "start": 1788877252442,
+                    "stop": 1788877256487,
+                    "duration": 4045
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
