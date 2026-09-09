@@ -17,6 +17,7 @@
   var runLabel = runButton.querySelector(".run-label") || runButton;
   var hint = document.getElementById("runHint");
   var progress = document.getElementById("runProgress");
+  var consoleBrowser = document.getElementById("consoleBrowser");
   var counter = document.getElementById("consoleCount");
   var results = document.getElementById("runnerResults");
   var frame = document.getElementById("allureFrame");
@@ -237,21 +238,25 @@
       /* A suite that ran on more than one browser says so in its own row. The
          same case on two browsers is two results and one case, so the chips
          count results and the areas below count them once per browser too. */
+      /* The browsers sit outside the collapsible list, always visible. They are
+         the filter for the runner, and a filter you have to expand a panel to
+         discover is not one: this was hidden inside the areas and nobody found
+         it, which is a fair description of a defect. */
+      var browsers = null;
       if (suite.engines.length) {
-        var browsers = el("li", "suite-engines");
+        browsers = el("div", "suite-browsers");
+        browsers.appendChild(el("span", "sb-label", "Ran on"));
         suite.engines.forEach(function (engine) {
-          /* the chip is a filter, not a label: showing two browsers and then
-             replaying both together is the obvious question left unanswered */
           var chip = el("button", engine.passed === engine.total ? "cb-engines-chip" : "cb-engines-chip is-off");
           chip.type = "button";
           chip.setAttribute("aria-pressed", "false");
+          chip.title = "Replay only what ran on " + engine.name;
           chip.appendChild(el("span", "cb-engine", engine.name));
           chip.appendChild(el("span", "cb-n", engine.passed + "/" + engine.total));
           chip.addEventListener("click", function () { toggleEngine(engine.name); });
           chip.dataset.engine = engine.name;
           browsers.appendChild(chip);
         });
-        groups.appendChild(browsers);
       }
       var widest = suite.areas.reduce(function (most, area) { return Math.max(most, area.sum); }, 1);
       suite.areas.forEach(function (area) {
@@ -275,6 +280,7 @@
       });
 
       box.appendChild(head);
+      if (browsers) { box.appendChild(browsers); }
       box.appendChild(groups);
       suiteList.appendChild(box);
 
@@ -295,9 +301,22 @@
     });
   }
 
+  /* The console bar used to say Chromium whatever was selected, which is the
+     kind of small lie that makes a reader doubt the rest of the page. It names
+     what the runner is about to replay: one browser when one is chosen, all of
+     them otherwise. */
+  function describeBrowsers() {
+    if (!consoleBrowser) { return; }
+    var engines = fromEngineBranches().map(function (row) { return row.name; });
+    var viewport = value(report.environment, "viewport");
+    var who = engineFilter || (engines.length ? engines.join(" and ") : value(report.environment, "browser"));
+    consoleBrowser.textContent = [who, viewport].filter(Boolean).join(" · ");
+  }
+
   function toggleEngine(name) {
     if (running) { return; }
     engineFilter = engineFilter === name ? null : name;
+    describeBrowsers();
 
     [].slice.call(document.querySelectorAll(".cb-engines-chip")).forEach(function (chip) {
       var on = chip.dataset.engine === engineFilter;
@@ -469,52 +488,21 @@
     );
   }
 
-  /* The canonical run is Chromium. The same functional cases also run on other
-     engines, and CI publishes that as its own report so one case does not
-     appear three times in the totals. Read separately, shown separately. */
-  var ENGINES = {
-    webkit: "WebKit",
-    "mobile-safari": "Mobile Safari",
-    chromium: "Chromium",
-    firefox: "Firefox",
-    "mobile-chrome": "Mobile Chrome"
-  };
-
-  /* A result can carry more than one parameter, and the suite has already gone
-     from one to two: the project id it ran under, "mobile-safari", plus a label
-     meant for a reader, "WebKit on iPhone 15". Counting every parameter turned
-     two engines into four chips, two of them duplicates, which is what the page
-     showed until this was fixed. So: group by the id, and let the label speak.
-     An id is the slug shaped one, lower case with dashes and no spaces. */
-  function isSlug(value) {
-    return /^[a-z0-9][a-z0-9-]*$/.test(value);
+  /* An engine name arrives as the branch it labels, "Chromium" or "WebKit". A
+     project that is the same engine at a different viewport says so in the same
+     string, "WebKit on iPhone 15", and counting that as a second browser would
+     overstate the coverage: it is one engine, two device profiles. The per
+     project split belongs in the report, the trend and the health page, all of
+     which are linked from this page. */
+  function engineName(name) {
+    return String(name || "").split(/\s+on\s+/i)[0].trim();
   }
 
-  /* The band is about engines, not about every project the suite defines.
-     "WebKit on iPhone 15" is WebKit at a phone viewport, so counting it as a
-     second browser overstates the coverage, and a label of the form "X on Y"
-     is the suite saying exactly that. Engine is the part before the "on"; the
-     per project split belongs in the report, the trend and the health page,
-     which are all linked from here. */
-  function engineOf(parameters) {
-    var list = (parameters || []).filter(Boolean);
-    if (!list.length) { return null; }
-    var id = list.filter(isSlug)[0] || list[0];
-    var label = list.filter(function (value) { return !isSlug(value); })[0];
-    var name = label || ENGINES[id] || id.replace(/-/g, " ");
-    return { name: name.split(/\s+on\s+/i)[0].trim() };
-  }
-
-  /* Where the browsers are read from moved once already: they used to be a
-     report of their own at /cross-browser/, and they are now engine branches
-     inside the main report. The band takes whichever it finds, so it survived
-     that move and will survive the next one, and it hides itself when neither
-     is there rather than leaving an empty frame. */
   function fromEngineBranches() {
     var rows = [];
     suites.forEach(function (suite) {
       suite.engines.forEach(function (engine) {
-        rows.push({ name: engineOf([engine.name]).name, total: engine.total, passed: engine.passed });
+        rows.push({ name: engineName(engine.name), total: engine.total, passed: engine.passed });
       });
     });
     /* two projects on one engine collapse into that engine, so a device profile
@@ -578,7 +566,7 @@
            reads as twice the coverage unless the card says where the doubling
            came from */
         var where = suite.engines.length
-          ? " on " + suite.engines.map(function (engine) { return engineOf([engine.name]).name; }).join(" and ")
+          ? " on " + suite.engines.map(function (engine) { return engineName(engine.name); }).join(" and ")
           : "";
         card.appendChild(
           el(
@@ -798,6 +786,7 @@
       renderSuites();
       renderStats();
       renderProvenance();
+      describeBrowsers();
       /* the button waits for the report rather than pretending to be ready:
          until the numbers are in there is nothing for it to replay */
       runButton.addEventListener("click", replay);

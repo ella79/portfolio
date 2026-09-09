@@ -694,7 +694,13 @@ textarea{min-height:132px;resize:vertical}
 .suite-groups li b{font-weight:500;color:var(--ink)}
 /* the browsers a suite ran on, in the row that owns them rather than in a band
    of their own repeating the same fact further down the page */
-.suite-groups li.suite-engines{display:flex;flex-wrap:wrap;gap:8px;border-top:0;padding:0 0 12px}
+/* outside the collapsible list on purpose: they filter the runner, so they have
+   to be visible without opening anything first */
+.suite-browsers{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 22px 18px;margin-top:-4px}
+.sb-label{
+  font-family:var(--font-mono);font-size:.625rem;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-soft);margin-right:2px;
+}
 .cb-engines-chip{
   display:inline-flex;align-items:baseline;gap:8px;
   padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card-wash);

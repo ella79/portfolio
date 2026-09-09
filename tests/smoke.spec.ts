@@ -469,45 +469,6 @@ test.describe('qa suite runner', () => {
         ],
       }),
     );
-    // the cross browser report: the same cases, run again on other engines,
-    // published beside the canonical one rather than inside it
-    await page.route(`${REPORT}/cross-browser/widgets/summary.json`, (route) =>
-      route.fulfill({
-        json: {
-          reportName: 'Cross browser',
-          statistic: { failed: 0, broken: 0, skipped: 0, passed: 4, unknown: 0, total: 4 },
-          time: { start: 1, stop: 149810, duration: 149809 },
-        },
-      }),
-    );
-    await page.route(`${REPORT}/cross-browser/data/suites.json`, (route) =>
-      route.fulfill({
-        json: {
-          name: 'suites',
-          children: [
-            {
-              name: 'Functional E2E',
-              children: [
-                {
-                  name: 'Checkout',
-                  children: [
-                    {
-                      name: 'Checkout',
-                      children: [
-                        result('TC-17: order end to end', 15800, 'passed', ['webkit']),
-                        result('TC-16: checkout guard', 4600, 'passed', ['webkit']),
-                        result('TC-17: order end to end', 16200, 'passed', ['mobile-safari']),
-                        result('TC-16: checkout guard', 4900, 'passed', ['mobile-safari']),
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      }),
-    );
     await page.route(`${REPORT}/`, (route) =>
       route.fulfill({ contentType: 'text/html', body: '<h1>Allure report</h1>' }),
     );
@@ -546,9 +507,11 @@ test.describe('qa suite runner', () => {
     await page.reload();
 
     const functional = page.locator('#suiteList .suite').first();
-    await functional.locator('.suite-head').click();
 
+    // visible without expanding anything, because they filter the runner
     const chips = functional.locator('.cb-engines-chip');
+    await expect(chips.first()).toBeVisible();
+    await functional.locator('.suite-head').click();
     await expect(chips).toHaveCount(2);
     await expect(chips.nth(0)).toContainText('Chromium');
     await expect(chips.nth(0)).toContainText('2/2');
@@ -556,7 +519,7 @@ test.describe('qa suite runner', () => {
 
     // an area is the sum of its runs on every browser, not the first one only:
     // two cases under Checkout, run on two browsers, is four
-    const areas = functional.locator('.suite-groups li:not(.suite-engines)');
+    const areas = functional.locator('.suite-groups li');
     await expect(areas.filter({ hasText: 'Checkout' })).toContainText('4 tests');
 
     // and the retired band is not in the page at all
@@ -572,10 +535,12 @@ test.describe('qa suite runner', () => {
     await page.reload();
 
     const functional = page.locator('#suiteList .suite').first();
-    await functional.locator('.suite-head').click();
     const webkit = functional.locator('.cb-engines-chip', { hasText: 'WebKit' });
+    await expect(webkit).toBeVisible();
 
     await webkit.click();
+    // the console names what it is about to replay, rather than always Chromium
+    await expect(page.locator('#consoleBrowser')).toContainText('WebKit');
     await expect(webkit).toHaveAttribute('aria-pressed', 'true');
 
     await page.getByRole('button', { name: /run WebKit only/i }).click();
