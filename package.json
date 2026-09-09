@@ -2,10 +2,12 @@
   "name": "portfolio",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "yarn@4.18.0",
   "description": "Personal landing page for Emanuela Telescu",
   "scripts": {
     "serve": "node scripts/serve.mjs 8000",
-    "test": "playwright test"
+    "test": "playwright test",
+    "playwright:install:chromium": "playwright install chromium"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0"

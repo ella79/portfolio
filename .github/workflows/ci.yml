@@ -74,7 +74,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund
+        run: corepack enable && yarn install --immutable
 
       - name: Read the Playwright version
         id: pw
@@ -92,11 +92,11 @@ jobs:
       # is what hung the run past the job timeout.
       - name: Install Chromium
         if: steps.browser-cache.outputs.cache-hit != 'true'
-        run: npx playwright install chromium
+        run: yarn playwright install chromium
         timeout-minutes: 5
 
       - name: Run the smoke suite
-        run: npx playwright test --project=chromium
+        run: yarn playwright test --project=chromium
 
       - name: Upload the report
         if: ${{ !cancelled() }}
