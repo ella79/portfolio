@@ -510,7 +510,7 @@ test.describe('qa suite runner', () => {
     const band = page.locator('#crossBrowser');
     await expect(band).toBeVisible();
     await expect(page.locator('#cbNote')).toContainText('2 functional cases');
-    await expect(page.locator('#cbNote')).toContainText('2 other engines');
+    await expect(page.locator('#cbNote')).toContainText('2 other browsers');
 
     const engines = page.locator('#cbEngines li');
     await expect(engines).toHaveCount(2);
@@ -570,7 +570,7 @@ test.describe('qa suite runner', () => {
     await expect(engines.nth(0)).toContainText('WebKit');
     await expect(engines.nth(1)).toContainText('WebKit on iPhone 15');
     await expect(engines.nth(0)).toContainText('2/2');
-    await expect(page.locator('#cbNote')).toContainText('2 other engines');
+    await expect(page.locator('#cbNote')).toContainText('2 other browsers');
   });
 
   test('the page says nothing about cross browser when that report is absent', async ({ page }) => {

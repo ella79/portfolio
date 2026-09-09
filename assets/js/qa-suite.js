@@ -419,9 +419,13 @@
 
     if (!order.length) { return; }
 
+    /* "browser" rather than "engine": WebKit and mobile Safari are two browsers
+       on one engine, so counting them as engines overstates the coverage. The
+       word has to stay true whether the next project added is another engine or
+       another device profile. */
     note.textContent =
       "The same " + plural(Object.keys(cases).length, "functional case") + ", run again on " +
-      plural(order.length, "other engine") + ". " + stat.passed + " of " + stat.total +
+      plural(order.length, "other browser") + ". " + stat.passed + " of " + stat.total +
       " results passed, in a report of their own so one case is not counted twice above.";
 
     fill(
