@@ -603,6 +603,16 @@ test.describe('qa suite runner', () => {
     await expect(page.locator('.ring-v')).toHaveText('50%');
     await expect(page.locator('.ring-fill')).toHaveClass(/is-off/);
 
+    // Hovering a chart used to repeat the number printed on it. Both the ring
+    // and the bar segments name the suite and what it came out as, so a reader
+    // can tell where the missing half went without opening the report.
+    await expect(page.locator('.ring title')).toContainText('Functional E2E: 1 failed, 1 broken');
+    await expect(page.locator('.ring title')).toContainText('Visual regression: 2 passed');
+    await expect(page.locator('#resultCards .result-card').first().locator('.bar .seg-failed')).toHaveAttribute(
+      'title',
+      /Functional E2E: 1 failed of 2/,
+    );
+
     // and the trace, which is where the step that failed is recorded
     const callout = page.locator('#notClean');
     await expect(callout).toBeVisible();

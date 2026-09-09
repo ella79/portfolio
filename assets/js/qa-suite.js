@@ -120,6 +120,49 @@
     );
   }
 
+  /* The whole verdict, not just the passing half: a bar drawn from the pass
+     rate alone leaves the rest as track, and the track is grey, which is what
+     this page uses for skipped. */
+  function tally(tests) {
+    var counts = {};
+    STATUSES.forEach(function (status) { counts[status] = 0; });
+    tests.forEach(function (test) {
+      var status = counts[test.status] === undefined ? "unknown" : test.status;
+      counts[status] += 1;
+    });
+    return counts;
+  }
+
+  /* "1 passed, 4 failed, 2 broken" rather than a percentage: a reader hovering
+     a slice of a chart wants the numbers behind it, and the statuses it does
+     not have are noise. */
+  function describe(counts) {
+    var parts = [];
+    STATUSES.forEach(function (status) {
+      if (counts[status]) { parts.push(counts[status] + " " + status); }
+    });
+    return parts.join(", ") || "no results";
+  }
+
+  /* One line per suite, and per engine where a suite ran on more than one.
+     "Functional E2E on Chromium: 0 passed, 20 failed" is the sentence the
+     charts could not say: the ring knew the total and the bar knew the suite,
+     and neither of them knew which browser the failures came from. */
+  function breakdown() {
+    var lines = [];
+    suites.forEach(function (suite) {
+      if (suite.engines.length > 1) {
+        suite.engines.forEach(function (engine) {
+          lines.push(suite.name + " on " + engineName(engine.name) + ": " + describe(engine.counts));
+        });
+      } else {
+        var only = suite.engines.length ? " on " + engineName(suite.engines[0].name) : "";
+        lines.push(suite.name + only + ": " + describe(suite.counts));
+      }
+    });
+    return lines;
+  }
+
   function readSuites(tree) {
     return (tree.children || []).map(function (suite) {
       var tests = leaves(suite, []);
@@ -148,26 +191,16 @@
         });
       });
 
-      /* the whole verdict, not just the passing half. A suite bar drawn from
-         the pass rate alone leaves the rest of the track grey, and grey is
-         skipped on this page, so twenty failures were being shown in the
-         colour of tests that never ran. */
-      var counts = {};
-      STATUSES.forEach(function (status) { counts[status] = 0; });
-      tests.forEach(function (test) {
-        var status = counts[test.status] === undefined ? "unknown" : test.status;
-        counts[status] += 1;
-      });
-
       return {
         name: suite.name,
-        counts: counts,
+        counts: tally(tests),
         engines: engines.map(function (branch) {
           var inBranch = leaves(branch, []);
           return {
             name: branch.name,
             total: inBranch.length,
-            passed: inBranch.filter(function (test) { return test.status === "passed"; }).length
+            passed: inBranch.filter(function (test) { return test.status === "passed"; }).length,
+            counts: tally(inBranch)
           };
         }),
         areas: areaOrder.map(function (name) { return areaTotals[name]; }),
@@ -311,6 +344,11 @@
         var track = el("span", "area-bar");
         var span = el("span");
         span.style.width = Math.max(4, (area.sum / widest) * 100) + "%";
+        /* the one bar on the page whose meaning is written nowhere beside it:
+           the row says how many tests, the bar says how much of the clock */
+        track.title =
+          area.name + ": " + secs(area.sum) + " of test time, " +
+          Math.round((area.sum / (suite.sum || 1)) * 100) + " per cent of this suite";
         track.appendChild(span);
         row.appendChild(track);
         row.appendChild(el("span", "n", plural(area.count, "test")));
@@ -495,8 +533,16 @@
     var circumference = 2 * Math.PI * radius;
 
     var chart = svg("svg", { viewBox: "0 0 120 120", "class": "ring", role: "img" });
+    /* Hovering the ring used to repeat the number printed inside it, which is
+       the one thing a reader already had. What it could not see is which suite
+       and which browser the missing percent came from, so that is what the
+       tooltip carries now. */
     var caption = svg("title", {});
-    caption.textContent = Math.round(rate * 100) + " per cent of " + plural(stat.total || 0, "test") + " passed";
+    caption.textContent = [
+      Math.round(rate * 100) + " per cent of " + plural(stat.total || 0, "result") + " passed"
+    ]
+      .concat(breakdown())
+      .join("\n");
     chart.appendChild(caption);
     chart.appendChild(svg("circle", { "class": "ring-track", cx: 60, cy: 60, r: radius }));
 
@@ -629,15 +675,27 @@
            was drawing them in the colour this page uses for skipped. */
         var counts = suite.counts || {};
         var bar = el("div", "bar");
+        /* Hovering a segment says which suite and which browser it came from,
+           not just how many. The bar knew it was Functional E2E and the chips
+           knew it was Chromium, and nothing on the card put the two together. */
+        var perEngine = suite.engines.length > 1
+          ? suite.engines.map(function (engine) {
+            return engineName(engine.name) + ": " + describe(engine.counts);
+          })
+          : [];
         var segments = [];
         STATUSES.forEach(function (status) {
           var n = counts[status] || 0;
           if (!n) { return; }
           var span = el("span", "seg-" + status);
-          span.title = n + " " + status;
+          span.title = [suite.name + ": " + n + " " + status + " of " + suite.total]
+            .concat(perEngine)
+            .join("\n");
           bar.appendChild(span);
           segments.push({ node: span, share: suite.total ? (n / suite.total) * 100 : 0 });
         });
+        /* the empty case has no segment to hover, so the track carries it */
+        bar.title = suite.name + ": " + describe(counts);
         card.appendChild(bar);
 
         /* the segments are named rather than left to the colour alone, so the
