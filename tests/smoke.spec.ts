@@ -523,6 +523,56 @@ test.describe('qa suite runner', () => {
     await expect(band.locator(`a[href="${REPORT}/cross-browser/"]`)).toBeVisible();
   });
 
+  // A result carries however many parameters the suite decides to attach, and
+  // it went from one to two without warning: the project id it ran under, plus
+  // a label written for a reader. Counting every parameter turned two engines
+  // into four chips, two of them duplicates, and it shipped that way.
+  test('an engine is counted once however many parameters a result carries', async ({ page }) => {
+    await page.route(`${REPORT}/cross-browser/data/suites.json`, (route) =>
+      route.fulfill({
+        json: {
+          name: 'suites',
+          children: [
+            {
+              name: 'Functional E2E',
+              children: [
+                {
+                  name: 'Checkout',
+                  children: [
+                    {
+                      name: 'Checkout',
+                      children: [
+                        result('TC-17: order end to end', 15800, 'passed', ['webkit', 'WebKit']),
+                        result('TC-16: checkout guard', 4600, 'passed', ['webkit', 'WebKit']),
+                        result('TC-17: order end to end', 16200, 'passed', [
+                          'mobile-safari',
+                          'WebKit on iPhone 15',
+                        ]),
+                        result('TC-16: checkout guard', 4900, 'passed', [
+                          'mobile-safari',
+                          'WebKit on iPhone 15',
+                        ]),
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    );
+    await page.reload();
+
+    const engines = page.locator('#cbEngines li');
+    await expect(engines).toHaveCount(2);
+    // the label the suite wrote wins over the id it ran under
+    await expect(engines.nth(0)).toContainText('WebKit');
+    await expect(engines.nth(1)).toContainText('WebKit on iPhone 15');
+    await expect(engines.nth(0)).toContainText('2/2');
+    await expect(page.locator('#cbNote')).toContainText('2 other engines');
+  });
+
   test('the page says nothing about cross browser when that report is absent', async ({ page }) => {
     await page.route(`${REPORT}/cross-browser/widgets/summary.json`, (route) => route.abort());
     await page.reload();

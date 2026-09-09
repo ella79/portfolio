@@ -372,8 +372,22 @@
     "mobile-chrome": "Mobile Chrome"
   };
 
-  function engineName(id) {
-    return ENGINES[id] || id.replace(/-/g, " ");
+  /* A result can carry more than one parameter, and the suite has already gone
+     from one to two: the project id it ran under, "mobile-safari", plus a label
+     meant for a reader, "WebKit on iPhone 15". Counting every parameter turned
+     two engines into four chips, two of them duplicates, which is what the page
+     showed until this was fixed. So: group by the id, and let the label speak.
+     An id is the slug shaped one, lower case with dashes and no spaces. */
+  function isSlug(value) {
+    return /^[a-z0-9][a-z0-9-]*$/.test(value);
+  }
+
+  function engineOf(parameters) {
+    var list = (parameters || []).filter(Boolean);
+    if (!list.length) { return null; }
+    var id = list.filter(isSlug)[0] || list[0];
+    var label = list.filter(function (value) { return !isSlug(value); })[0];
+    return { id: id, name: label || ENGINES[id] || id.replace(/-/g, " ") };
   }
 
   function crossBrowser(summary, tree) {
@@ -389,32 +403,34 @@
     /* which engine a result came from is in the Allure parameters, the same
        place the project name sits in the canonical report */
     var byEngine = {};
+    var order = [];
     var cases = {};
     tests.forEach(function (test) {
       cases[test.name] = true;
-      (test.parameters || []).forEach(function (parameter) {
-        var seen = byEngine[parameter] || { total: 0, passed: 0 };
-        seen.total += 1;
-        if (test.status === "passed") { seen.passed += 1; }
-        byEngine[parameter] = seen;
-      });
+      var engine = engineOf(test.parameters);
+      if (!engine) { return; }
+      if (!byEngine[engine.id]) {
+        byEngine[engine.id] = { name: engine.name, total: 0, passed: 0 };
+        order.push(engine.id);
+      }
+      byEngine[engine.id].total += 1;
+      if (test.status === "passed") { byEngine[engine.id].passed += 1; }
     });
 
-    var engines = Object.keys(byEngine);
-    if (!engines.length) { return; }
+    if (!order.length) { return; }
 
     note.textContent =
       "The same " + plural(Object.keys(cases).length, "functional case") + ", run again on " +
-      plural(engines.length, "other engine") + ". " + stat.passed + " of " + stat.total +
+      plural(order.length, "other engine") + ". " + stat.passed + " of " + stat.total +
       " results passed, in a report of their own so one case is not counted twice above.";
 
     fill(
       host,
-      engines.map(function (id) {
+      order.map(function (id) {
         var seen = byEngine[id];
         var clean = seen.passed === seen.total;
         var item = el("li", clean ? null : "is-off");
-        item.appendChild(el("span", "cb-engine", engineName(id)));
+        item.appendChild(el("span", "cb-engine", seen.name));
         item.appendChild(el("span", "cb-n", seen.passed + "/" + seen.total));
         return item;
       })
