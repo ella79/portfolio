@@ -379,6 +379,20 @@ test.describe('qa suite runner', () => {
     children: [twoEngineTree.children[0], visualSuite],
   };
 
+  // The same run, published the way the suite labels it now: the engine is in
+  // the parent suite name, because Allure's own Overview reads only that level
+  // and was drawing both engines as one bar. Every suite carries its engine
+  // there, the single engine one included. The page folds them back under one
+  // parent, so everything below has to behave identically.
+  const parentEngineTree = {
+    name: 'suites',
+    children: [
+      { name: 'Functional E2E · Chromium', uid: 'uid-chromium', children: engineBranch('Chromium', 'e2e-playwright').children },
+      { name: 'Functional E2E · WebKit', uid: 'uid-webkit', children: engineBranch('WebKit', 'webkit').children },
+      { ...visualSuite, name: 'Visual regression · Chromium' },
+    ],
+  };
+
   // the shape that made the chips unreadable: one engine green, the other red.
   // Both ran; only one of them held.
   const splitEngineTree = {
@@ -584,10 +598,22 @@ test.describe('qa suite runner', () => {
   // Chromium too, so choosing Chromium under the functional suite replayed the
   // visual one as well, and the visual suite had no chip at all so it could
   // never be replayed on its own.
+  //
+  // Run against both shapes of the tree. The engine used to be a branch under
+  // the suite and is now in the parent suite name, and the two repositories
+  // deploy separately, so for a while the page will meet either. Steps rather
+  // than two tests, so a failure still says which shape broke.
   test('a chip filters the replay to one suite on one browser', async ({ page }) => {
-    await page.route(`${REPORT}/data/suites.json`, (route) =>
-      route.fulfill({ json: bothShapesTree }),
-    );
+    for (const [shape, tree] of [
+      ['the engine as a branch', bothShapesTree],
+      ['the engine in the parent suite name', parentEngineTree],
+    ] as const) {
+      await test.step(shape, () => filterBehaviour(page, tree));
+    }
+  });
+
+  const filterBehaviour = async (page: Page, tree: unknown) => {
+    await page.route(`${REPORT}/data/suites.json`, (route) => route.fulfill({ json: tree }));
     await page.reload();
 
     const functional = page.locator('#suiteList .suite').first();
@@ -628,7 +654,7 @@ test.describe('qa suite runner', () => {
     await expect(chromium).toHaveAttribute('aria-pressed', 'false');
     await expect(page.getByRole('button', { name: /run the qa suites/i })).toBeEnabled();
     await expect(page.locator('#allureFrame')).toHaveAttribute('src', `${REPORT}/#`);
-  });
+  };
 
   // A case that runs on two browsers is two results and one case. Showing only
   // the larger number would claim twice the coverage that exists.
