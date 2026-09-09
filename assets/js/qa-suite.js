@@ -369,7 +369,7 @@
       var suite = row.suite;
       chain = chain.then(function () {
         suite.node.classList.add("is-running");
-        write("> npx playwright test --project=" + (PROJECT[suite.name] || suite.name), "head");
+        write("> yarn playwright test --project=" + (PROJECT[suite.name] || suite.name), "head");
         write(
           "Running " + plural(row.tests.length, "test") +
             (engineFilter ? " on " + engineFilter : " on every browser this suite covers"),

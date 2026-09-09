@@ -33,10 +33,10 @@ dependencies. The only third party request the page makes is to Google Fonts.
 ## Run it
 
 ```bash
-npm install
-npm run serve          # http://127.0.0.1:8000
-npx playwright install chromium
-npm test
+yarn install
+yarn serve          # http://127.0.0.1:8000
+yarn playwright:install:chromium
+yarn test
 ```
 
 Serve the folder rather than opening the files: the Content Security Policy and

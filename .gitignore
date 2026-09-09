@@ -14,3 +14,8 @@ Thumbs.db
 # local design scratch, not part of the site
 logo-variante.png
 _local/
+
+# Yarn
+.yarn/*
+!.yarn/patches
+.pnp.*

@@ -1,7 +1,7 @@
 /* The static server the tests and local previews run against.
  *
  * It replaced `python3 -m http.server`, for two reasons. The command itself is
- * not portable: on Windows the executable is `python`, so `npm run serve` could
+ * not portable: on Windows the executable is `python`, so `yarn serve` could
  * not start at all. And that server keeps a request queue of five, which the
  * suite overruns the moment Playwright runs its files in parallel: a page would
  * load, its stylesheet would arrive, and `main.js` would come back
