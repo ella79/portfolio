@@ -20,11 +20,16 @@ dependencies. The only third party request the page makes is to Google Fonts.
 |   |-- js/qa-suite.js           # reads the Allure report and replays the run it recorded
 |   |-- img/                     # photo, favicon, social icons
 |   \-- cv/                      # the two page PDF the CV button hands over
+|-- contract/                    # what qa-suite.html reads out of the suite's Allure report
 |-- scripts/serve.mjs            # the static server the tests and previews run on
+|-- scripts/verify-contract.mjs  # checks a report, published or on disk, against that contract
+|-- scripts/ci-summary.mjs       # turns the Playwright JSON report into the summary CI draws
 |-- tests/smoke.spec.ts          # Playwright smoke suite
+|-- tests/fixtures/              # two reports, one that satisfies the contract and one that does not
 |-- playwright.config.ts
 |-- .github/
 |   |-- workflows/ci.yml         # runs the suite on every push and pull request
+|   |-- workflows/contract.yml   # weekly, checks the published report still fits the contract
 |   |-- workflows/deploy.yml     # publishes to GitHub Pages
 |   \-- dependabot.yml           # keeps the actions current
 |-- .gitattributes               # LF in the repository, binaries left alone
@@ -70,6 +75,77 @@ npm test
 
 CI runs the same suite on every push. Runs are serialised per branch, so a new
 push cancels the one already in flight instead of racing it.
+
+### What CI shows
+
+The pipeline is three jobs rather than one, and the shape is deliberate: GitHub
+draws the graph on the run page from the `needs` between them, so it can be read
+at a glance.
+
+```
+contract ─┐
+          ├─→ summary
+smoke ────┘
+```
+
+`contract` and `smoke` are independent and run side by side. `summary` waits for
+both and writes the run summary, and it runs even when the suite went red,
+because a red run is exactly when somebody wants to see which tests fell over
+without downloading an artifact first.
+
+That summary is markdown on the run page: the totals, a split per project since
+every check runs on desktop and on mobile, the slowest five, and a mermaid chart
+which GitHub renders. Which chart depends on the run. When something broke it is
+the split by status, because that is the question. When nothing did, a status
+chart would be one slice saying nothing, so it shows what the suite covers
+instead.
+
+A run that never started is reported as a failure rather than a pass. That case
+is not hypothetical: the first version of this script called an aborted run
+"Suite green", because zero failures out of zero tests is technically green.
+
+Every test in the suite is hermetic. The runner page reads a report published by
+another repository, and the tests serve that report themselves rather than
+fetching it, so what is under test is what the page does with the numbers, not
+whether GitHub Pages answered today. That includes the cases a live report will
+not produce on demand: a run carrying failures, a widget missing mid publish, a
+report that never answers.
+
+## The report contract
+
+`qa-suite.html` reads the Allure report that
+[agentic-playwright-suite](https://github.com/ella79/agentic-playwright-suite)
+publishes. That is a dependency across two repositories with no build step
+between them, so it is written down rather than assumed.
+
+`contract/allure-report.contract.json` states exactly what this site consumes:
+which documents, which fields inside them, and which addresses are linked.
+Everything the page does not touch is free to change without warning.
+
+`scripts/verify-contract.mjs` checks a report against that contract, and it runs
+from either side:
+
+```bash
+node scripts/verify-contract.mjs
+```
+
+checks the published report, which is what `contract.yml` does weekly. The
+cadence is a judgement call, not a rule: a break costs one panel on one page
+rather than the site, so a slow schedule with no noise is the right trade.
+
+```bash
+node scripts/verify-contract.mjs --base ./allure-report
+```
+
+checks a report on disk, which is the direction that actually prevents breakage:
+the suite's own pipeline can run it against a freshly generated report before
+publishing. The consumer states what it needs, the provider verifies it, which
+is what consumer driven contract testing means. Nothing here needs a token, the
+contract is a public file in a public repository.
+
+`tests/fixtures/` holds two reports, one that satisfies the contract and one
+where a suite has been renamed and a duration dropped. CI runs the verifier
+against both on every push: a checker that cannot fail is not a checker.
 
 ## Deployment
 

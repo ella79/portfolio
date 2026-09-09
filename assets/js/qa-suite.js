@@ -149,10 +149,14 @@
   function renderStats() {
     var stat = report.summary.statistic || {};
     var time = report.summary.time || {};
+    var clean = stat.total && stat.passed === stat.total;
     set("statTests", stat.total || 0);
     set("statSuites", suites.length);
     set("statPassing", (stat.total ? Math.round((stat.passed / stat.total) * 100) : 0) + "%");
     set("statDuration", wall(time.duration || 0));
+
+    var passing = document.getElementById("statPassing");
+    if (passing) { passing.classList.toggle("is-off", !clean); }
     if (embedMeta && time.stop) {
       embedMeta.textContent = "Allure report, published by GitHub Actions on " + when(time.stop);
     }
@@ -234,7 +238,9 @@
     var total = suites.reduce(function (sum, suite) { return sum + suite.total; }, 0);
     var done = 0;
     var passed = 0;
-    var failures = 0;
+    /* counted by the status Allure recorded, not lumped together: failed and
+       broken mean different things and a QA reader knows the difference */
+    var failures = {};
     var chain = Promise.resolve();
 
     suites.forEach(function (suite) {
@@ -248,9 +254,13 @@
       suite.tests.forEach(function (test, index) {
         chain = chain.then(function () {
           var ok = test.status === "passed";
-          if (ok) { passed += 1; } else { failures += 1; }
+          if (ok) { passed += 1; } else { failures[test.status] = (failures[test.status] || 0) + 1; }
           done += 1;
-          write("  " + (ok ? CHECK : CROSS) + "  " + test.name + "  (" + secs(duration(test)) + ")", ok ? "ok" : "warn");
+          write(
+            "  " + (ok ? CHECK : CROSS) + "  " + test.name + "  (" + secs(duration(test)) + ")" +
+              (ok ? "" : "  " + test.status),
+            ok ? "ok" : "warn"
+          );
           suite.countNode.textContent = index + 1 + " / " + suite.total;
           if (progress) { progress.style.width = (done / total) * 100 + "%"; }
           if (counter) { counter.textContent = done + " / " + total + " tests"; }
@@ -268,11 +278,18 @@
 
     return chain.then(function () {
       var time = report.summary.time || {};
-      write(
-        plural(passed, "test") + " passed" + (failures ? ", " + failures + " failed" : "") +
-          "  (" + wall(time.duration || 0) + " wall time)",
-        "head"
-      );
+      /* a fixed order, so the summary line reads the same way every run rather
+         than in whatever order the failures happened to come back */
+      var parts = [plural(passed, "test") + " passed"];
+      ["failed", "broken", "skipped", "unknown"].forEach(function (status) {
+        if (failures[status]) { parts.push(failures[status] + " " + status); }
+      });
+      Object.keys(failures).forEach(function (status) {
+        if (["failed", "broken", "skipped", "unknown"].indexOf(status) === -1) {
+          parts.push(failures[status] + " " + status);
+        }
+      });
+      write(parts.join(", ") + "  (" + wall(time.duration || 0) + " wall time)", "head");
       write("Report published to ella79.github.io/agentic-playwright-suite", "muted");
       runButton.disabled = false;
       runLabel.textContent = "Run again";
@@ -296,7 +313,9 @@
     chart.appendChild(svg("circle", { "class": "ring-track", cx: 60, cy: 60, r: radius }));
 
     var arc = svg("circle", {
-      "class": "ring-fill",
+      /* a run that did not come back clean must not be drawn in the colour that
+         means "clean". The number is the report's; so is the colour. */
+      "class": rate < 1 ? "ring-fill is-off" : "ring-fill",
       cx: 60,
       cy: 60,
       r: radius,
@@ -340,6 +359,89 @@
         return item;
       })
     );
+  }
+
+  /* The canonical run is Chromium. The same functional cases also run on other
+     engines, and CI publishes that as its own report so one case does not
+     appear three times in the totals. Read separately, shown separately. */
+  var ENGINES = {
+    webkit: "WebKit",
+    "mobile-safari": "Mobile Safari",
+    chromium: "Chromium",
+    firefox: "Firefox",
+    "mobile-chrome": "Mobile Chrome"
+  };
+
+  function engineName(id) {
+    return ENGINES[id] || id.replace(/-/g, " ");
+  }
+
+  function crossBrowser(summary, tree) {
+    var box = document.getElementById("crossBrowser");
+    var note = document.getElementById("cbNote");
+    var host = document.getElementById("cbEngines");
+    if (!box || !note || !host) { return; }
+
+    var stat = (summary || {}).statistic || {};
+    var tests = leaves(tree || {}, []);
+    if (!stat.total || !tests.length) { return; }
+
+    /* which engine a result came from is in the Allure parameters, the same
+       place the project name sits in the canonical report */
+    var byEngine = {};
+    var cases = {};
+    tests.forEach(function (test) {
+      cases[test.name] = true;
+      (test.parameters || []).forEach(function (parameter) {
+        var seen = byEngine[parameter] || { total: 0, passed: 0 };
+        seen.total += 1;
+        if (test.status === "passed") { seen.passed += 1; }
+        byEngine[parameter] = seen;
+      });
+    });
+
+    var engines = Object.keys(byEngine);
+    if (!engines.length) { return; }
+
+    note.textContent =
+      "The same " + plural(Object.keys(cases).length, "functional case") + ", run again on " +
+      plural(engines.length, "other engine") + ". " + stat.passed + " of " + stat.total +
+      " results passed, in a report of their own so one case is not counted twice above.";
+
+    fill(
+      host,
+      engines.map(function (id) {
+        var seen = byEngine[id];
+        var clean = seen.passed === seen.total;
+        var item = el("li", clean ? null : "is-off");
+        item.appendChild(el("span", "cb-engine", engineName(id)));
+        item.appendChild(el("span", "cb-n", seen.passed + "/" + seen.total));
+        return item;
+      })
+    );
+    box.hidden = false;
+  }
+
+  /* A published run can legitimately carry failures. That is a result, not an
+     error state of this page, and when it happens the trace is the artefact
+     worth reaching for, not the dashboard. */
+  function notClean() {
+    var box = document.getElementById("notClean");
+    var head = document.getElementById("ncHead");
+    if (!box || !head) { return; }
+
+    var stat = report.summary.statistic || {};
+    var off = (stat.failed || 0) + (stat.broken || 0);
+    if (!off) {
+      box.hidden = true;
+      return;
+    }
+
+    var parts = [];
+    if (stat.failed) { parts.push(plural(stat.failed, "test") + " failed"); }
+    if (stat.broken) { parts.push(stat.broken + " broke"); }
+    head.textContent = "This run did not come back clean: " + parts.join(" and ") + " of " + stat.total + ".";
+    box.hidden = false;
   }
 
   function suiteBars() {
@@ -477,6 +579,7 @@
   function showResults() {
     if (!results) { return; }
     if (!drawn) {
+      notClean();
       ring();
       suiteBars();
       environment();
@@ -548,7 +651,9 @@
     json("widgets/environment.json", []),
     json("widgets/history-trend.json", []),
     json("widgets/duration-trend.json", []),
-    json("widgets/retry-trend.json", [])
+    json("widgets/retry-trend.json", []),
+    json("cross-browser/widgets/summary.json", null),
+    json("cross-browser/data/suites.json", null)
   ])
     .then(function (payload) {
       report = {
@@ -564,6 +669,9 @@
       renderSuites();
       renderStats();
       renderProvenance();
+      /* optional: the cross browser report is published beside the canonical
+         one, and the page simply says nothing about it when it is not there */
+      crossBrowser(payload[7], payload[8]);
       /* the button waits for the report rather than pretending to be ready:
          until the numbers are in there is nothing for it to replay */
       runButton.addEventListener("click", replay);

@@ -6,7 +6,12 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list']],
+  // In CI: annotations on the diff, the HTML report as an artifact, and JSON,
+  // which is what scripts/ci-summary.mjs turns into the summary drawn on the
+  // run page. A green log nobody opens is not a result anybody reads.
+  reporter: process.env.CI
+    ? [['github'], ['html', { open: 'never' }], ['json', { outputFile: 'reports/results.json' }]]
+    : [['list']],
   use: {
     baseURL: 'http://127.0.0.1:8000',
     trace: 'on-first-retry',

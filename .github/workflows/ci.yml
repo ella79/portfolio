@@ -16,7 +16,52 @@ concurrency:
 permissions:
   contents: read
 
+# Three jobs rather than one, and the shape is the point. GitHub draws the
+# graph on the run page from the needs below, so the pipeline can be read at a
+# glance: the contract check and the browser suite are independent and run side
+# by side, and the summary waits for both and reports the run as a whole.
+#
+#   contract ─┐
+#             ├─→ summary
+#   smoke ────┘
 jobs:
+  contract:
+    name: Report contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      # Hermetic, and deliberately not against the published report: this proves
+      # the contract verifier itself still works. The report it guards is checked
+      # on a schedule instead, in contract.yml, so a bad day in another
+      # repository cannot turn this pipeline red.
+      - name: Prove the verifier passes a good report and rejects a drifted one
+        run: |
+          node scripts/verify-contract.mjs --base tests/fixtures/report > /dev/null
+          if node scripts/verify-contract.mjs --base tests/fixtures/report-drifted > /dev/null 2>&1; then
+            echo "The verifier accepted a report that has drifted. It is broken."
+            exit 1
+          fi
+
+      - name: Say what was checked
+        if: ${{ !cancelled() }}
+        run: |
+          {
+            echo "## Report contract"
+            echo ""
+            echo "\`qa-suite.html\` reads a report published by another repository."
+            echo "This job proves the verifier that guards that contract still works:"
+            echo "it passes a report which satisfies the contract, and rejects one where"
+            echo "a suite was renamed and a duration dropped."
+            echo ""
+            echo "The published report itself is checked on a schedule, in \`contract.yml\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
   smoke:
     name: Playwright smoke suite
     runs-on: ubuntu-latest
@@ -60,3 +105,38 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+      # the machine readable version of the same run, which the summary job
+      # turns into the tables and the chart drawn on the run page
+      - name: Upload the results as JSON
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: results-json
+          path: reports/results.json
+          retention-days: 7
+
+  summary:
+    name: Run summary
+    needs: [contract, smoke]
+    # it runs even when the suite went red, because a red run is exactly when
+    # somebody wants to see which tests fell over without downloading anything
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      - name: Fetch the results
+        uses: actions/download-artifact@v5
+        with:
+          name: results-json
+          path: reports
+        continue-on-error: true
+
+      - name: Draw the summary
+        run: node scripts/ci-summary.mjs reports/results.json >> "$GITHUB_STEP_SUMMARY"

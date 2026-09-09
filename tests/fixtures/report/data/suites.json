@@ -1,0 +1,47 @@
+{
+  "name": "suites",
+  "children": [
+    {
+      "name": "Functional E2E",
+      "children": [
+        {
+          "name": "Checkout",
+          "children": [
+            {
+              "name": "Checkout",
+              "children": [
+                {
+                  "name": "TC-17: a signed-in user can complete an order end to end",
+                  "status": "passed",
+                  "parameters": ["e2e-playwright"],
+                  "time": { "start": 1788877248297, "stop": 1788877259061, "duration": 10764 }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Visual regression",
+      "children": [
+        {
+          "name": "Home",
+          "children": [
+            {
+              "name": "Visual regression - home",
+              "children": [
+                {
+                  "name": "VR-01: site header for an anonymous visitor",
+                  "status": "passed",
+                  "parameters": ["visual-regression"],
+                  "time": { "start": 1788877252442, "stop": 1788877256487, "duration": 4045 }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

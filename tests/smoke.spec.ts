@@ -1,5 +1,5 @@
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 test.describe('home page', () => {
   test.beforeEach(async ({ page }) => {
@@ -305,11 +305,69 @@ test.describe('qa suite runner', () => {
   // page does with the numbers, not whether GitHub Pages answered today.
   const REPORT = 'https://ella79.github.io/agentic-playwright-suite';
 
-  const passing = (name: string, duration: number) => ({
+  const result = (name: string, duration: number, status = 'passed', parameters: string[] = []) => ({
     name,
-    status: 'passed',
+    status,
+    parameters,
     time: { start: duration, stop: duration * 2, duration },
   });
+
+  const passing = (name: string, duration: number) => result(name, duration);
+
+  // The published report is green almost all of the time, so the code that
+  // renders a run which is not green would otherwise never be executed, here or
+  // in a browser, until the day it matters. These reports are served by the
+  // test and reach nothing outside it.
+  const reportWithFailures = async (page: Page) => {
+    await page.route(`${REPORT}/widgets/summary.json`, (route) =>
+      route.fulfill({
+        json: {
+          statistic: { failed: 1, broken: 1, skipped: 0, passed: 2, unknown: 0, total: 4 },
+          time: { start: 1, stop: 63256, duration: 63255 },
+        },
+      }),
+    );
+    await page.route(`${REPORT}/data/suites.json`, (route) =>
+      route.fulfill({
+        json: {
+          name: 'suites',
+          children: [
+            {
+              name: 'Functional E2E',
+              children: [
+                {
+                  name: 'Checkout',
+                  children: [
+                    {
+                      name: 'Checkout',
+                      children: [
+                        result('TC-17: a signed-in user can complete an order', 15800, 'broken'),
+                        result('TC-16: an anonymous visitor cannot reach checkout', 4600, 'failed'),
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'Visual regression',
+              children: [
+                {
+                  name: 'Home',
+                  children: [
+                    {
+                      name: 'Visual regression - home',
+                      children: [passing('VR-01: site header', 4045), passing('VR-02: featured grid', 3788)],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    );
+  };
 
   test.beforeEach(async ({ page }) => {
     await page.route(`${REPORT}/widgets/summary.json`, (route) =>
@@ -379,6 +437,45 @@ test.describe('qa suite runner', () => {
         ],
       }),
     );
+    // the cross browser report: the same cases, run again on other engines,
+    // published beside the canonical one rather than inside it
+    await page.route(`${REPORT}/cross-browser/widgets/summary.json`, (route) =>
+      route.fulfill({
+        json: {
+          reportName: 'Cross browser',
+          statistic: { failed: 0, broken: 0, skipped: 0, passed: 4, unknown: 0, total: 4 },
+          time: { start: 1, stop: 149810, duration: 149809 },
+        },
+      }),
+    );
+    await page.route(`${REPORT}/cross-browser/data/suites.json`, (route) =>
+      route.fulfill({
+        json: {
+          name: 'suites',
+          children: [
+            {
+              name: 'Functional E2E',
+              children: [
+                {
+                  name: 'Checkout',
+                  children: [
+                    {
+                      name: 'Checkout',
+                      children: [
+                        result('TC-17: order end to end', 15800, 'passed', ['webkit']),
+                        result('TC-16: checkout guard', 4600, 'passed', ['webkit']),
+                        result('TC-17: order end to end', 16200, 'passed', ['mobile-safari']),
+                        result('TC-16: checkout guard', 4900, 'passed', ['mobile-safari']),
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    );
     await page.route(`${REPORT}/`, (route) =>
       route.fulfill({ contentType: 'text/html', body: '<h1>Allure report</h1>' }),
     );
@@ -390,9 +487,76 @@ test.describe('qa suite runner', () => {
     const strip = page.locator('.published');
     await expect(strip).toBeVisible();
 
-    for (const path of ['', 'functional/', 'visual/', 'playwright-report/', 'metrics/']) {
+    for (const path of ['', 'functional/', 'visual/', 'cross-browser/', 'playwright-report/', 'metrics/']) {
       await expect(strip.locator(`a[href="${REPORT}/${path}"]`)).toBeVisible();
     }
+  });
+
+  // Cross browser coverage is a question every senior QA posting asks, so it
+  // belongs on the page. It stays out of the totals above because it reruns the
+  // same cases: folding it in would count one case several times.
+  test('cross browser is shown as its own coverage, not folded into the totals', async ({ page }) => {
+    const band = page.locator('#crossBrowser');
+    await expect(band).toBeVisible();
+    await expect(page.locator('#cbNote')).toContainText('2 functional cases');
+    await expect(page.locator('#cbNote')).toContainText('2 other engines');
+
+    const engines = page.locator('#cbEngines li');
+    await expect(engines).toHaveCount(2);
+    await expect(engines.nth(0)).toContainText('WebKit');
+    await expect(engines.nth(1)).toContainText('Mobile Safari');
+    await expect(engines.nth(0)).toContainText('2/2');
+
+    // the canonical totals stay untouched by it
+    await expect(page.locator('#statTests')).toHaveText('4');
+    await expect(band.locator(`a[href="${REPORT}/cross-browser/"]`)).toBeVisible();
+  });
+
+  test('the page says nothing about cross browser when that report is absent', async ({ page }) => {
+    await page.route(`${REPORT}/cross-browser/widgets/summary.json`, (route) => route.abort());
+    await page.reload();
+
+    await expect(page.locator('#statTests')).toHaveText('4');
+    await expect(page.locator('#crossBrowser')).toBeHidden();
+  });
+
+  test('a run with failures is not rendered as a clean one', async ({ page }) => {
+    await reportWithFailures(page);
+    await page.reload();
+
+    // the headline number, before anything is pressed
+    await expect(page.locator('#statPassing')).toHaveText('50%');
+    await expect(page.locator('#statPassing')).toHaveClass(/is-off/);
+
+    // the suite that carries them is marked, the clean one is not
+    const suites = page.locator('#suiteList .suite');
+    await expect(suites.nth(0).locator('.suite-mark')).toHaveText('×');
+    await expect(suites.nth(1).locator('.suite-mark')).toHaveText('✓');
+
+    await page.getByRole('button', { name: /run the qa suites/i }).click();
+
+    // failed and broken are different things and the console says which is which
+    await expect(page.locator('#consoleLog')).toContainText('broken');
+    await expect(page.locator('#consoleLog')).toContainText('2 tests passed, 1 failed, 1 broken');
+
+    await expect(page.locator('#runnerResults')).toBeVisible();
+    await expect(page.locator('.ring-v')).toHaveText('50%');
+    await expect(page.locator('.ring-fill')).toHaveClass(/is-off/);
+
+    // and the trace, which is where the step that failed is recorded
+    const callout = page.locator('#notClean');
+    await expect(callout).toBeVisible();
+    await expect(callout).toContainText('did not come back clean');
+    await expect(callout.locator(`a[href="${REPORT}/playwright-report/"]`)).toBeVisible();
+  });
+
+  test('a clean run says nothing about traces', async ({ page }) => {
+    await page.getByRole('button', { name: /run the qa suites/i }).click();
+    await expect(page.locator('#runnerResults')).toBeVisible();
+
+    await expect(page.locator('#notClean')).toBeHidden();
+    await expect(page.locator('.ring-fill')).not.toHaveClass(/is-off/);
+    await expect(page.locator('#statPassing')).not.toHaveClass(/is-off/);
   });
 
   test('the suites and the totals are the ones the report holds', async ({ page }) => {

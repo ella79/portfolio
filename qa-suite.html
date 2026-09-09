@@ -92,13 +92,26 @@
         </div>
       </div>
 
-      <!-- the five addresses CI republishes on every push to main, so a
-           visitor can reach the raw report without waiting for the replay -->
+      <!-- The run above is the canonical one, on Chromium. The same functional
+           cases also run on other engines, published as their own report so
+           that one case does not appear three times in the totals. -->
+      <div class="crossbrowser reveal" id="crossBrowser" hidden>
+        <div class="cb-text">
+          <h3>Cross browser</h3>
+          <p class="cb-note" id="cbNote">&mdash;</p>
+        </div>
+        <ul class="cb-engines" id="cbEngines"></ul>
+        <a class="prov-link" href="https://ella79.github.io/agentic-playwright-suite/cross-browser/" target="_top" rel="noopener noreferrer">Open the cross browser report<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg></a>
+      </div>
+
+      <!-- the addresses CI republishes on every push to main, so a visitor can
+           reach the raw reports without waiting for the replay -->
       <div class="published reveal">
         <span class="published-l">Published on every push to main</span>
         <a href="https://ella79.github.io/agentic-playwright-suite/" target="_top" rel="noopener noreferrer">Results dashboard</a>
         <a href="https://ella79.github.io/agentic-playwright-suite/functional/" target="_top" rel="noopener noreferrer">Functional trend</a>
         <a href="https://ella79.github.io/agentic-playwright-suite/visual/" target="_top" rel="noopener noreferrer">Visual trend</a>
+        <a href="https://ella79.github.io/agentic-playwright-suite/cross-browser/" target="_top" rel="noopener noreferrer">Cross browser</a>
         <a href="https://ella79.github.io/agentic-playwright-suite/playwright-report/" target="_top" rel="noopener noreferrer">Trace viewer</a>
         <a href="https://ella79.github.io/agentic-playwright-suite/metrics/" target="_top" rel="noopener noreferrer">Suite health</a>
       </div>
@@ -106,7 +119,16 @@
       <div class="runner-results" id="runnerResults">
 
         <h2 class="dash-title">What that run says</h2>
-        <p class="section-intro">Five readings of the same forty tests: how many held, how the work is split, what the tests ran against, how the suite has behaved over its last runs, and which cases cost the most time.</p>
+        <p class="section-intro" id="dashIntro">Five readings of the same run: how many tests held, how the work is split, what they ran against, how the suite has behaved over its last runs, and which cases cost the most time.</p>
+
+        <!-- shown only when the published run was not clean. A failure is not an
+             error state of this page, it is a result, and the trace is where the
+             step that failed is recorded. -->
+        <div class="not-clean" id="notClean" hidden>
+          <p class="nc-head" id="ncHead">&mdash;</p>
+          <p class="nc-body">A failed test is an assertion that did not hold, so it points at the product. A broken one never got to check anything, so it points at the test or the environment it ran in. The step where either of them stopped is in the trace.</p>
+          <a class="btn btn-ghost" href="https://ella79.github.io/agentic-playwright-suite/playwright-report/" target="_top" rel="noopener noreferrer"><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h9"/></svg>Open the trace viewer</a>
+        </div>
 
         <div class="dash-row dash-row-3">
           <div class="dash-card">

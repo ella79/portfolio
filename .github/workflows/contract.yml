@@ -1,0 +1,47 @@
+name: Report contract
+
+# The QA suite page reads a report published by another repository. If that
+# report moves or changes shape, the page degrades politely rather than loudly,
+# which is the worst kind of breakage: nobody finds out. This is the check that
+# finds out. Weekly is a judgement call, not a rule. The report changes on every
+# push to that repository, but a break here costs a panel on one page, not a
+# broken site, so a slow cadence with no noise is the right trade. Move it to
+# daily by changing the cron below.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: contract
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify the published report against the contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      # A checker that cannot fail is not a checker. Before trusting today's
+      # verdict, prove the verifier still passes a report that satisfies the
+      # contract and still rejects one that does not.
+      - name: Prove the verifier works
+        run: |
+          node scripts/verify-contract.mjs --base tests/fixtures/report > /dev/null
+          if node scripts/verify-contract.mjs --base tests/fixtures/report-drifted > /dev/null 2>&1; then
+            echo "The verifier accepted a report that has drifted. It is broken."
+            exit 1
+          fi
+          echo "The verifier passes a good report and rejects a drifted one."
+
+      - name: Verify the published report
+        run: node scripts/verify-contract.mjs
