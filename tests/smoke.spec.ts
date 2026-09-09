@@ -483,6 +483,17 @@ test.describe('qa suite runner', () => {
     await page.goto('/qa-suite.html');
   });
 
+  // The page depends on another repository's build output. Saying so, and
+  // linking the contract that pins it, is part of the point: a reader should
+  // not have to open the repository to learn how the dependency is held.
+  test('the page names the contract it reads the report under', async ({ page }) => {
+    await expect(
+      page.locator(
+        'a[href="https://github.com/ella79/portfolio/blob/main/contract/allure-report.contract.json"]',
+      ),
+    ).toBeVisible();
+  });
+
   test('the published addresses are reachable without playing the replay', async ({ page }) => {
     const strip = page.locator('.published');
     await expect(strip).toBeVisible();
