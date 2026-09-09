@@ -21,6 +21,7 @@
   var counter = document.getElementById("consoleCount");
   var results = document.getElementById("runnerResults");
   var frame = document.getElementById("allureFrame");
+  var reportLink = document.getElementById("reportLink");
   var embedMeta = document.getElementById("embedMeta");
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -32,7 +33,14 @@
   var SVG_NS = "http://www.w3.org/2000/svg";
   var CHECK = "✓";
   var CROSS = "×";
+  /* the verdict on a suite that did not come back clean. A cross in a circle at
+     the head of a row that also expands is read as a close button, and this one
+     never changed when the row opened, so it looked like a broken one. */
+  var ALERT = "!";
   var ARROW = "▾";
+  /* the order a run is summarised in, so the console line, the card and the bar
+     all name the statuses the same way round */
+  var STATUSES = ["passed", "failed", "broken", "skipped", "unknown"];
 
   /* ---------- formatting ---------- */
 
@@ -113,6 +121,49 @@
     );
   }
 
+  /* The whole verdict, not just the passing half: a bar drawn from the pass
+     rate alone leaves the rest as track, and the track is grey, which is what
+     this page uses for skipped. */
+  function tally(tests) {
+    var counts = {};
+    STATUSES.forEach(function (status) { counts[status] = 0; });
+    tests.forEach(function (test) {
+      var status = counts[test.status] === undefined ? "unknown" : test.status;
+      counts[status] += 1;
+    });
+    return counts;
+  }
+
+  /* "1 passed, 4 failed, 2 broken" rather than a percentage: a reader hovering
+     a slice of a chart wants the numbers behind it, and the statuses it does
+     not have are noise. */
+  function describe(counts) {
+    var parts = [];
+    STATUSES.forEach(function (status) {
+      if (counts[status]) { parts.push(counts[status] + " " + status); }
+    });
+    return parts.join(", ") || "no results";
+  }
+
+  /* One line per suite, and per engine where a suite ran on more than one.
+     "Functional E2E on Chromium: 0 passed, 20 failed" is the sentence the
+     charts could not say: the ring knew the total and the bar knew the suite,
+     and neither of them knew which browser the failures came from. */
+  function breakdown() {
+    var lines = [];
+    suites.forEach(function (suite) {
+      if (suite.engines.length > 1) {
+        suite.engines.forEach(function (engine) {
+          lines.push(suite.name + " on " + engineName(engine.name) + ": " + describe(engine.counts));
+        });
+      } else {
+        var only = suite.engines.length ? " on " + engineName(suite.engines[0].name) : "";
+        lines.push(suite.name + only + ": " + describe(suite.counts));
+      }
+    });
+    return lines;
+  }
+
   function readSuites(tree) {
     return (tree.children || []).map(function (suite) {
       var tests = leaves(suite, []);
@@ -143,12 +194,19 @@
 
       return {
         name: suite.name,
+        /* Allure gives every branch an address of its own. Carrying it lets a
+           filtered replay open the report on the same branch it just played,
+           instead of dropping the reader at the top of the whole run. */
+        uid: suite.uid,
+        counts: tally(tests),
         engines: engines.map(function (branch) {
           var inBranch = leaves(branch, []);
           return {
             name: branch.name,
+            uid: branch.uid,
             total: inBranch.length,
-            passed: inBranch.filter(function (test) { return test.status === "passed"; }).length
+            passed: inBranch.filter(function (test) { return test.status === "passed"; }).length,
+            counts: tally(inBranch)
           };
         }),
         areas: areaOrder.map(function (name) { return areaTotals[name]; }),
@@ -162,6 +220,45 @@
         sum: sum
       };
     });
+  }
+
+  /* A suite that ran on a single engine has no engine branch to read: its tree
+     forks on area instead, so the column had chips for the functional suite and
+     nothing at all for the visual one, and there was no way to replay the
+     visual suite on its own. The engine is still recorded on every result, so a
+     name that every test in the suite carries, and that another suite has
+     already proved is an engine rather than an area, is this suite's engine.
+     Guessing from the environment note instead would be guessing: that field is
+     written by hand and has been wrong before. */
+  function deriveEngines(list) {
+    var vocabulary = [];
+    list.forEach(function (suite) {
+      suite.engines.forEach(function (engine) {
+        if (vocabulary.indexOf(engine.name) === -1) { vocabulary.push(engine.name); }
+      });
+    });
+
+    list.forEach(function (suite) {
+      if (suite.engines.length || !suite.tests.length) { return; }
+      var found = vocabulary.filter(function (name) {
+        return suite.tests.every(function (test) {
+          return (test.parameters || []).indexOf(name) !== -1;
+        });
+      });
+      /* one name, or none: two would mean the tests are not split by engine
+         after all, and a chip that claims otherwise is worse than no chip */
+      if (found.length !== 1) { return; }
+      suite.engines = [{
+        name: found[0],
+        /* the whole suite is the branch here, so it is the suite's own address
+           the report should open on */
+        uid: suite.uid,
+        total: suite.total,
+        passed: suite.passed,
+        counts: suite.counts
+      }];
+    });
+    return list;
   }
 
   function value(list, name) {
@@ -221,8 +318,17 @@
       head.type = "button";
       head.setAttribute("aria-expanded", "false");
 
-      var mark = el("span", "suite-mark", suite.passed === suite.total ? CHECK : CROSS);
-      mark.setAttribute("aria-hidden", "true");
+      /* a verdict rather than a control: a tick when every result held, an
+         exclamation when one did not. Both are readable at a glance and
+         neither can be mistaken for the thing that opens the row. */
+      var clean = suite.passed === suite.total;
+      var mark = el("span", clean ? "suite-mark" : "suite-mark is-off", clean ? CHECK : ALERT);
+      mark.setAttribute("role", "img");
+      mark.setAttribute(
+        "aria-label",
+        clean ? "Every result passed" : suite.total - suite.passed + " of " + suite.total + " results did not pass"
+      );
+      mark.title = mark.getAttribute("aria-label");
       var count = el("span", "suite-count", plural(suite.total, "test"));
       var arrow = el("span", "suite-arrow", ARROW);
       arrow.setAttribute("aria-hidden", "true");
@@ -250,11 +356,29 @@
           var chip = el("button", engine.passed === engine.total ? "cb-engines-chip" : "cb-engines-chip is-off");
           chip.type = "button";
           chip.setAttribute("aria-pressed", "false");
-          chip.title = "Replay only what ran on " + engine.name;
+          /* The number counts results that passed, and without the word it was
+             read as results that ran: 0/20 next to 20/20 said Chromium never
+             started, when in fact it started twenty times and held none. Both
+             engines are under "Ran on", so both ran; what differs is how they
+             came out. */
+          var ran = el("span", "cb-ran", CHECK);
+          ran.setAttribute("aria-hidden", "true");
+          chip.appendChild(ran);
           chip.appendChild(el("span", "cb-engine", engine.name));
           chip.appendChild(el("span", "cb-n", engine.passed + "/" + engine.total));
-          chip.addEventListener("click", function () { toggleEngine(engine.name); });
+          chip.appendChild(el("span", "cb-unit", "passed"));
+          chip.dataset.title =
+            engine.name + ": " + engine.passed + " of " + plural(engine.total, "result") +
+            " passed. Press to replay " + suite.name + " on this browser alone.";
+          chip.title = chip.dataset.title;
+          chip.setAttribute(
+            "aria-label",
+            suite.name + " on " + engine.name + ", " + engine.passed + " of " +
+              plural(engine.total, "result") + " passed"
+          );
+          chip.addEventListener("click", function () { toggleFilter(suite, engine); });
           chip.dataset.engine = engine.name;
+          chip.dataset.suite = suite.name;
           browsers.appendChild(chip);
         });
       }
@@ -267,6 +391,11 @@
         var track = el("span", "area-bar");
         var span = el("span");
         span.style.width = Math.max(4, (area.sum / widest) * 100) + "%";
+        /* the one bar on the page whose meaning is written nowhere beside it:
+           the row says how many tests, the bar says how much of the clock */
+        track.title =
+          area.name + ": " + secs(area.sum) + " of test time, " +
+          Math.round((area.sum / (suite.sum || 1)) * 100) + " per cent of this suite";
         track.appendChild(span);
         row.appendChild(track);
         row.appendChild(el("span", "n", plural(area.count, "test")));
@@ -289,16 +418,38 @@
     });
   }
 
-  /* One browser at a time, or all of them. The filter changes what the runner
-     replays and what the counter counts; it does not change the report, which
-     is why the numbers in the panels above stay where they are. */
-  var engineFilter = null;
+  /* One suite on one browser, or the whole run. The filter used to be an engine
+     name and nothing else, which made it lie in both directions: choosing
+     Chromium under the functional suite also replayed the visual suite, because
+     the visual cases record Chromium too, and the visual suite could not be
+     replayed on its own at all because it had no chip to press.
+     A filter is a suite and an engine together, and it now scopes the embedded
+     report as well: replaying one branch and then opening the report at the top
+     of everything is half an answer. It does not touch the panels above, which
+     describe the published run rather than the selection. */
+  var filter = null;
 
   function testsOf(suite) {
-    if (!engineFilter) { return suite.tests; }
+    if (!filter) { return suite.tests; }
+    if (filter.suite !== suite.name) { return []; }
     return suite.tests.filter(function (test) {
-      return (test.parameters || []).indexOf(engineFilter) !== -1;
+      return (test.parameters || []).indexOf(filter.engine) !== -1;
     });
+  }
+
+  /* The address the report should open on: the filtered branch when there is
+     one, the whole run otherwise. A report without the branch addresses falls
+     back to the top rather than to a link that goes nowhere. */
+  function reportUrl() {
+    return REPORT + (filter && filter.uid ? "#suites/" + filter.uid : "#");
+  }
+
+  /* "Functional E2E on WebKit" where the suite forked, "Visual regression"
+     where it did not: naming an engine the suite only ever ran on adds a word
+     and no information. */
+  function filterLabel() {
+    if (!filter) { return ""; }
+    return filter.suite + (filter.multi ? " on " + filter.display : "");
   }
 
   /* The console bar used to say Chromium whatever was selected, which is the
@@ -309,27 +460,57 @@
     if (!consoleBrowser) { return; }
     var engines = fromEngineBranches().map(function (row) { return row.name; });
     var viewport = value(report.environment, "viewport");
-    var who = engineFilter || (engines.length ? engines.join(" and ") : value(report.environment, "browser"));
+    var who = filter
+      ? filter.display
+      : engines.length ? engines.join(" and ") : value(report.environment, "browser");
     consoleBrowser.textContent = [who, viewport].filter(Boolean).join(" · ");
   }
 
-  function toggleEngine(name) {
+  function chips() {
+    return [].slice.call(document.querySelectorAll(".cb-engines-chip"));
+  }
+
+  function toggleFilter(suite, engine) {
     if (running) { return; }
-    engineFilter = engineFilter === name ? null : name;
+    var same = filter && filter.suite === suite.name && filter.engine === engine.name;
+    filter = same
+      ? null
+      : {
+        suite: suite.name,
+        engine: engine.name,
+        display: engineName(engine.name),
+        uid: engine.uid,
+        /* whether naming the engine adds anything, or only length */
+        multi: suite.engines.length > 1
+      };
     describeBrowsers();
 
-    [].slice.call(document.querySelectorAll(".cb-engines-chip")).forEach(function (chip) {
-      var on = chip.dataset.engine === engineFilter;
+    chips().forEach(function (chip) {
+      var on = !!filter && chip.dataset.suite === filter.suite && chip.dataset.engine === filter.engine;
       chip.classList.toggle("is-on", on);
       chip.setAttribute("aria-pressed", on ? "true" : "false");
     });
 
-    runLabel.textContent = engineFilter ? "Run " + engineFilter + " only" : "Run the QA suites";
+    runLabel.textContent = filter ? "Run " + filterLabel() : "Run the QA suites";
     if (hint) {
-      hint.textContent = engineFilter
-        ? "Replays only what ran on " + engineFilter + ". Press the browser again for the whole run."
+      hint.textContent = filter
+        ? "Replays " + filterLabel() + " alone, then opens the report on that branch. Press the chip again for the whole run."
         : "Replays the last run recorded in the Allure report, then opens that report below.";
     }
+    /* the embed follows the selection, and a report already on screen is moved
+       rather than left showing the branch that was chosen before */
+    pointReport();
+  }
+
+  /* Both the frame and the link beside it, so opening the report in a tab lands
+     where the embedded one is. */
+  function pointReport() {
+    var url = reportUrl();
+    if (frame) {
+      frame.setAttribute("data-src", url);
+      if (frame.getAttribute("src")) { frame.setAttribute("src", url); }
+    }
+    if (reportLink) { reportLink.setAttribute("href", url); }
   }
 
   /* ---------- the console ---------- */
@@ -351,6 +532,11 @@
     runButton.disabled = true;
     runLabel.textContent = "Running";
     log.innerHTML = "";
+    /* the ticks belong to the replay that is starting, not the one before it */
+    chips().forEach(function (chip) {
+      chip.classList.remove("is-ran");
+      if (chip.dataset.title) { chip.title = chip.dataset.title; }
+    });
 
     /* a filtered replay plays a subset, and a suite that has nothing left in it
        is skipped rather than announced and then left empty */
@@ -372,7 +558,7 @@
         write("> yarn playwright test --project=" + (PROJECT[suite.name] || suite.name), "head");
         write(
           "Running " + plural(row.tests.length, "test") +
-            (engineFilter ? " on " + engineFilter : " on every browser this suite covers"),
+            (filter ? " on " + filter.display : " on every browser this suite covers"),
           "muted"
         );
         return wait(420);
@@ -418,6 +604,14 @@
       });
       write(parts.join(", ") + "  (" + wall(time.duration || 0) + " wall time)", "head");
       write("Report published to ella79.github.io/agentic-playwright-suite", "muted");
+      /* the console scrolls away, so the browsers that were replayed keep a
+         tick: which engine the run covered is still on screen afterwards */
+      chips().forEach(function (chip) {
+        if (!filter || (chip.dataset.suite === filter.suite && chip.dataset.engine === filter.engine)) {
+          chip.classList.add("is-ran");
+          chip.title = "Replayed in this run. " + chip.dataset.title;
+        }
+      });
       runButton.disabled = false;
       runLabel.textContent = "Run again";
       running = false;
@@ -434,8 +628,16 @@
     var circumference = 2 * Math.PI * radius;
 
     var chart = svg("svg", { viewBox: "0 0 120 120", "class": "ring", role: "img" });
+    /* Hovering the ring used to repeat the number printed inside it, which is
+       the one thing a reader already had. What it could not see is which suite
+       and which browser the missing percent came from, so that is what the
+       tooltip carries now. */
     var caption = svg("title", {});
-    caption.textContent = Math.round(rate * 100) + " per cent of " + plural(stat.total || 0, "test") + " passed";
+    caption.textContent = [
+      Math.round(rate * 100) + " per cent of " + plural(stat.total || 0, "result") + " passed"
+    ]
+      .concat(breakdown())
+      .join("\n");
     chart.appendChild(caption);
     chart.appendChild(svg("circle", { "class": "ring-track", cx: 60, cy: 60, r: radius }));
 
@@ -470,10 +672,14 @@
 
     var legend = document.getElementById("ringLegend");
     if (!legend) { return; }
+    /* Failed and broken had the same amber dot, which put two different
+       findings behind one colour in the only place the page explains them.
+       A failed test is the application; a broken one is the suite or the box it
+       ran in, and the legend has to be able to say so. */
     var rows = [
       { key: "passed", label: "Passed", tone: "is-pass" },
       { key: "failed", label: "Failed", tone: "is-fail" },
-      { key: "broken", label: "Broken", tone: "is-fail" },
+      { key: "broken", label: "Broken", tone: "is-broken" },
       { key: "skipped", label: "Skipped", tone: "is-skip" }
     ];
     fill(
@@ -558,10 +764,47 @@
         card.appendChild(el("h4", null, suite.name));
         card.appendChild(el("p", "meta", suite.passed + " of " + suite.total + " passed"));
 
+        /* One segment per status the run recorded, in the colours the legend
+           beside it names. The bar used to stop at the pass rate and leave the
+           rest as track, and the track is grey, so a suite with twenty failures
+           was drawing them in the colour this page uses for skipped. */
+        var counts = suite.counts || {};
         var bar = el("div", "bar");
-        var span = el("span");
-        bar.appendChild(span);
+        /* Hovering a segment says which suite and which browser it came from,
+           not just how many. The bar knew it was Functional E2E and the chips
+           knew it was Chromium, and nothing on the card put the two together. */
+        var perEngine = suite.engines.length > 1
+          ? suite.engines.map(function (engine) {
+            return engineName(engine.name) + ": " + describe(engine.counts);
+          })
+          : [];
+        var segments = [];
+        STATUSES.forEach(function (status) {
+          var n = counts[status] || 0;
+          if (!n) { return; }
+          var span = el("span", "seg-" + status);
+          span.title = [suite.name + ": " + n + " " + status + " of " + suite.total]
+            .concat(perEngine)
+            .join("\n");
+          bar.appendChild(span);
+          segments.push({ node: span, share: suite.total ? (n / suite.total) * 100 : 0 });
+        });
+        /* the empty case has no segment to hover, so the track carries it */
+        bar.title = suite.name + ": " + describe(counts);
         card.appendChild(bar);
+
+        /* the segments are named rather than left to the colour alone, so the
+           card still reads without the legend and without colour at all */
+        var key = el("ul", "bar-key");
+        STATUSES.forEach(function (status) {
+          var n = counts[status] || 0;
+          if (!n) { return; }
+          var item = el("li");
+          item.appendChild(el("span", "swatch seg-" + status));
+          item.appendChild(el("span", null, n + " " + status));
+          key.appendChild(item);
+        });
+        if (key.childNodes.length > 1) { card.appendChild(key); }
         /* naming the browsers here matters: forty results out of twenty cases
            reads as twice the coverage unless the card says where the doubling
            came from */
@@ -577,7 +820,7 @@
         );
 
         window.setTimeout(function () {
-          span.style.width = (suite.total ? (suite.passed / suite.total) * 100 : 0) + "%";
+          segments.forEach(function (segment) { segment.node.style.width = segment.share + "%"; });
         }, 80);
         return card;
       })
@@ -708,11 +951,16 @@
     }
     /* the report is a full application of its own, so it is fetched when it is
        asked for rather than on every visit to this page */
+    pointReport();
     if (frame && !frame.getAttribute("src")) {
       frame.setAttribute("src", frame.getAttribute("data-src"));
     }
     results.classList.add("is-ready");
-    if (hint) { hint.textContent = "That is the published run. What it says is below, report included."; }
+    if (hint) {
+      hint.textContent = filter
+        ? "That is " + filterLabel() + " out of the published run, and the report below opens on it."
+        : "That is the published run. What it says is below, report included.";
+    }
     results.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   }
 
@@ -781,7 +1029,7 @@
         durations: payload[5],
         retries: payload[6]
       };
-      suites = readSuites(payload[1] || {});
+      suites = deriveEngines(readSuites(payload[1] || {}));
       if (!suites.length) { throw new Error("The report holds no suites."); }
       renderSuites();
       renderStats();

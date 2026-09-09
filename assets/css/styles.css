@@ -9,6 +9,17 @@
   --teal-dark:#0a554c;
   --teal-wash:#e6f0ee;
   --amber:#b4620f;
+  /* Failed and broken are different findings and cannot share a colour: one
+     amber for both made the two rows of the pass rate legend read as one.
+     Red and amber were the first attempt and still sat twenty degrees apart on
+     the hue wheel, which is not a difference at the size of a legend dot. The
+     violet is nowhere near either, and nowhere near the teal, so the three
+     outcomes separate at a glance and stay separated for a red-green reader.
+     Red is failed, where the application is at fault; violet is broken, where
+     the suite or the box it ran in is. */
+  --red:#a3271b;
+  --violet:#6a4a9c;
+  --grey:#a9b8b4;
   --panel:#0e1e26;
   --panel-line:#223a45;
   --panel-text:#c6d7dd;
@@ -672,11 +683,17 @@ textarea{min-height:132px;resize:vertical}
   transition:background .2s ease;
 }
 .suite-head:hover{background:var(--teal-wash)}
+/* The status of a suite, not a control. It used to be a cross, which in a row
+   that also expands reads as a close button rather than as a verdict, and it
+   said the same thing open or shut. A tick for a clean suite and an exclamation
+   for one that is not are both verdicts, and neither is mistakable for a
+   button: the chevron on the right is the only thing here that opens anything. */
 .suite-mark{
-  flex:none;width:22px;height:22px;border-radius:50%;font-size:.75rem;
+  flex:none;width:22px;height:22px;border-radius:50%;font-size:.75rem;font-weight:700;
   display:inline-flex;align-items:center;justify-content:center;
   background:var(--teal-wash);color:var(--teal-dark);
 }
+.suite-mark.is-off{background:#f7e3e0;color:var(--red)}
 /* a suite that is mid replay is the one place the amber belongs here */
 .suite.is-running .suite-mark{background:#fbeedd;color:var(--amber)}
 .suite.is-running .suite-count{color:var(--amber)}
@@ -696,7 +713,10 @@ textarea{min-height:132px;resize:vertical}
    of their own repeating the same fact further down the page */
 /* outside the collapsible list on purpose: they filter the runner, so they have
    to be visible without opening anything first */
-.suite-browsers{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 22px 18px;margin-top:-4px}
+/* the negative margin pulled this row up under the suite name, where at some
+   text sizes the two touched. The chips are a control of their own and need
+   the space to read as one. */
+.suite-browsers{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:4px 22px 20px}
 .sb-label{
   font-family:var(--font-mono);font-size:.625rem;letter-spacing:.09em;
   text-transform:uppercase;color:var(--ink-soft);margin-right:2px;
@@ -708,12 +728,28 @@ textarea{min-height:132px;resize:vertical}
   transition:border-color .2s ease,background .2s ease,color .2s ease;
 }
 .cb-engines-chip:hover{border-color:var(--teal)}
+/* what the chip counts is passing results, not results that ran: both browsers
+   in the row ran, and 0/20 beside 20/20 read as one of them never having
+   started. The word is the fix; the number on its own cannot say it. */
+.cb-unit{font-family:var(--font-mono);font-size:.6875rem;color:var(--ink-soft)}
+/* the tick appears once the replay has actually played that browser, so the row
+   still says which engine was run after the console has scrolled on */
+.cb-ran{display:none;font-size:.75rem;line-height:1;color:var(--teal-dark)}
+.cb-engines-chip.is-ran .cb-ran{display:inline}
+.cb-engines-chip.is-off{border-color:#e3c4be;background:#fdf3f1}
+.cb-engines-chip.is-off .cb-n{color:var(--red)}
+.cb-engines-chip.is-off .cb-ran{color:var(--red)}
 /* the chosen browser is the one the runner will replay, so it carries the
-   colour the page uses for a result rather than a hover */
-.cb-engines-chip.is-on{background:var(--teal-dark);border-color:var(--teal-dark);color:#fff}
-.cb-engines-chip.is-on .cb-n{color:#bfe6df}
-.cb-engines-chip.is-off{border-color:#e6c9a4;background:#fdf6ec}
-.cb-engines-chip.is-off .cb-n{color:var(--amber)}
+   colour the page uses for a result rather than a hover. This has to outrank
+   the state above it: while it sat first, a browser with failures kept its pale
+   background when it was selected and the white label vanished into it. */
+.cb-engines-chip.is-on,
+.cb-engines-chip.is-off.is-on{background:var(--teal-dark);border-color:var(--teal-dark);color:#fff}
+.cb-engines-chip.is-on .cb-n,
+.cb-engines-chip.is-off.is-on .cb-n,
+.cb-engines-chip.is-on .cb-unit,
+.cb-engines-chip.is-on .cb-ran,
+.cb-engines-chip.is-off.is-on .cb-ran{color:#bfe6df}
 
 .area-bar{height:5px;border-radius:999px;background:var(--line);overflow:hidden}
 .area-bar span{display:block;height:100%;background:var(--teal);opacity:.55}
@@ -809,9 +845,12 @@ textarea{min-height:132px;resize:vertical}
 .ring-l{fill:var(--ink-soft);font-family:"IBM Plex Mono",monospace;font-size:.62rem;text-anchor:middle}
 .legend{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
 .legend li{display:flex;align-items:center;gap:10px;font-size:.8125rem;color:var(--ink-soft)}
-.legend .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);flex:none}
-.legend .is-fail .dot{background:var(--amber)}
-.legend .is-skip .dot{background:var(--line)}
+/* Colour alone would still ask a red green reader to separate failed from
+   broken, so the two also differ in fill: failed is solid, broken is a ring. */
+.legend .dot{width:10px;height:10px;border-radius:50%;background:var(--teal);flex:none}
+.legend .is-fail .dot{background:var(--red)}
+.legend .is-broken .dot{background:transparent;border:2.5px solid var(--violet)}
+.legend .is-skip .dot{background:transparent;border:2.5px solid var(--grey)}
 .legend .label{flex:1}
 .legend .n{font-family:var(--font-mono);font-size:.75rem;color:var(--ink)}
 
@@ -820,8 +859,26 @@ textarea{min-height:132px;resize:vertical}
 .result-card:first-child{padding-top:0;border-top:0}
 .result-card:last-child{padding-bottom:0}
 .result-card .meta{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);margin:6px 0 0}
-.bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin:12px 0 10px}
+/* One bar per suite, split by status rather than filled to the pass rate and
+   left grey after it. Grey is what this page uses for skipped, so a suite with
+   twenty failures was drawing them in the colour of tests that never ran. */
+.bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin:12px 0 10px;display:flex}
 .bar span{display:block;height:100%;width:0;background:var(--teal);transition:width .9s ease}
+.bar .seg-failed{background:var(--red)}
+.bar .seg-broken{background:var(--violet)}
+.bar .seg-skipped{background:var(--grey)}
+.bar .seg-unknown{background:#7d8f8b}
+/* the counts under the bar, in the words the report uses for them */
+.bar-key{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 4px;padding:0;list-style:none}
+.bar-key li{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:.6875rem;color:var(--ink-soft);
+}
+.bar-key .swatch{width:10px;height:10px;border-radius:2px;background:var(--teal);flex:none}
+.bar-key .swatch.seg-failed{background:var(--red)}
+.bar-key .swatch.seg-broken{background:var(--violet)}
+.bar-key .swatch.seg-skipped{background:var(--grey)}
+.bar-key .swatch.seg-unknown{background:#7d8f8b}
 
 /* environment */
 .env{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;margin:0;font-size:.8125rem}

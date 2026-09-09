@@ -317,8 +317,11 @@ test.describe('qa suite runner', () => {
   // the shape the suite publishes now: the engine is the branch, and the same
   // engine name is on every result underneath it, which is how the page tells
   // an engine apart from an area without reading tree position
-  const engineBranch = (engine: string, project: string) => ({
+  const engineBranch = (engine: string, project: string, status = 'passed') => ({
     name: engine,
+    // Allure gives every branch an address, and the page uses it to open the
+    // report on the branch a filtered replay just played.
+    uid: `uid-${engine.toLowerCase()}`,
     children: [
       {
         name: 'Checkout',
@@ -326,8 +329,8 @@ test.describe('qa suite runner', () => {
           {
             name: 'Checkout',
             children: [
-              result('TC-17: order end to end', 15800, 'passed', [project, engine]),
-              result('TC-16: checkout guard', 4600, 'passed', [project, engine]),
+              result('TC-17: order end to end', 15800, status, [project, engine]),
+              result('TC-16: checkout guard', 4600, status, [project, engine]),
             ],
           },
         ],
@@ -335,12 +338,59 @@ test.describe('qa suite runner', () => {
     ],
   });
 
+  // The visual suite forks on area rather than on engine, so it has no engine
+  // branch to read. Its engine is on every result all the same, which is what
+  // gives it a chip of its own.
+  const visualSuite = {
+    name: 'Visual regression',
+    uid: 'uid-visual',
+    children: [
+      {
+        name: 'Home',
+        children: [
+          {
+            name: 'Visual regression - home',
+            children: [
+              result('VR-01: site header', 4045, 'passed', ['visual-regression', 'Chromium']),
+              result('VR-02: featured grid', 3788, 'passed', ['visual-regression', 'Chromium']),
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
   const twoEngineTree = {
     name: 'suites',
     children: [
       {
         name: 'Functional E2E',
+        uid: 'uid-functional',
         children: [engineBranch('Chromium', 'e2e-playwright'), engineBranch('WebKit', 'webkit')],
+      },
+    ],
+  };
+
+  // Both shapes at once: a suite that forks on engine beside one that does not.
+  // This is the report as it is actually published, and the only shape in which
+  // a filter can get the two suites confused.
+  const bothShapesTree = {
+    name: 'suites',
+    children: [twoEngineTree.children[0], visualSuite],
+  };
+
+  // the shape that made the chips unreadable: one engine green, the other red.
+  // Both ran; only one of them held.
+  const splitEngineTree = {
+    name: 'suites',
+    children: [
+      {
+        name: 'Functional E2E',
+        uid: 'uid-functional',
+        children: [
+          engineBranch('Chromium', 'e2e-playwright', 'failed'),
+          engineBranch('WebKit', 'webkit'),
+        ],
       },
     ],
   };
@@ -528,13 +578,20 @@ test.describe('qa suite runner', () => {
 
   // Showing two browsers and then replaying both together leaves the obvious
   // question unanswered, so the chip is a filter rather than a label.
-  test('a browser chip filters the replay to that browser', async ({ page }) => {
+  //
+  // A filter is a suite and a browser together, not a browser alone. While it
+  // was a browser alone it was wrong in both directions: the visual cases record
+  // Chromium too, so choosing Chromium under the functional suite replayed the
+  // visual one as well, and the visual suite had no chip at all so it could
+  // never be replayed on its own.
+  test('a chip filters the replay to one suite on one browser', async ({ page }) => {
     await page.route(`${REPORT}/data/suites.json`, (route) =>
-      route.fulfill({ json: twoEngineTree }),
+      route.fulfill({ json: bothShapesTree }),
     );
     await page.reload();
 
     const functional = page.locator('#suiteList .suite').first();
+    const visual = page.locator('#suiteList .suite').nth(1);
     const webkit = functional.locator('.cb-engines-chip', { hasText: 'WebKit' });
     await expect(webkit).toBeVisible();
 
@@ -543,14 +600,34 @@ test.describe('qa suite runner', () => {
     await expect(page.locator('#consoleBrowser')).toContainText('WebKit');
     await expect(webkit).toHaveAttribute('aria-pressed', 'true');
 
-    await page.getByRole('button', { name: /run WebKit only/i }).click();
+    await page.getByRole('button', { name: /run Functional E2E on WebKit/i }).click();
     await expect(page.locator('#consoleLog')).toContainText('2 tests passed');
     await expect(page.locator('#consoleLog')).toContainText('on WebKit');
+    // no Chromium, and no visual case that never ran on WebKit
+    await expect(page.locator('#consoleLog')).not.toContainText('VR-01');
+
+    // the report follows the selection rather than opening at the top of a run
+    // the reader did not ask to see
+    await expect(page.locator('#allureFrame')).toHaveAttribute('src', `${REPORT}/#suites/uid-webkit`);
+    await expect(page.locator('#reportLink')).toHaveAttribute('href', `${REPORT}/#suites/uid-webkit`);
+
+    // the visual suite forks on area, so it has no engine branch. Its engine is
+    // on every result all the same, which is what gives it a chip of its own.
+    const chromium = visual.locator('.cb-engines-chip', { hasText: 'Chromium' });
+    await expect(chromium).toContainText('2/2');
+    await chromium.click();
+    await expect(webkit).toHaveAttribute('aria-pressed', 'false');
+
+    await page.getByRole('button', { name: /run Visual regression/i }).click();
+    await expect(page.locator('#consoleLog')).toContainText('VR-01: site header');
+    await expect(page.locator('#consoleLog')).not.toContainText('TC-17');
+    await expect(page.locator('#allureFrame')).toHaveAttribute('src', `${REPORT}/#suites/uid-visual`);
 
     // pressing it again gives the whole run back
-    await webkit.click();
-    await expect(webkit).toHaveAttribute('aria-pressed', 'false');
+    await chromium.click();
+    await expect(chromium).toHaveAttribute('aria-pressed', 'false');
     await expect(page.getByRole('button', { name: /run the qa suites/i })).toBeEnabled();
+    await expect(page.locator('#allureFrame')).toHaveAttribute('src', `${REPORT}/#`);
   });
 
   // A case that runs on two browsers is two results and one case. Showing only
@@ -575,7 +652,7 @@ test.describe('qa suite runner', () => {
 
     // the suite that carries them is marked, the clean one is not
     const suites = page.locator('#suiteList .suite');
-    await expect(suites.nth(0).locator('.suite-mark')).toHaveText('×');
+    await expect(suites.nth(0).locator('.suite-mark')).toHaveText('!');
     await expect(suites.nth(1).locator('.suite-mark')).toHaveText('✓');
 
     await page.getByRole('button', { name: /run the qa suites/i }).click();
@@ -588,11 +665,133 @@ test.describe('qa suite runner', () => {
     await expect(page.locator('.ring-v')).toHaveText('50%');
     await expect(page.locator('.ring-fill')).toHaveClass(/is-off/);
 
+    // Hovering a chart used to repeat the number printed on it. Both the ring
+    // and the bar segments name the suite and what it came out as, so a reader
+    // can tell where the missing half went without opening the report.
+    await expect(page.locator('.ring title')).toContainText('Functional E2E: 1 failed, 1 broken');
+    await expect(page.locator('.ring title')).toContainText('Visual regression: 2 passed');
+    await expect(page.locator('#resultCards .result-card').first().locator('.bar .seg-failed')).toHaveAttribute(
+      'title',
+      /Functional E2E: 1 failed of 2/,
+    );
+
     // and the trace, which is where the step that failed is recorded
     const callout = page.locator('#notClean');
     await expect(callout).toBeVisible();
     await expect(callout).toContainText('did not come back clean');
     await expect(callout.locator(`a[href="${REPORT}/playwright-report/"]`)).toBeVisible();
+  });
+
+  // A cross in a circle at the head of a row that also expands is read as a
+  // close button, and this one said the same thing whether the row was open or
+  // shut, so it looked like one that had stopped working. The mark is a verdict
+  // and nothing else opens or closes with it.
+  test('the suite mark is a verdict rather than a control', async ({ page }) => {
+    await reportWithFailures(page);
+    await page.reload();
+
+    const failing = page.locator('#suiteList .suite').nth(0);
+    const clean = page.locator('#suiteList .suite').nth(1);
+
+    await expect(failing.locator('.suite-mark')).toHaveText('!');
+    await expect(failing.locator('.suite-mark')).toHaveClass(/is-off/);
+    await expect(failing.locator('.suite-mark')).toHaveAttribute('aria-label', /did not pass/);
+    await expect(clean.locator('.suite-mark')).toHaveText('✓');
+    await expect(clean.locator('.suite-mark')).not.toHaveClass(/is-off/);
+
+    // opening the row is the chevron's job, and the verdict does not move for it
+    await failing.locator('.suite-head').click();
+    await expect(failing.locator('.suite-groups')).toBeVisible();
+    await expect(failing.locator('.suite-mark')).toHaveText('!');
+  });
+
+  // The number on a chip counts results that passed. Without the word, 0/2 next
+  // to 2/2 was read as a browser that never started, which is the opposite of
+  // what the row above them says.
+  test('a browser chip says what its number counts', async ({ page }) => {
+    await page.route(`${REPORT}/data/suites.json`, (route) =>
+      route.fulfill({ json: splitEngineTree }),
+    );
+    await page.reload();
+
+    const chromium = page.locator('.cb-engines-chip', { hasText: 'Chromium' });
+    await expect(chromium).toContainText('0/2');
+    await expect(chromium).toContainText('passed');
+    await expect(chromium).toHaveAttribute('aria-label', 'Functional E2E on Chromium, 0 of 2 results passed');
+  });
+
+  // Selecting a browser that had failures used to leave its pale background in
+  // place under white text, so the label disappeared at the moment it mattered.
+  test('the chosen browser stays legible and keeps its tick after the replay', async ({ page }) => {
+    await page.route(`${REPORT}/data/suites.json`, (route) =>
+      route.fulfill({ json: splitEngineTree }),
+    );
+    await page.reload();
+
+    const chromium = page.locator('.cb-engines-chip', { hasText: 'Chromium' });
+    const webkit = page.locator('.cb-engines-chip', { hasText: 'WebKit' });
+    await chromium.click();
+
+    // polled rather than read once: the chip fades into its selected colours,
+    // and a single sample lands somewhere in the middle of that
+    await expect
+      .poll(() =>
+        chromium.evaluate((node) => {
+          const style = getComputedStyle(node);
+          return [style.color, style.backgroundColor].join(' on ');
+        }),
+      )
+      .toBe('rgb(255, 255, 255) on rgb(10, 85, 76)');
+
+    // which browser was replayed has to survive the console scrolling on
+    await expect(chromium.locator('.cb-ran')).toBeHidden();
+    await page.getByRole('button', { name: /run Functional E2E on Chromium/i }).click();
+    await expect(page.locator('#runnerResults')).toBeVisible();
+
+    await expect(chromium.locator('.cb-ran')).toBeVisible();
+    await expect(webkit.locator('.cb-ran')).toBeHidden();
+  });
+
+  // The bar stopped at the pass rate and left the rest as track. The track is
+  // grey and grey is skipped on this page, so twenty failures were being drawn
+  // in the colour of tests that never ran.
+  test('a suite bar carries every status the run recorded', async ({ page }) => {
+    await reportWithFailures(page);
+    await page.reload();
+    await page.getByRole('button', { name: /run the qa suites/i }).click();
+    await expect(page.locator('#runnerResults')).toBeVisible();
+
+    const functional = page.locator('#resultCards .result-card').first();
+    await expect(functional.locator('.bar .seg-failed')).toHaveCount(1);
+    await expect(functional.locator('.bar .seg-broken')).toHaveCount(1);
+    await expect(functional.locator('.bar .seg-passed')).toHaveCount(0);
+    await expect(functional.locator('.bar-key')).toContainText('1 failed');
+    await expect(functional.locator('.bar-key')).toContainText('1 broken');
+
+    const segments = await functional.evaluate((card) =>
+      [...card.querySelectorAll('.bar span')].map((span) => getComputedStyle(span).backgroundColor),
+    );
+    expect(segments.length).toBe(2);
+    expect(new Set(segments).size).toBe(segments.length);
+  });
+
+  // Failed and broken shared one amber dot in the only place the page explains
+  // the difference between them.
+  test('every status in the legend is drawn differently', async ({ page }) => {
+    await reportWithFailures(page);
+    await page.reload();
+    await page.getByRole('button', { name: /run the qa suites/i }).click();
+    await expect(page.locator('#runnerResults')).toBeVisible();
+
+    const dots = await page.locator('#ringLegend li .dot').evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const style = getComputedStyle(node);
+        return [style.backgroundColor, style.borderColor, style.borderWidth].join('|');
+      }),
+    );
+
+    expect(dots.length).toBe(4);
+    expect(new Set(dots).size).toBe(dots.length);
   });
 
   test('a clean run says nothing about traces', async ({ page }) => {
