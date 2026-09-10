@@ -533,6 +533,25 @@ test.describe('qa suite runner', () => {
         ],
       }),
     );
+    // The three below were not served here, so they left for the real GitHub
+    // Pages on every one of these tests. The page retries a document once after
+    // a second and a half before giving up on it, which on a slow runner pushed
+    // the moment the suite column is rendered past the first click against it,
+    // and "a suite opens on the areas it covers" failed on a race rather than
+    // on anything it was testing. The suite says it is hermetic; now it is.
+    await page.route(`${REPORT}/widgets/executors.json`, (route) =>
+      route.fulfill({
+        json: [{ buildName: 'CI #124', buildUrl: 'https://github.com/ella79/agentic-playwright-suite/actions/runs/1' }],
+      }),
+    );
+    // one entry per published run, which is what makes the chart measure the
+    // runs by wall time rather than by the tests they carried
+    await page.route(`${REPORT}/widgets/duration-trend.json`, (route) =>
+      route.fulfill({ json: [{ data: { duration: 63255 } }, { data: { duration: 58120 } }] }),
+    );
+    await page.route(`${REPORT}/widgets/retry-trend.json`, (route) =>
+      route.fulfill({ json: [{ data: { retry: 0 } }] }),
+    );
     await page.route(`${REPORT}/`, (route) =>
       route.fulfill({ contentType: 'text/html', body: '<h1>Allure report</h1>' }),
     );
@@ -843,6 +862,11 @@ test.describe('qa suite runner', () => {
 
   test('a suite opens on the areas it covers', async ({ page }) => {
     const suite = page.locator('#suiteList .suite').first();
+    // The row that says the report is still being read is a .suite as well, and
+    // it has no areas at all, so the hidden assertion below would pass against
+    // it and the click would land on a head with nothing behind it. Waiting for
+    // a name that only the rendered column has closes that door.
+    await expect(suite.locator('.suite-name')).toHaveText('Functional E2E');
     await expect(suite.locator('.suite-groups')).toBeHidden();
 
     await suite.locator('.suite-head').click();

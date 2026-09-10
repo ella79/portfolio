@@ -716,10 +716,17 @@ textarea{min-height:132px;resize:vertical}
 /* the negative margin pulled this row up under the suite name, where at some
    text sizes the two touched. The chips are a control of their own and need
    the space to read as one. */
-.suite-browsers{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:4px 22px 20px}
+/* The label and the chips are two columns rather than one wrapping line: with
+   everything in one row, a second chip that did not fit came back to the left
+   edge and sat under the label instead of under the chip above it. */
+.suite-browsers{display:flex;align-items:flex-start;gap:10px;padding:4px 22px 20px}
+.sb-chips{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
 .sb-label{
+  flex:none;
   font-family:var(--font-mono);font-size:.625rem;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--ink-soft);margin-right:2px;
+  text-transform:uppercase;color:var(--ink-soft);
+  /* sits on the first chip's baseline rather than the top of the column */
+  padding-top:8px;
 }
 .cb-engines-chip{
   display:inline-flex;align-items:baseline;gap:8px;

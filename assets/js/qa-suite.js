@@ -386,6 +386,10 @@
       if (suite.engines.length) {
         browsers = el("div", "suite-browsers");
         browsers.appendChild(el("span", "sb-label", "Ran on"));
+        /* the chips get a column of their own so that a second one wrapping
+           lands under the first rather than under the label */
+        var chipRow = el("div", "sb-chips");
+        browsers.appendChild(chipRow);
         suite.engines.forEach(function (engine) {
           var chip = el("button", engine.passed === engine.total ? "cb-engines-chip" : "cb-engines-chip is-off");
           chip.type = "button";
@@ -413,7 +417,7 @@
           chip.addEventListener("click", function () { toggleFilter(suite, engine); });
           chip.dataset.engine = engine.name;
           chip.dataset.suite = suite.name;
-          browsers.appendChild(chip);
+          chipRow.appendChild(chip);
         });
       }
       var widest = suite.areas.reduce(function (most, area) { return Math.max(most, area.sum); }, 1);
