@@ -43,6 +43,12 @@ jobs:
       - name: Prove the verifier passes a good report and rejects a drifted one
         run: |
           node scripts/verify-contract.mjs --base tests/fixtures/report > /dev/null
+          # Both shapes of the suites tree, because the engine moved into the
+          # parent suite name and the two repositories deploy separately: for a
+          # while the published report will be one shape and this contract will
+          # have to hold on either.
+          node scripts/verify-contract.mjs --base tests/fixtures/report-two-engines > /dev/null
+          node scripts/verify-contract.mjs --base tests/fixtures/report-parent-engine > /dev/null
           if node scripts/verify-contract.mjs --base tests/fixtures/report-drifted > /dev/null 2>&1; then
             echo "The verifier accepted a report that has drifted. It is broken."
             exit 1

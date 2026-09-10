@@ -37,6 +37,8 @@ jobs:
       - name: Prove the verifier works
         run: |
           node scripts/verify-contract.mjs --base tests/fixtures/report > /dev/null
+          node scripts/verify-contract.mjs --base tests/fixtures/report-two-engines > /dev/null
+          node scripts/verify-contract.mjs --base tests/fixtures/report-parent-engine > /dev/null
           if node scripts/verify-contract.mjs --base tests/fixtures/report-drifted > /dev/null 2>&1; then
             echo "The verifier accepted a report that has drifted. It is broken."
             exit 1

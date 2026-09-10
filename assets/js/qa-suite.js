@@ -164,6 +164,40 @@
     return lines;
   }
 
+  /* Allure's Overview widget reads only the top level of the suites tree, so
+     while both engines shared a parent it drew one bar for forty results and a
+     run that failed everything on Chromium and passed everything on WebKit
+     looked like one suite that half worked. The suite now puts the engine in
+     the parent name, "Functional E2E · Chromium".
+     Folding those back under one parent here means the rest of this file reads
+     the tree it always read: the engine becomes a branch again, and the chips,
+     the filter, the areas and the per engine tooltips carry on unchanged. It
+     also means the page works against a report published before the change,
+     which it has to, because the two repositories deploy separately. */
+  var ENGINE_SEP = " · ";
+
+  function foldEngines(tree) {
+    var out = [];
+    var byBase = {};
+    (tree.children || []).forEach(function (node) {
+      var at = String(node.name || "").indexOf(ENGINE_SEP);
+      if (at === -1) { out.push(node); return; }
+      var base = node.name.slice(0, at);
+      if (!byBase[base]) {
+        byBase[base] = { name: base, children: [] };
+        out.push(byBase[base]);
+      }
+      /* the engine node keeps its own address, which is the one a filtered
+         replay should open the report on */
+      byBase[base].children.push({
+        name: node.name.slice(at + ENGINE_SEP.length),
+        uid: node.uid,
+        children: node.children || []
+      });
+    });
+    return { name: tree.name, uid: tree.uid, children: out };
+  }
+
   function readSuites(tree) {
     return (tree.children || []).map(function (suite) {
       var tests = leaves(suite, []);
@@ -352,6 +386,10 @@
       if (suite.engines.length) {
         browsers = el("div", "suite-browsers");
         browsers.appendChild(el("span", "sb-label", "Ran on"));
+        /* the chips get a column of their own so that a second one wrapping
+           lands under the first rather than under the label */
+        var chipRow = el("div", "sb-chips");
+        browsers.appendChild(chipRow);
         suite.engines.forEach(function (engine) {
           var chip = el("button", engine.passed === engine.total ? "cb-engines-chip" : "cb-engines-chip is-off");
           chip.type = "button";
@@ -379,7 +417,7 @@
           chip.addEventListener("click", function () { toggleFilter(suite, engine); });
           chip.dataset.engine = engine.name;
           chip.dataset.suite = suite.name;
-          browsers.appendChild(chip);
+          chipRow.appendChild(chip);
         });
       }
       var widest = suite.areas.reduce(function (most, area) { return Math.max(most, area.sum); }, 1);
@@ -1029,7 +1067,7 @@
         durations: payload[5],
         retries: payload[6]
       };
-      suites = deriveEngines(readSuites(payload[1] || {}));
+      suites = deriveEngines(readSuites(foldEngines(payload[1] || {})));
       if (!suites.length) { throw new Error("The report holds no suites."); }
       renderSuites();
       renderStats();
