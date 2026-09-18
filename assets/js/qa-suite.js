@@ -242,7 +242,14 @@
             passed: inBranch.filter(function (test) { return test.status === "passed"; }).length,
             counts: tally(inBranch)
           };
-        }),
+        /* Allure does not promise the order of its top level between runs, so
+           the chips came out WebKit first on one run and Chromium first on the
+           next, and the same page read differently from one day to the other.
+           Sorted by name, which is also the order Playwright lists its own
+           browsers in: chromium, firefox, webkit. Everything that walks the
+           engines reads this list, so the chips, the tooltips, the browser row
+           and the console bar all settle on the same order at once. */
+        }).sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; }),
         areas: areaOrder.map(function (name) { return areaTotals[name]; }),
         /* start order is the order the run happened in, and a replay that loses
            it is an animation rather than a record of anything */

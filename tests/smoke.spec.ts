@@ -584,8 +584,16 @@ test.describe('qa suite runner', () => {
   // that used to carry them is gone rather than left hidden: a page that can
   // never render a thing should not still describe it.
   test('a suite that ran on two browsers says so in its own row', async ({ page }) => {
+    // Served WebKit first on purpose. Allure does not keep its top level in a
+    // fixed order between runs, and the published report has come out both
+    // ways round, so a tree already in the order asserted below would prove
+    // nothing about it.
+    const webkitFirst = {
+      ...twoEngineTree,
+      children: [{ ...twoEngineTree.children[0], children: [...twoEngineTree.children[0].children].reverse() }],
+    };
     await page.route(`${REPORT}/data/suites.json`, (route) =>
-      route.fulfill({ json: twoEngineTree }),
+      route.fulfill({ json: webkitFirst }),
     );
     await page.reload();
 
@@ -596,6 +604,7 @@ test.describe('qa suite runner', () => {
     await expect(chips.first()).toBeVisible();
     await functional.locator('.suite-head').click();
     await expect(chips).toHaveCount(2);
+    // Chromium first whatever order the report arrived in
     await expect(chips.nth(0)).toContainText('Chromium');
     await expect(chips.nth(0)).toContainText('2/2');
     await expect(chips.nth(1)).toContainText('WebKit');
