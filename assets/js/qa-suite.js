@@ -176,6 +176,14 @@
      which it has to, because the two repositories deploy separately. */
   var ENGINE_SEP = " · ";
 
+  /* Allure does not promise the order of its own top level between runs
+     either, the same instability the engine sort above exists to settle: this
+     suite list came out Visual regression first on one run and Functional E2E
+     first on the next, with nothing in the run itself to explain the swap.
+     Named suites sort to the front in this order; anything unrecognised keeps
+     whatever relative order it arrived in, appended after. */
+  var SUITE_ORDER = ["Functional E2E", "Visual regression"];
+
   function foldEngines(tree) {
     var out = [];
     var byBase = {};
@@ -195,6 +203,16 @@
         children: node.children || []
       });
     });
+    out = out
+      .map(function (node, index) { return { node: node, index: index }; })
+      .sort(function (a, b) {
+        var rank = function (entry) {
+          var at = SUITE_ORDER.indexOf(entry.node.name);
+          return at === -1 ? SUITE_ORDER.length + entry.index : at;
+        };
+        return rank(a) - rank(b);
+      })
+      .map(function (entry) { return entry.node; });
     return { name: tree.name, uid: tree.uid, children: out };
   }
 
@@ -899,7 +917,20 @@
     host.innerHTML = "";
     rows.forEach(function (row) {
       host.appendChild(el("dt", null, row[0]));
-      host.appendChild(el("dd", null, row[1]));
+      var value_ = el("dd", null);
+      /* Target names the application under test, an address worth opening
+         rather than only reading, so it is the one row rendered as a link. */
+      if (row[0] === "Target") {
+        var link = document.createElement("a");
+        link.href = row[1];
+        link.textContent = row[1];
+        link.target = "_blank";
+        link.rel = "noopener";
+        value_.appendChild(link);
+      } else {
+        value_.textContent = row[1];
+      }
+      host.appendChild(value_);
     });
   }
 
