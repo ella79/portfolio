@@ -869,6 +869,31 @@ test.describe('qa suite runner', () => {
     await expect(suites.nth(1)).toContainText('Visual regression');
   });
 
+  test('the suites keep a fixed order whichever way the report lists them', async ({ page }) => {
+    // Served Visual regression first on purpose, in the shape the report
+    // actually publishes today. Allure does not keep its own top level in a
+    // fixed order between runs either, the published site has come out both
+    // ways round, and a tree already in the order asserted below would prove
+    // nothing about it.
+    const visualFirst = {
+      name: 'suites',
+      children: [
+        { ...visualSuite, name: 'Visual regression · Chromium' },
+        { name: 'Functional E2E · Chromium', uid: 'uid-chromium', children: engineBranch('Chromium', 'e2e-playwright').children },
+        { name: 'Functional E2E · WebKit', uid: 'uid-webkit', children: engineBranch('WebKit', 'webkit').children },
+      ],
+    };
+    await page.route(`${REPORT}/data/suites.json`, (route) =>
+      route.fulfill({ json: visualFirst }),
+    );
+    await page.reload();
+
+    const suites = page.locator('#suiteList .suite');
+    await expect(suites).toHaveCount(2);
+    await expect(suites.nth(0)).toContainText('Functional E2E');
+    await expect(suites.nth(1)).toContainText('Visual regression');
+  });
+
   test('a suite opens on the areas it covers', async ({ page }) => {
     const suite = page.locator('#suiteList .suite').first();
     // The row that says the report is still being read is a .suite as well, and
@@ -882,6 +907,20 @@ test.describe('qa suite runner', () => {
 
     await expect(suite.locator('.suite-groups')).toBeVisible();
     await expect(suite.locator('.suite-groups li').first()).toContainText('Authentication');
+  });
+
+  // Target names the application under test, an address worth opening rather
+  // than only reading, so it is the one environment row rendered as a link.
+  test('the target environment row is a link to the application under test', async ({ page }) => {
+    // The environment card is drawn once the replay finishes, alongside the
+    // ring and the trend, not on the bare page load.
+    await page.getByRole('button', { name: /run the qa suites/i }).click();
+    await expect(page.locator('#runnerResults')).toBeVisible();
+
+    const target = page.locator('#envList a', { hasText: 'https://automationexercise.com' });
+    await expect(target).toHaveAttribute('href', 'https://automationexercise.com');
+    await expect(target).toHaveAttribute('target', '_blank');
+    await expect(target).toHaveAttribute('rel', 'noopener');
   });
 
   test('the run replays the report and then opens it', async ({ page }) => {
