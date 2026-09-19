@@ -520,8 +520,8 @@ test.describe('qa suite runner', () => {
     await page.route(`${REPORT}/widgets/environment.json`, (route) =>
       route.fulfill({
         json: [
-          { name: 'base_url', values: ['https://automationexercise.com'] },
-          { name: 'browser', values: ['Chromium'] },
+          { name: 'Base URL', values: ['https://automationexercise.com'] },
+          { name: 'Browser', values: ['Chromium'] },
         ],
       }),
     );

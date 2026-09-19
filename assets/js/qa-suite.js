@@ -334,8 +334,8 @@
     var stop = (report.summary.time || {}).stop;
 
     set("provBuild", executor.buildName || "not recorded");
-    set("provBranch", value(env, "branch") || "not recorded");
-    set("provCommit", (value(env, "commit") || "").slice(0, 8) || "not recorded");
+    set("provBranch", value(env, "Branch") || "not recorded");
+    set("provCommit", (value(env, "Commit") || "").slice(0, 8) || "not recorded");
     set("provRetries", retry && retry.data ? String(retry.data.retry) : "0");
     set("provWhen", stop ? when(stop) : "not recorded");
 
@@ -522,10 +522,10 @@
   function describeBrowsers() {
     if (!consoleBrowser) { return; }
     var engines = fromEngineBranches().map(function (row) { return row.name; });
-    var viewport = value(report.environment, "viewport");
+    var viewport = value(report.environment, "Viewport");
     var who = filter
       ? filter.display
-      : engines.length ? engines.join(" and ") : value(report.environment, "browser");
+      : engines.length ? engines.join(" and ") : value(report.environment, "Browser");
     consoleBrowser.textContent = [who, viewport].filter(Boolean).join(" · ");
   }
 
@@ -894,18 +894,18 @@
     var host = document.getElementById("envList");
     if (!host) { return; }
     var env = report.environment || [];
-    var runner = value(env, "os") + (value(env, "node") ? ", node " + value(env, "node") : "");
+    var runner = value(env, "OS") + (value(env, "Node") ? ", node " + value(env, "Node") : "");
     /* The browser field is written by hand into the report's environment, and
        it said Chromium on a run that also covered WebKit. The engines derived
        from the results are the run itself rather than a note about it, so they
        win when there are any. */
     var engines = fromEngineBranches().map(function (row) { return row.name; });
     var rows = [
-      ["Target", value(env, "base_url")],
-      ["Browser", engines.length ? engines.join(" and ") : value(env, "browser")],
-      ["Viewport", value(env, "viewport")],
+      ["Target", value(env, "Base URL")],
+      ["Browser", engines.length ? engines.join(" and ") : value(env, "Browser")],
+      ["Viewport", value(env, "Viewport")],
       ["Runner", runner],
-      ["Pipeline", value(env, "ci")]
+      ["Pipeline", value(env, "CI")]
     ].filter(function (row) { return row[1]; });
 
     var card = document.getElementById("envCard");
