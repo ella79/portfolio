@@ -342,7 +342,7 @@ test.describe('qa suite runner', () => {
   // branch to read. Its engine is on every result all the same, which is what
   // gives it a chip of its own.
   const visualSuite = {
-    name: 'Visual regression',
+    name: 'Visual Regression',
     uid: 'uid-visual',
     children: [
       {
@@ -389,7 +389,7 @@ test.describe('qa suite runner', () => {
     children: [
       { name: 'Functional E2E · Chromium', uid: 'uid-chromium', children: engineBranch('Chromium', 'e2e-playwright').children },
       { name: 'Functional E2E · WebKit', uid: 'uid-webkit', children: engineBranch('WebKit', 'webkit').children },
-      { ...visualSuite, name: 'Visual regression · Chromium' },
+      { ...visualSuite, name: 'Visual Regression · Chromium' },
     ],
   };
 
@@ -446,7 +446,7 @@ test.describe('qa suite runner', () => {
               ],
             },
             {
-              name: 'Visual regression',
+              name: 'Visual Regression',
               children: [
                 {
                   name: 'Home',
@@ -497,7 +497,7 @@ test.describe('qa suite runner', () => {
               ],
             },
             {
-              name: 'Visual regression',
+              name: 'Visual Regression',
               children: [
                 {
                   name: 'Home',
@@ -672,7 +672,7 @@ test.describe('qa suite runner', () => {
     await chromium.click();
     await expect(webkit).toHaveAttribute('aria-pressed', 'false');
 
-    await page.getByRole('button', { name: /run Visual regression/i }).click();
+    await page.getByRole('button', { name: /run Visual Regression/i }).click();
     await expect(page.locator('#consoleLog')).toContainText('VR-01: site header');
     await expect(page.locator('#consoleLog')).not.toContainText('TC-17');
     await expect(page.locator('#allureFrame')).toHaveAttribute('src', `${REPORT}/#suites/uid-visual`);
@@ -723,7 +723,7 @@ test.describe('qa suite runner', () => {
     // and the bar segments name the suite and what it came out as, so a reader
     // can tell where the missing half went without opening the report.
     await expect(page.locator('.ring title')).toContainText('Functional E2E: 1 failed, 1 broken');
-    await expect(page.locator('.ring title')).toContainText('Visual regression: 2 passed');
+    await expect(page.locator('.ring title')).toContainText('Visual Regression: 2 passed');
     await expect(page.locator('#resultCards .result-card').first().locator('.bar .seg-failed')).toHaveAttribute(
       'title',
       /Functional E2E: 1 failed of 2/,
@@ -866,11 +866,11 @@ test.describe('qa suite runner', () => {
     const suites = page.locator('#suiteList .suite');
     await expect(suites).toHaveCount(2);
     await expect(suites.nth(0)).toContainText('Functional E2E');
-    await expect(suites.nth(1)).toContainText('Visual regression');
+    await expect(suites.nth(1)).toContainText('Visual Regression');
   });
 
   test('the suites keep a fixed order whichever way the report lists them', async ({ page }) => {
-    // Served Visual regression first on purpose, in the shape the report
+    // Served Visual Regression first on purpose, in the shape the report
     // actually publishes today. Allure does not keep its own top level in a
     // fixed order between runs either, the published site has come out both
     // ways round, and a tree already in the order asserted below would prove
@@ -878,7 +878,7 @@ test.describe('qa suite runner', () => {
     const visualFirst = {
       name: 'suites',
       children: [
-        { ...visualSuite, name: 'Visual regression · Chromium' },
+        { ...visualSuite, name: 'Visual Regression · Chromium' },
         { name: 'Functional E2E · Chromium', uid: 'uid-chromium', children: engineBranch('Chromium', 'e2e-playwright').children },
         { name: 'Functional E2E · WebKit', uid: 'uid-webkit', children: engineBranch('WebKit', 'webkit').children },
       ],
@@ -891,7 +891,7 @@ test.describe('qa suite runner', () => {
     const suites = page.locator('#suiteList .suite');
     await expect(suites).toHaveCount(2);
     await expect(suites.nth(0)).toContainText('Functional E2E');
-    await expect(suites.nth(1)).toContainText('Visual regression');
+    await expect(suites.nth(1)).toContainText('Visual Regression');
   });
 
   test('a suite opens on the areas it covers', async ({ page }) => {
