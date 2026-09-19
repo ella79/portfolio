@@ -178,11 +178,11 @@
 
   /* Allure does not promise the order of its own top level between runs
      either, the same instability the engine sort above exists to settle: this
-     suite list came out Visual regression first on one run and Functional E2E
-     first on the next, with nothing in the run itself to explain the swap.
+     suite list came out Visual Regression first on one run and Functional
+     E2E first on the next, with nothing in the run itself to explain the swap.
      Named suites sort to the front in this order; anything unrecognised keeps
      whatever relative order it arrived in, appended after. */
-  var SUITE_ORDER = ["Functional E2E", "Visual regression"];
+  var SUITE_ORDER = ["Functional E2E", "Visual Regression"];
 
   function foldEngines(tree) {
     var out = [];
@@ -507,7 +507,7 @@
     return REPORT + (filter && filter.uid ? "#suites/" + filter.uid : "#");
   }
 
-  /* "Functional E2E on WebKit" where the suite forked, "Visual regression"
+  /* "Functional E2E on WebKit" where the suite forked, "Visual Regression"
      where it did not: naming an engine the suite only ever ran on adds a word
      and no information. */
   function filterLabel() {
@@ -587,7 +587,7 @@
     return new Promise(function (resolve) { window.setTimeout(resolve, reduce ? 0 : ms); });
   }
 
-  var PROJECT = { "Functional E2E": "e2e-playwright", "Visual regression": "visual-regression" };
+  var PROJECT = { "Functional E2E": "e2e-playwright", "Visual Regression": "visual-regression" };
 
   function replay() {
     if (running || !suites.length) { return; }
