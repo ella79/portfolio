@@ -182,7 +182,7 @@
      E2E first on the next, with nothing in the run itself to explain the swap.
      Named suites sort to the front in this order; anything unrecognised keeps
      whatever relative order it arrived in, appended after. */
-  var SUITE_ORDER = ["Functional E2E", "Visual Regression"];
+  var SUITE_ORDER = ["Functional E2E", "Visual Regression", "API"];
 
   function foldEngines(tree) {
     var out = [];
@@ -522,10 +522,14 @@
   function describeBrowsers() {
     if (!consoleBrowser) { return; }
     var engines = fromEngineBranches().map(function (row) { return row.name; });
-    var viewport = value(report.environment, "Viewport");
     var who = filter
       ? filter.display
       : engines.length ? engines.join(" and ") : value(report.environment, "Browser");
+    /* The API suite has no browser, so it renders at no resolution either.
+       The environment's one recorded viewport describes the UI suites; naming
+       it beside REST would claim an API request rendered on screen. */
+    var hasViewport = !filter || filter.suite !== "API";
+    var viewport = hasViewport ? value(report.environment, "Viewport") : "";
     consoleBrowser.textContent = [who, viewport].filter(Boolean).join(" · ");
   }
 
