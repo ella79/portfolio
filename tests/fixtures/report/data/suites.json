@@ -42,6 +42,27 @@
           ]
         }
       ]
+    },
+    {
+      "name": "API",
+      "children": [
+        {
+          "name": "Products",
+          "children": [
+            {
+              "name": "Products",
+              "children": [
+                {
+                  "name": "TC-API-01: the products list answers with every product",
+                  "status": "passed",
+                  "parameters": ["api"],
+                  "time": { "start": 1788877249100, "stop": 1788877249620, "duration": 520 }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
