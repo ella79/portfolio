@@ -182,7 +182,7 @@
      E2E first on the next, with nothing in the run itself to explain the swap.
      Named suites sort to the front in this order; anything unrecognised keeps
      whatever relative order it arrived in, appended after. */
-  var SUITE_ORDER = ["Functional E2E", "Visual Regression"];
+  var SUITE_ORDER = ["Functional E2E", "Visual Regression", "API"];
 
   function foldEngines(tree) {
     var out = [];
