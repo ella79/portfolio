@@ -268,7 +268,13 @@
            engines reads this list, so the chips, the tooltips, the browser row
            and the console bar all settle on the same order at once. */
         }).sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; }),
-        areas: areaOrder.map(function (name) { return areaTotals[name]; }),
+        /* Same reasoning as the engine sort above: Allure does not promise the
+           order areas come out in, so this list read differently from one run
+           to the next with nothing on the page explaining why. Sorted by
+           name for the same stability. */
+        areas: areaOrder
+          .map(function (name) { return areaTotals[name]; })
+          .sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; }),
         /* start order is the order the run happened in, and a replay that loses
            it is an animation rather than a record of anything */
         tests: tests.sort(function (a, b) {
