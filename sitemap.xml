@@ -10,4 +10,14 @@
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
+  <url>
+    <loc>https://ella79.github.io/portfolio/privacy.html</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>https://ella79.github.io/portfolio/terms.html</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
 </urlset>

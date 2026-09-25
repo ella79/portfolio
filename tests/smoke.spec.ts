@@ -1,5 +1,12 @@
-
 import { test, expect, type Page } from '@playwright/test';
+
+const fillContactForm = async (page: Page) => {
+  await page.locator('#contact').scrollIntoViewIfNeeded();
+  await page.fill('#name-f', 'Ana Popescu');
+  await page.fill('#email-f', 'ana@example.com');
+  await page.selectOption('#subject-f', 'Collaboration');
+  await page.fill('#message-f', 'We are hiring a senior QA automation engineer for a remote role.');
+};
 
 test.describe('home page', () => {
   test.beforeEach(async ({ page }) => {
@@ -17,72 +24,144 @@ test.describe('home page', () => {
     });
 
     await page.reload();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Emanuela Telescu');
-    await expect(page.locator('.avatar img')).toBeVisible();
-    await expect(page.locator('.monogram .mark')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Emanuela Telescu' })).toBeVisible();
+    // the name is animated letter by letter, and the space between the two words has to survive that
+    await expect(page.locator('#name')).toHaveText('Emanuela Telescu');
+    await expect(page.locator('#headline')).toContainText('Senior QA Automation Engineer');
+    await expect(page.locator('.avatar img').first()).toBeVisible();
+    await expect(page.locator('.bar .mark')).toBeVisible();
     expect(errors).toEqual([]);
   });
 
+  test('the title is the one used on LinkedIn, never SDET', async ({ page }) => {
+    await expect(page.locator('#headline')).toContainText(
+      'AI-Augmented & Agentic Test Automation • Playwright MCP • TypeScript • Claude Code',
+    );
+    await expect(page.locator('main')).not.toContainText('SDET');
+  });
+
   test('in page navigation reaches every section', async ({ page }) => {
-    for (const section of ['about', 'experience', 'projects', 'contact']) {
+    for (const section of ['me', 'journey', 'skills', 'projects', 'reads', 'contact']) {
       await page.locator(`.nav a[href="#${section}"]`).click();
-      await expect(page.locator(`#${section}`)).toBeInViewport();
+      await expect(page.locator(`#${section} h2`).first()).toBeInViewport();
     }
   });
 
-  test('the career timeline expands to the earlier roles', async ({ page }) => {
+  test('a nav click stops on its own section, never past it', async ({ page }) => {
+    // start at the bottom, where the last section reaches for the end of the page
+    await page.locator('.nav a[href="#contact"]').click();
+
+    for (const id of ['projects', 'me', 'journey', 'skills', 'contact']) {
+      await page.locator(`.nav a[href="#${id}"]`).click();
+      await expect
+        .poll(() =>
+          page.evaluate((section) => {
+            const heading = document.querySelector(`#${section} h2`);
+            const header = document.getElementById('bar');
+            if (!heading || !header) return false;
+            const box = heading.getBoundingClientRect();
+            // clear of the sticky header, and inside the screen
+            return box.top >= header.offsetHeight - 2 && box.bottom <= window.innerHeight;
+          }, id),
+        )
+        .toBe(true);
+    }
+  });
+
+  test('Home brings the page back to the very top', async ({ page }) => {
+    await page.locator('.nav a[href="#me"]').click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(200);
+    await page.locator('.nav a[href="#home"]').click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(5);
+  });
+
+  test('the journey expands to the earlier roles', async ({ page }) => {
     await page.locator('#timeline').scrollIntoViewIfNeeded();
 
     // reading the expected counts from the markup rather than hardcoding them,
     // so moving a role behind the expand button cannot turn the suite red on its own
-    const total = await page.locator('.tl-item').count();
-    const collapsed = await page.locator('.tl-item:not(.tl-extra)').count();
+    const total = await page.locator('.job').count();
+    const collapsed = await page.locator('.job:not(.extra)').count();
+    expect(collapsed).toBeLessThan(total);
 
-    await expect(page.locator('.tl-item:visible')).toHaveCount(collapsed);
-    await page.getByRole('button', { name: /show the earlier roles/i }).click();
-    await expect(page.locator('.tl-item:visible')).toHaveCount(total);
+    await expect(page.locator('.job:visible')).toHaveCount(collapsed);
+    await page.getByRole('button', { name: /show earlier roles/i }).click();
+    await expect(page.locator('.job:visible')).toHaveCount(total);
   });
 
-  test('the skill timeline bars fill to the value each one declares', async ({ page }) => {
-    await page.locator('#skillsGrid').scrollIntoViewIfNeeded();
-
-    // asserting the declared level rather than a number written here, so
-    // editing the content cannot turn a passing suite red on its own
-    await expect
-      .poll(() =>
-        page.evaluate(() =>
-          [...document.querySelectorAll<HTMLElement>('.t-fill[data-level]')].every(
-            (bar) => bar.style.width === `${bar.dataset.level}%`,
-          ),
-        ),
-      )
-      .toBe(true);
-
-    expect(await page.locator('.t-fill[data-level]').count()).toBeGreaterThan(3);
+  test('a role shows its details only when it is opened', async ({ page }) => {
+    const head = page.locator('.job-head').first();
+    await head.scrollIntoViewIfNeeded();
+    await expect(head).toHaveAttribute('aria-expanded', 'false');
+    await head.click();
+    await expect(head).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('#job-0')).toContainText('test automation strategy');
   });
 
-  test('the contact form stays closed until it is asked for', async ({ page }) => {
-    await page.locator('#contact').scrollIntoViewIfNeeded();
-    await expect(page.locator('#contactForm')).toBeHidden();
-    await page.getByRole('button', { name: /open the contact form/i }).click();
-    await expect(page.locator('#contactForm')).toBeVisible();
+  test('the journey carries no impact percentages', async ({ page }) => {
+    await expect(page.locator('#journey')).not.toContainText('%');
+  });
+
+  test('every skill on the radar says where it was used', async ({ page }) => {
+    await page.locator('#skills').scrollIntoViewIfNeeded();
+    const nodes = page.locator('.rl');
+    expect(await nodes.count()).toBeGreaterThan(20);
+
+    // on narrow screens the radar shows dots only and the same skills are listed underneath
+    const wide = await page.evaluate(() => !document.getElementById('radar')!.classList.contains('dots'));
+    const pick = wide ? nodes.nth(4) : page.locator('#skList button').nth(4);
+    const name = (await pick.textContent())!.trim();
+    await pick.click();
+
+    await expect(page.locator('#skDetail h3')).toHaveText(name);
+    expect(await page.locator('#skDetail .where li').count()).toBeGreaterThan(0);
+  });
+
+  test('the radar labels never overlap', async ({ page }) => {
+    await page.locator('#skills').scrollIntoViewIfNeeded();
+    const overlaps = await page.evaluate(() => {
+      const boxes = [...document.querySelectorAll('.rl')].map((node) => node.getBoundingClientRect());
+      let count = 0;
+      for (let i = 0; i < boxes.length; i++)
+        for (let j = i + 1; j < boxes.length; j++) {
+          const a = boxes[i], b = boxes[j];
+          if (a.left < b.right - 1 && a.right > b.left + 1 && a.top < b.bottom - 1 && a.bottom > b.top + 1) count++;
+        }
+      return count;
+    });
+    expect(overlaps).toBe(0);
+  });
+
+  test('a legend group dims every skill outside it', async ({ page }) => {
+    await page.locator('#skills').scrollIntoViewIfNeeded();
+    await page.locator('#legend button[data-g="ai"]').click();
+    await expect(page.locator('#legend button[data-g="ai"]')).toHaveAttribute('aria-pressed', 'true');
+    const total = await page.locator('.rl').count();
+    const dimmed = await page.locator('.rl.off').count();
+    expect(dimmed).toBeGreaterThan(0);
+    expect(dimmed).toBeLessThan(total);
+  });
+
+  test('the article in Reads links to LinkedIn and the carousel knows it holds one', async ({ page }) => {
+    await page.locator('#reads').scrollIntoViewIfNeeded();
+    const card = page.locator('#readTrack .art');
+    await expect(card).toHaveCount(1);
+    await expect(card).toHaveAttribute('href', /linkedin\.com\/pulse\//);
+    await expect(card.locator('img')).toHaveAttribute('src', 'assets/img/article-cover.jpg');
+    await expect(page.locator('#prevRead')).toBeDisabled();
+    await expect(page.locator('#nextRead')).toBeDisabled();
+    await expect(page.getByRole('link', { name: 'View all articles' })).toHaveAttribute('aria-disabled', 'true');
   });
 
   test('the contact form rejects an empty submission', async ({ page }) => {
     await page.locator('#contact').scrollIntoViewIfNeeded();
-    await page.getByRole('button', { name: /open the contact form/i }).click();
     await page.getByRole('button', { name: 'Send message' }).click();
-    await expect(page.locator('.field.invalid')).toHaveCount(4);
+    await expect(page.locator('#contactForm .f.bad')).toHaveCount(4);
   });
 
   test('the contact form accepts a complete submission', async ({ page }) => {
-    await page.locator('#contact').scrollIntoViewIfNeeded();
-    await page.getByRole('button', { name: /open the contact form/i }).click();
-    await page.fill('#name', 'Ana Popescu');
-    await page.fill('#email', 'ana@example.com');
-    await page.selectOption('#subject', 'Collaboration');
-    await page.fill('#message', 'We are hiring a senior SDET for a remote role.');
-    await expect(page.locator('.field.invalid')).toHaveCount(0);
+    await fillContactForm(page);
+    await expect(page.locator('#contactForm .f.bad')).toHaveCount(0);
   });
 
   test('a valid submission posts to Formspree and confirms it was sent', async ({ page }) => {
@@ -92,19 +171,14 @@ test.describe('home page', () => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
     });
 
-    await page.locator('#contact').scrollIntoViewIfNeeded();
-    await page.getByRole('button', { name: /open the contact form/i }).click();
-    await page.fill('#name', 'Ana Popescu');
-    await page.fill('#email', 'ana@example.com');
-    await page.selectOption('#subject', 'Collaboration');
-    await page.fill('#message', 'We are hiring a senior SDET for a remote role.');
+    await fillContactForm(page);
 
     // the honeypot field ships empty and out of tab order -- a filled-in one is a bot's doing
     await expect(page.locator('input[name="_gotcha"]')).toBeHidden();
     await expect(page.locator('input[name="_gotcha"]')).toHaveValue('');
 
     await page.getByRole('button', { name: 'Send message' }).click();
-    await expect(page.getByText('Message sent. I will get back to you soon.')).toBeVisible();
+    await expect(page.getByText('Thanks, your message is on its way. I usually reply within a day.')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Send message' })).toBeEnabled();
 
     expect(request).not.toBeNull();
@@ -121,41 +195,15 @@ test.describe('home page', () => {
   test('a failed submission tells the visitor to email directly instead', async ({ page }) => {
     await page.route('https://formspree.io/f/**', (route) => route.fulfill({ status: 500 }));
 
-    await page.locator('#contact').scrollIntoViewIfNeeded();
-    await page.getByRole('button', { name: /open the contact form/i }).click();
-    await page.fill('#name', 'Ana Popescu');
-    await page.fill('#email', 'ana@example.com');
-    await page.selectOption('#subject', 'Collaboration');
-    await page.fill('#message', 'We are hiring a senior SDET for a remote role.');
+    await fillContactForm(page);
     await page.getByRole('button', { name: 'Send message' }).click();
 
-    await expect(page.getByText('Something went wrong. Please write to emanuela.telescu@yahoo.com directly.')).toBeVisible();
+    await expect(page.getByText('The message did not send. Please email me directly at emanuela.telescu@yahoo.com.')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Send message' })).toBeEnabled();
   });
 
-  test('a nav click stops on its own section, never past it', async ({ page }) => {
-    // start at the bottom, where the last section reaches for the end of the page
-    await page.locator('.nav a[href="#contact"]').click();
-
-    for (const id of ['projects', 'about', 'experience', 'contact']) {
-      await page.locator(`.nav a[href="#${id}"]`).click();
-      await expect
-        .poll(() =>
-          page.evaluate((section) => {
-            const heading = document.querySelector(`#${section} h2`);
-            const header = document.getElementById('siteHeader');
-            if (!heading || !header) return false;
-            const box = heading.getBoundingClientRect();
-            // clear of the sticky header, and inside the screen
-            return box.top >= header.offsetHeight - 2 && box.bottom <= window.innerHeight;
-          }, id),
-        )
-        .toBe(true);
-    }
-  });
-
   test('the CV button hands over the PDF rather than opening a page', async ({ page }) => {
-    const button = page.locator('.nav .nav-page');
+    const button = page.locator('.bar .cv-btn');
     await expect(button).toHaveAttribute('href', /assets\/cv\/Emanuela-Telescu-CV\.pdf$/);
     await expect(button).toHaveAttribute('download', /\.pdf$/);
 
@@ -170,51 +218,55 @@ test.describe('home page', () => {
 
     await page.reload({ waitUntil: 'load' });
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(50);
-    await expect(page.locator('.nav a[href="#contact"]')).not.toHaveClass(/is-active/);
+    await expect(page.locator('.nav a[href="#contact"]')).not.toHaveAttribute('aria-current', 'true');
   });
 
-  test('the floating button steps aside once Projects is on screen', async ({ page }) => {
-    const cta = page.locator('#stickyCta');
-
-    await page.locator('#experience').scrollIntoViewIfNeeded();
-    await expect(cta).toHaveClass(/\bon\b/);
-
-    await page.locator('#projects').scrollIntoViewIfNeeded();
-    await expect(cta).not.toHaveClass(/\bon\b/);
+  test('the direct contact details are where they should be', async ({ page }) => {
+    await page.locator('#contact').scrollIntoViewIfNeeded();
+    await expect(page.locator('#mail')).toHaveText('emanuela.telescu@yahoo.com');
+    await expect(page.locator('#contact a[href*="linkedin.com/in/emanuelatelescu"]')).toBeVisible();
+    await expect(page.locator('#contact a[href="https://github.com/ella79"]')).toBeVisible();
   });
 
-  test('the direct contact links point where they should', async ({ page }) => {
-    await expect(page.locator('a[href="mailto:emanuela.telescu@yahoo.com"]').first()).toBeVisible();
-    await expect(page.locator('a[href*="linkedin.com/in/emanuelatelescu"]').first()).toBeVisible();
-    await expect(page.locator('a[href="https://github.com/ella79"]').first()).toBeVisible();
+  test('the theme switch flips the theme and remembers it', async ({ page }) => {
+    const theme = () => page.evaluate(() => document.documentElement.dataset.theme);
+    const before = await theme();
+    await page.locator('#theme').click();
+    const after = await theme();
+    expect(after).not.toBe(before);
+
+    await page.reload();
+    expect(await theme()).toBe(after);
+  });
+
+  test('the footer links to the legal pages and carries the version', async ({ page }) => {
+    await expect(page.locator('.foot a[href="privacy.html"]')).toBeVisible();
+    await expect(page.locator('.foot a[href="terms.html"]')).toBeVisible();
+    await expect(page.locator('.foot .ver')).toHaveText(/^v\d+\.\d+\.\d+$/);
   });
 });
 
 test.describe('asset versions', () => {
   // The ?v= token is what makes a deploy reach a browser that has been here
-  // before. index.html once fell behind cv.html by six revisions, and the site
-  // looked unchanged for anyone with a warm cache. The two pages must agree.
-  test('both pages ask for the same stylesheet and script', async ({ page }) => {
+  // before. A page that falls behind the others looks unchanged for anyone with
+  // a warm cache, so every page on the shared stylesheet must ask for the same one.
+  test('every page asks for the same stylesheet and theme script', async ({ page }) => {
     const versions = async (path: string) => {
       await page.goto(path);
       return page.evaluate(() => ({
-        css: (document.querySelector('link[href*="styles.css"]') as HTMLLinkElement)
-          .getAttribute('href'),
-        js: (document.querySelector('script[src*="main.js"]') as HTMLScriptElement)
-          .getAttribute('src'),
+        css: (document.querySelector('link[href*="site.css"]') as HTMLLinkElement).getAttribute('href'),
+        js: (document.querySelector('script[src*="theme.js"]') as HTMLScriptElement).getAttribute('src'),
       }));
     };
 
     const home = await versions('/');
-    const cv = await versions('/cv.html');
-    const runner = await versions('/qa-suite.html');
-
     expect(home.css).toMatch(/\?v=/);
     expect(home.js).toMatch(/\?v=/);
-    expect(cv.css).toBe(home.css);
-    expect(cv.js).toBe(home.js);
-    expect(runner.css).toBe(home.css);
-    expect(runner.js).toBe(home.js);
+    for (const path of ['/qa-suite.html', '/privacy.html', '/terms.html']) {
+      const other = await versions(path);
+      expect(other.css, path).toBe(home.css);
+      expect(other.js, path).toBe(home.js);
+    }
   });
 });
 
@@ -226,6 +278,33 @@ test.describe('CV page', () => {
 
     const pdf = await page.request.get('/assets/cv/Emanuela-Telescu-CV.pdf');
     expect(pdf.status()).toBe(200);
+  });
+
+  test('links back to sections that exist on the home page', async ({ page }) => {
+    await page.goto('/cv.html');
+    for (const href of await page.locator('a[href^="index.html#"]').evaluateAll((links) => links.map((a) => a.getAttribute('href')!))) {
+      await page.goto('/' + href);
+      await expect(page, href).not.toHaveURL(/404\.html$/);
+    }
+  });
+});
+
+test.describe('legal pages', () => {
+  for (const [path, title] of [['/privacy.html', 'Privacy Policy'], ['/terms.html', 'Terms of Use']]) {
+    test(`${title} carries the site header and footer`, async ({ page }) => {
+      await page.goto(path);
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
+      await expect(page.locator('.bar .nav a')).toHaveCount(7);
+      await expect(page.locator('.foot [aria-current="page"]')).toHaveText(title);
+    });
+  }
+
+  test('the privacy policy names the services the site actually uses', async ({ page }) => {
+    await page.goto('/privacy.html');
+    for (const service of ['Formspree', 'GitHub Pages', 'Google Fonts']) {
+      await expect(page.locator('main')).toContainText(service);
+    }
+    await expect(page.locator('main')).not.toContainText('Google Analytics');
   });
 });
 
@@ -241,19 +320,14 @@ test.describe('addresses', () => {
     expect(response.status()).toBe(404);
   });
 
-  test('an anchor that used to exist still reaches the right section', async ({ page }) => {
-    await page.goto('/index.html#approach');
-    await expect(page).toHaveURL(/#about$/);
-    await expect(page.locator('#about')).toBeInViewport();
-  });
-
-  // Projects lived at #work until the section was given its own name. Links to
-  // the old anchor are already out in the world, so it has to keep landing.
-  test('the old projects anchor still reaches Projects', async ({ page }) => {
-    await page.goto('/index.html#work');
-    await expect(page).toHaveURL(/#projects$/);
-    await expect(page.locator('#projects')).toBeInViewport();
-  });
+  // Links to the sections the redesign renamed are already out in the world, so they have to keep landing.
+  for (const [old, now] of [['about', 'me'], ['approach', 'me'], ['experience', 'journey'], ['work', 'projects']]) {
+    test(`the old #${old} anchor still reaches #${now}`, async ({ page }) => {
+      await page.goto(`/index.html#${old}`);
+      await expect(page).toHaveURL(new RegExp(`#${now}$`));
+      await expect(page.locator(`#${now} h2`).first()).toBeInViewport();
+    });
+  }
 });
 
 test.describe('projects', () => {
@@ -262,32 +336,17 @@ test.describe('projects', () => {
     await page.locator('#projects').scrollIntoViewIfNeeded();
   });
 
-  test('every project card carries its repository', async ({ page }) => {
-    const cards = page.locator('#projects .project-card');
-    await expect(cards).toHaveCount(2);
-
-    await expect(cards.nth(0).locator('a[href="https://github.com/ella79/portfolio"]')).toBeVisible();
-    await expect(
-      cards.nth(1).locator('a[href="https://github.com/ella79/agentic-playwright-suite"]'),
-    ).toBeVisible();
-
-    // The portfolio card is deliberately the quiet one: a short description and
-    // the repository, nothing that opens a page of its own. The suite card is
-    // the one that carries a stack and a way in.
-    await expect(cards.nth(0).locator('.card-tags')).toHaveCount(0);
-    await expect(cards.nth(0).locator('.card-actions a')).toHaveCount(1);
-    expect(await cards.nth(1).locator('.card-tags li').count()).toBeGreaterThan(0);
+  test('every project carries its repository', async ({ page }) => {
+    await expect(page.locator('#projects .proj a[href="https://github.com/ella79/agentic-playwright-suite"]')).toBeVisible();
+    await expect(page.locator('#projects .card a[href="https://github.com/ella79/portfolio"]')).toBeVisible();
   });
 
   // Deployment links are the first thing someone opens from a repository, so
   // the card carries them rather than making a visitor find them on GitHub.
   test('the suite card links what CI publishes', async ({ page }) => {
-    const card = page.locator('#projects .project-card').nth(1);
-
+    const card = page.locator('#projects .proj');
     for (const path of ['', 'metrics/', 'playwright-report/']) {
-      await expect(
-        card.locator(`a[href="https://ella79.github.io/agentic-playwright-suite/${path}"]`),
-      ).toBeVisible();
+      await expect(card.locator(`a[href="https://ella79.github.io/agentic-playwright-suite/${path}"]`)).toBeVisible();
     }
   });
 
@@ -295,7 +354,7 @@ test.describe('projects', () => {
     await page.getByRole('link', { name: /run the qa suites/i }).click();
 
     await expect(page).toHaveURL(/qa-suite\.html$/);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Agentic Playwright suite');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Agentic Playwright Suite');
   });
 });
 
@@ -795,7 +854,7 @@ test.describe('qa suite runner', () => {
           return [style.color, style.backgroundColor].join(' on ');
         }),
       )
-      .toBe('rgb(255, 255, 255) on rgb(10, 85, 76)');
+      .toBe('rgb(255, 255, 255) on rgb(36, 80, 200)');
 
     // which browser was replayed has to survive the console scrolling on
     await expect(chromium.locator('.cb-ran')).toBeHidden();
