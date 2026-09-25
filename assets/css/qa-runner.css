@@ -1,0 +1,315 @@
+/* Runner styles taken from assets/css/styles.css, pointed at the prototype's tokens.
+   Pass reads in cobalt, failed in red, broken in violet, skipped in grey, so the four
+   outcomes stay apart for red-green colour blindness as well. */
+:root{
+  --teal:var(--pri); --teal-dark:var(--pri); --teal-wash:var(--pri-wash);
+  --ink-soft:var(--soft); --paper:var(--bg); --card:var(--surface);
+  --amber:#B45309; --red:#B42318; --violet:#6A4A9C; --grey:#98A2AD;
+  --font-display:var(--display); --font-body:var(--body); --font-mono:var(--mono);
+}
+:root[data-theme="dark"]{ --amber:#E0A04A; --red:#F07167; --violet:#B9A3E3; --grey:#6B7480; }
+.page-head{padding:clamp(40px,6vw,72px) 0 clamp(40px,5vw,64px);background:var(--band)}
+/* the dashboard sits on the same tint as the page head, full width, so the page alternates like the home page */
+#runnerResults{margin-top:clamp(40px,5vw,64px);padding-block:clamp(40px,5vw,64px) clamp(56px,7vw,104px);background:var(--band);box-shadow:0 0 0 100vmax var(--band);clip-path:inset(0 -100vmax)}
+.page-head h1{font-family:var(--display);font-size:clamp(2rem,1.5rem + 2.4vw,3rem);font-weight:700;font-stretch:108%;letter-spacing:-.03em;line-height:1.05;margin:0 0 14px}
+.page-head .role{font-family:var(--mono);font-size:.875rem;color:var(--pri);margin:0 0 22px}
+.cv-actions{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0 10px}
+.runner-section{padding-top:clamp(32px,4vw,48px)}
+/* ---------- qa suite runner ---------- */
+/* The page borrows the vocabulary of the site rather than inventing a second
+   one: card wash and hairlines for anything a visitor reads, the panel colours
+   for the console, and teal kept for a result. Amber keeps the meaning it has
+   on the landing page, a measured number worth stopping on, which here is a
+   run that did not come back clean. */
+.runner-intro{max-width:66ch;color:var(--ink-soft);margin-top:14px;text-align:justify;-webkit-hyphens:auto;hyphens:auto}
+.runner-section{padding-top:72px}
+
+/* provenance: the run these numbers came from, named before they are shown */
+.provenance{
+  display:flex;flex-wrap:wrap;align-items:center;gap:14px 34px;
+  padding:16px 22px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);
+}
+.prov-item{display:flex;flex-direction:column;gap:3px;min-width:0}
+.prov-l{font-family:var(--font-mono);font-size:.625rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+.prov-v{font-family:var(--font-mono);font-size:.8125rem;color:var(--ink)}
+.prov-link{
+  margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+  font-size:.8125rem;color:var(--teal-dark);text-decoration:none;
+  border-bottom:1px solid transparent;transition:border-color .2s ease;
+}
+.prov-link:hover{border-bottom-color:var(--teal)}
+
+.runner-stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:20px;border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden}
+.runner-stats .stat{padding:20px 22px;border-right:1px solid var(--line)}
+.runner-stats .stat:last-child{border-right:0}
+.runner-stats .v{font-family:var(--font-display);font-size:1.75rem;line-height:1;color:var(--teal-dark)}
+.runner-stats .l{margin-top:9px;font-family:var(--font-mono);font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+
+.runner{
+  display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);
+  margin-top:20px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);overflow:hidden;
+}
+.runner-suites{border-right:1px solid var(--line);min-width:0}
+.suite{border-bottom:1px solid var(--line)}
+.suite:last-child{border-bottom:0}
+.suite-head{
+  width:100%;display:flex;align-items:center;gap:14px;padding:20px 22px;
+  background:none;border:0;font:inherit;color:var(--ink);text-align:left;cursor:pointer;
+  transition:background .2s ease;
+}
+.suite-head:hover{background:var(--teal-wash)}
+/* The status of a suite, not a control. It used to be a cross, which in a row
+   that also expands reads as a close button rather than as a verdict, and it
+   said the same thing open or shut. A tick for a clean suite and an exclamation
+   for one that is not are both verdicts, and neither is mistakable for a
+   button: the chevron on the right is the only thing here that opens anything. */
+.suite-mark{
+  flex:none;width:22px;height:22px;border-radius:50%;font-size:.75rem;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--teal-wash);color:var(--teal-dark);
+}
+.suite-mark.is-off{background:#f7e3e0;color:var(--red)}
+/* a suite that is mid replay is the one place the amber belongs here */
+.suite.is-running .suite-mark{background:#fbeedd;color:var(--amber)}
+.suite.is-running .suite-count{color:var(--amber)}
+.suite-name{flex:1;font-family:var(--font-display);font-weight:600;font-size:1rem}
+.suite-count{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft)}
+.suite-arrow{flex:none;color:var(--ink-soft);font-size:.75rem;transition:transform .28s ease}
+.suite.is-open .suite-arrow{transform:rotate(180deg)}
+.suite-groups{display:none;margin:0;padding:0 22px 20px;list-style:none}
+.suite.is-open .suite-groups{display:block}
+.suite-groups li{
+  display:grid;grid-template-columns:minmax(0,1fr) 72px auto;align-items:center;gap:14px;
+  padding:9px 0;border-top:1px solid var(--line);
+  font-size:.875rem;color:var(--ink-soft);
+}
+.suite-groups li b{font-weight:500;color:var(--ink)}
+/* the browsers a suite ran on, in the row that owns them rather than in a band
+   of their own repeating the same fact further down the page */
+/* outside the collapsible list on purpose: they filter the runner, so they have
+   to be visible without opening anything first */
+/* the negative margin pulled this row up under the suite name, where at some
+   text sizes the two touched. The chips are a control of their own and need
+   the space to read as one. */
+/* The label and the chips are two columns rather than one wrapping line: with
+   everything in one row, a second chip that did not fit came back to the left
+   edge and sat under the label instead of under the chip above it. */
+.suite-browsers{display:flex;align-items:flex-start;gap:10px;padding:4px 22px 20px}
+.sb-chips{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.sb-label{
+  flex:none;
+  font-family:var(--font-mono);font-size:.625rem;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-soft);
+  /* sits on the first chip's baseline rather than the top of the column */
+  padding-top:8px;
+}
+.cb-engines-chip{
+  display:inline-flex;align-items:baseline;gap:8px;
+  padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);
+  font:inherit;color:var(--ink);cursor:pointer;
+  transition:border-color .2s ease,background .2s ease,color .2s ease;
+}
+.cb-engines-chip:hover{border-color:var(--teal)}
+/* what the chip counts is passing results, not results that ran: both browsers
+   in the row ran, and 0/20 beside 20/20 read as one of them never having
+   started. The word is the fix; the number on its own cannot say it. */
+.cb-unit{font-family:var(--font-mono);font-size:.6875rem;color:var(--ink-soft)}
+/* the tick appears once the replay has actually played that browser, so the row
+   still says which engine was run after the console has scrolled on */
+.cb-ran{display:none;font-size:.75rem;line-height:1;color:var(--teal-dark)}
+.cb-engines-chip.is-ran .cb-ran{display:inline}
+.cb-engines-chip.is-off{border-color:#e3c4be;background:#fdf3f1}
+.cb-engines-chip.is-off .cb-n{color:var(--red)}
+.cb-engines-chip.is-off .cb-ran{color:var(--red)}
+/* the chosen browser is the one the runner will replay, so it carries the
+   colour the page uses for a result rather than a hover. This has to outrank
+   the state above it: while it sat first, a browser with failures kept its pale
+   background when it was selected and the white label vanished into it. */
+.cb-engines-chip.is-on,
+.cb-engines-chip.is-off.is-on{background:var(--teal-dark);border-color:var(--teal-dark);color:#fff}
+.cb-engines-chip.is-on .cb-n,
+.cb-engines-chip.is-off.is-on .cb-n,
+.cb-engines-chip.is-on .cb-unit,
+.cb-engines-chip.is-on .cb-ran,
+.cb-engines-chip.is-off.is-on .cb-ran{color:#bfe6df}
+
+.area-bar{height:5px;border-radius:999px;background:var(--line);overflow:hidden}
+.area-bar span{display:block;height:100%;background:var(--teal);opacity:.55}
+.suite-groups .n{font-family:var(--font-mono);font-size:.75rem;white-space:nowrap}
+
+/* the console is the one part of the page that should look like the terminal
+   the run actually happened in, so it takes the panel colours */
+.runner-console{background:var(--panel);color:var(--panel-text);display:flex;flex-direction:column;min-width:0}
+.console-bar{
+  display:flex;align-items:center;gap:10px;padding:14px 20px;
+  border-bottom:1px solid var(--panel-line);
+  font-family:var(--font-mono);font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:#8ea6b0;
+}
+.console-dot{width:8px;height:8px;border-radius:50%;background:#86A6FF;flex:none}
+.console-bar .browser{margin-left:auto;text-transform:none;letter-spacing:.02em}
+.console-bar .counter{text-transform:none;letter-spacing:.02em;color:#86A6FF;min-width:74px;text-align:right}
+.console-progress{height:2px;background:var(--panel-line)}
+.console-progress span{display:block;height:100%;width:0;background:#86A6FF;transition:width .18s linear}
+.console-log{
+  margin:0;padding:20px;flex:1;min-height:340px;max-height:440px;overflow:auto;
+  font-family:var(--font-mono);font-size:.78rem;line-height:1.85;white-space:pre-wrap;word-break:break-word;
+}
+.console-log .muted{color:#7f97a1}
+.console-log .ok{color:#86A6FF}
+.console-log .warn{color:#e8a75a}
+.console-log .head{color:#fff}
+.console-actions{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:18px 20px;border-top:1px solid var(--panel-line);
+}
+.console-actions .hint{font-size:.8125rem;color:#8ea6b0;margin:0;flex:1;min-width:210px}
+.btn-run{background:#86A6FF;border-color:#86A6FF;color:#0C1417;font-weight:600}
+.btn-run:hover{background:#A9C0FF;border-color:#A9C0FF;transform:translateY(-1px)}
+.btn-run[disabled]{opacity:.6;cursor:default;transform:none}
+
+/* the addresses CI keeps current, listed where they can be reached without
+   playing the replay first */
+.published{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;
+  margin-top:20px;padding:15px 22px;
+  border:1px solid var(--line);border-radius:10px;background:var(--card);
+}
+.published-l{font-family:var(--font-mono);font-size:.625rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+.published a{
+  font-size:.8125rem;color:var(--teal-dark);text-decoration:none;
+  border-bottom:1px solid var(--teal-wash);transition:border-color .2s ease;
+}
+.published a:hover{border-bottom-color:var(--teal)}
+
+.card-links{font-size:.8125rem;color:var(--ink-soft);margin:0 0 22px}
+.card-links a{color:var(--teal-dark);text-decoration:none;border-bottom:1px solid var(--teal-wash);transition:border-color .2s ease}
+.card-links a:hover{border-bottom-color:var(--teal)}
+
+/* a run that did not come back clean says so, in the colour this site keeps for
+   a number worth stopping on */
+.not-clean{
+  margin:26px 0 0;padding:22px 24px;
+  border:1px solid #e6c9a4;border-left:4px solid var(--amber);border-radius:10px;background:#fdf6ec;
+}
+.not-clean[hidden]{display:none}
+.nc-head{font-family:var(--font-display);font-weight:600;color:var(--amber);margin:0 0 8px}
+.nc-body{font-size:.875rem;color:var(--ink-soft);margin:0 0 18px;max-width:70ch}
+.runner-stats .v.is-off{color:var(--amber)}
+
+/* ---------- the dashboard the run opens ---------- */
+.runner-results{display:none;margin-top:64px}
+.runner-results.is-ready{display:block}
+.dash-title{margin-bottom:6px}
+.dash-row{display:grid;gap:22px;margin-top:26px}
+/* auto-fit rather than three fixed columns: a panel whose widget was
+   missing from the report hides itself, and the row closes over the gap */
+.dash-row-3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.dash-row-2{grid-template-columns:1fr 1.35fr}
+.dash-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:24px;display:flex;flex-direction:column;
+}
+.dash-card h3{
+  font-family:var(--font-mono);font-size:.6875rem;font-weight:500;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:16px;
+}
+.dash-card[hidden]{display:none}
+.dash-card h4{font-family:var(--font-display);font-size:.9375rem;margin:0}
+.dash-note{font-size:.8125rem;color:var(--ink-soft);margin:0 0 18px;line-height:1.6}
+
+/* pass rate */
+.ring-wrap{display:flex;justify-content:center;padding:4px 0 8px}
+.ring{width:150px;height:150px}
+.ring-track{fill:none;stroke:var(--line);stroke-width:9}
+.ring-fill{fill:none;stroke:var(--teal);stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.1s ease}
+.ring-fill.is-off{stroke:var(--amber)}
+.ring-v{fill:var(--ink);font-family:"Archivo",Georgia,sans-serif;font-size:1.65rem;font-weight:600;text-anchor:middle}
+.ring-l{fill:var(--ink-soft);font-family:"IBM Plex Mono",monospace;font-size:.62rem;text-anchor:middle}
+.legend{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.legend li{display:flex;align-items:center;gap:10px;font-size:.8125rem;color:var(--ink-soft)}
+/* Colour alone would still ask a red green reader to separate failed from
+   broken, so the two also differ in fill: failed is solid, broken is a ring. */
+.legend .dot{width:10px;height:10px;border-radius:50%;background:var(--teal);flex:none}
+.legend .is-fail .dot{background:var(--red)}
+.legend .is-broken .dot{background:transparent;border:2.5px solid var(--violet)}
+.legend .is-skip .dot{background:transparent;border:2.5px solid var(--grey)}
+.legend .label{flex:1}
+.legend .n{font-family:var(--font-mono);font-size:.75rem;color:var(--ink)}
+
+/* per suite */
+.result-card{padding:16px 0;border-top:1px solid var(--line)}
+.result-card:first-child{padding-top:0;border-top:0}
+.result-card:last-child{padding-bottom:0}
+.result-card .meta{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);margin:6px 0 0}
+/* One bar per suite, split by status rather than filled to the pass rate and
+   left grey after it. Grey is what this page uses for skipped, so a suite with
+   twenty failures was drawing them in the colour of tests that never ran. */
+.result-card .bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin:12px 0 10px;display:flex}
+.result-card .bar span{display:block;height:100%;width:0;background:var(--teal);transition:width .9s ease}
+.result-card .bar .seg-failed{background:var(--red)}
+.result-card .bar .seg-broken{background:var(--violet)}
+.result-card .bar .seg-skipped{background:var(--grey)}
+.result-card .bar .seg-unknown{background:#7d8f8b}
+/* the counts under the bar, in the words the report uses for them */
+.bar-key{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 4px;padding:0;list-style:none}
+.bar-key li{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:.6875rem;color:var(--ink-soft);
+}
+.bar-key .swatch{width:10px;height:10px;border-radius:2px;background:var(--teal);flex:none}
+.bar-key .swatch.seg-failed{background:var(--red)}
+.bar-key .swatch.seg-broken{background:var(--violet)}
+.bar-key .swatch.seg-skipped{background:var(--grey)}
+.bar-key .swatch.seg-unknown{background:#7d8f8b}
+
+/* environment */
+.env{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;margin:0;font-size:.8125rem}
+.env dt{font-family:var(--font-mono);font-size:.6875rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);padding-top:2px}
+.env dd{margin:0;color:var(--ink);word-break:break-word}
+
+/* history */
+.trend{display:flex;align-items:flex-end;gap:10px;height:150px;margin-top:auto}
+.trend-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px}
+.trend-bar{display:block;width:100%;border-radius:6px 6px 0 0;background:var(--teal);opacity:.85;transition:opacity .2s ease}
+.trend-col:hover .trend-bar{opacity:1}
+.trend-col.is-fail .trend-bar{background:var(--amber)}
+.trend-l{font-family:var(--font-mono);font-size:.6875rem;color:var(--ink-soft)}
+
+/* slowest tests */
+.slow{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.slow li{display:grid;grid-template-columns:minmax(0,1fr) 30% auto;align-items:center;gap:16px}
+.slow-name{font-size:.8125rem;color:var(--ink);line-height:1.45}
+.slow-bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}
+.slow-bar span{display:block;height:100%;width:0;background:var(--teal);opacity:.7;transition:width .9s ease}
+.slow-v{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft)}
+
+/* the report itself */
+.allure-embed{margin-top:26px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.allure-embed .embed-bar{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--line);
+  font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);
+}
+.allure-embed .embed-bar a{margin-left:auto;padding:9px 17px;font-size:.8125rem}
+.allure-frame{display:block;width:100%;height:640px;border:0;background:#fff}
+
+@media (max-width:960px){
+  .dash-row-3,.dash-row-2{grid-template-columns:1fr}
+}
+@media (max-width:860px){
+  .runner{grid-template-columns:1fr}
+  .runner-suites{border-right:0;border-bottom:1px solid var(--line)}
+  .runner-stats{grid-template-columns:repeat(2,1fr)}
+  .runner-stats .stat:nth-child(2){border-right:0}
+  .runner-stats .stat:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .prov-link{margin-left:0}
+  .allure-frame{height:540px}
+}
+@media (max-width:640px){
+  .slow li{grid-template-columns:minmax(0,1fr) auto}
+  .slow-bar{display:none}
+}
+
+/* when the dashboard is showing, its band runs straight into the footer instead of leaving a strip of page background */
+main:has(#runnerResults.is-ready){padding-bottom:0}
