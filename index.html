@@ -68,7 +68,8 @@
 <section class="home" id="home" aria-label="Home">
   <div class="aurora" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>
   <div class="wrap home-inner">
-    <div class="avatar cut" id="avatar">
+    <div class="avatar cut" id="avatar" tabindex="0" aria-describedby="hello">
+      <span class="hello" id="hello" role="tooltip">Hi, I'm Emanuela. Let's talk quality.</span>
       <div class="orbit" aria-hidden="true">
         <svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="49"/><circle class="track" cx="50" cy="50" r="44"/></svg>
         <span class="dot d1"></span>
@@ -118,7 +119,7 @@
   <div class="wrap">
     <div class="sec-head center">
       <p class="eyebrow">Where I've been</p>
-      <h2 class="h2" id="journey-h">From manual testing to agentic tooling</h2>
+      <h2 class="h2 flow rv" id="journey-h" aria-label="From manual testing to automation to AI"><span class="step s1" aria-hidden="true">Manual</span><span class="arr a1" aria-hidden="true"></span><span class="step s2" aria-hidden="true">Automation</span><span class="arr a2" aria-hidden="true"></span><span class="step s3 ai" aria-hidden="true">AI</span></h2>
       <p class="intro">Open any role to see what I did there.</p>
     </div>
     <div class="tl" id="timeline"><span class="fill" aria-hidden="true"></span></div>

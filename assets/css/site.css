@@ -424,6 +424,42 @@ form{position:relative;background:var(--surface);border:1px solid var(--line);bo
 @media (max-width:860px){ .me-photo{max-width:300px} }
 @media (max-width:640px){ .me-photo{display:block;max-width:240px} .me-photo img{max-height:340px} }
 
+/* ---------- journey title: Manual -> Automation -> AI, drawn in order when it scrolls into view ---------- */
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.25em .45em}
+.flow .step{display:inline-block}
+.flow .step.ai{color:var(--pri)}
+.flow .arr{position:relative;display:inline-block;width:1.25em;height:.09em;min-height:3px;border-radius:2px;background:var(--gold-fill);transform-origin:left center;overflow:visible}
+.flow .arr::after{content:"";position:absolute;right:-.02em;top:50%;width:.32em;height:.32em;border-top:.09em solid var(--gold-fill);border-right:.09em solid var(--gold-fill);transform:translateY(-50%) rotate(45deg)}
+.flow .arr::before{content:"";position:absolute;inset:-2px 0;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:current 2.6s 1.8s linear infinite}
+@keyframes current{from{background-position:-60% 0}to{background-position:160% 0}}
+.flow.in .step{animation:stepIn .6s var(--ease) both}
+.flow.in .s2{animation-delay:.55s}
+.flow.in .s3{animation-delay:1.1s}
+.flow.in .arr{animation:draw .45s var(--ease) both}
+.flow.in .a1{animation-delay:.3s}
+.flow.in .a2{animation-delay:.85s}
+@keyframes stepIn{from{opacity:0;transform:translateY(.35em)}}
+@keyframes draw{from{transform:scaleX(0)}}
+/* the title itself does not slide in; its parts do */
+.flow.pre{opacity:1;transform:none}
+.flow.pre .step{opacity:0}
+.flow.pre .arr{transform:scaleX(0)}
+@media (max-width:640px){ .flow{font-size:clamp(1.3rem,6.4vw,1.75rem)} }
+
+/* ---------- the avatar says hello: hover, keyboard focus, or a tap ---------- */
+.avatar.cut{cursor:pointer;outline-offset:8px}
+.avatar.cut .cutout{transition:transform .5s var(--ease)}
+.avatar.cut .orbit circle.track,.avatar.cut .orbit .dot::after{transition:stroke .4s var(--ease),transform .4s var(--ease),box-shadow .4s var(--ease)}
+.avatar.cut:is(:hover,:focus-visible,.on) .cutout{transform:translateY(-8px) scale(1.03)}
+.avatar.cut:is(:hover,:focus-visible,.on) .orbit circle.track{stroke:var(--pri)}
+.avatar.cut:is(:hover,:focus-visible,.on) .orbit .dot::after{transform:scale(1.5);box-shadow:0 0 0 4px var(--bg),0 0 14px 2px var(--c)}
+.hello{position:absolute;left:50%;top:-6%;z-index:3;white-space:nowrap;font-family:var(--body);font-size:.875rem;font-weight:500;color:var(--ink);
+  background:var(--surface);border:1px solid var(--line-strong);border-radius:12px;padding:8px 14px;box-shadow:0 14px 30px -18px rgba(21,25,30,.5);
+  opacity:0;pointer-events:none;transform:translate(-50%,6px) scale(.94);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.hello::after{content:"";position:absolute;left:50%;bottom:-6px;width:10px;height:10px;background:var(--surface);border-right:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);transform:translateX(-50%) rotate(45deg)}
+.avatar.cut:is(:hover,:focus-visible,.on) .hello{opacity:1;transform:translate(-50%,-100%) scale(1)}
+@media (max-width:640px){ .home{padding-top:72px} }
+
 /* ---------- helpers that replace inline style attributes, which the CSP blocks ---------- */
 .sprite{position:absolute;width:0;height:0;overflow:hidden}
 .cv-btn{padding:0 14px;min-height:40px}
