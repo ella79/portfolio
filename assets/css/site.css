@@ -460,6 +460,13 @@ form{position:relative;background:var(--surface);border:1px solid var(--line);bo
 .avatar.cut:is(:hover,:focus-visible,.on) .hello{opacity:1;transform:translate(-50%,-100%) scale(1)}
 @media (max-width:640px){ .home{padding-top:72px} }
 
+/* ---------- Me, dark theme: a soft white-grey cloud behind the head and hair, so the cut-out edge melts into light ---------- */
+:root[data-theme="dark"] .me-photo::before{
+  inset:-8% -20% 24%;border-radius:50%;filter:blur(28px);
+  background:
+    radial-gradient(ellipse 66% 54% at 50% 33%,rgba(232,236,242,.50),rgba(214,221,230,.24) 55%,transparent 80%),
+    radial-gradient(ellipse 80% 60% at 50% 45%,rgba(200,208,220,.14),transparent 70%)}
+
 /* ---------- helpers that replace inline style attributes, which the CSP blocks ---------- */
 .sprite{position:absolute;width:0;height:0;overflow:hidden}
 .cv-btn{padding:0 14px;min-height:40px}
