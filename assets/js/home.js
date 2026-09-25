@@ -51,10 +51,15 @@ hl.querySelectorAll(".sep").forEach((s,i) => s.style.animationDelay = (740 + i*9
 /* tap or Enter switches between the treated portrait and the original photo */
 
 
-/* the avatar says hello on hover, keyboard focus, or a tap on touch screens */
+/* hovering, focusing or tapping the avatar runs a scan over it; the scan is cut to her outline,
+   so it is masked with the portrait itself (set here, through the CSSOM, so the page keeps its CSP) */
 const avatar = document.getElementById("avatar");
-avatar.addEventListener("click", () => avatar.classList.toggle("on"));
-document.addEventListener("click", e => { if (!avatar.contains(e.target)) avatar.classList.remove("on"); });
+const scanFx = document.getElementById("scanFx");
+const portrait = avatar.querySelector(".cutout");
+const shapeScan = () => { const u = `url("${portrait.currentSrc || portrait.src}")`; scanFx.style.webkitMaskImage = u; scanFx.style.maskImage = u; };
+portrait.complete ? shapeScan() : portrait.addEventListener("load", shapeScan);
+avatar.addEventListener("click", () => { avatar.classList.remove("on"); void avatar.offsetWidth; avatar.classList.add("on"); });
+avatar.addEventListener("animationend", e => { if (e.animationName === "scanFx") avatar.classList.remove("on"); });
 
 /* ---------- data ---------- */
 const JOBS = [

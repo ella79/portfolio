@@ -446,19 +446,21 @@ form{position:relative;background:var(--surface);border:1px solid var(--line);bo
 .flow.pre .arr{transform:scaleX(0)}
 @media (max-width:640px){ .flow{font-size:clamp(1.3rem,6.4vw,1.75rem)} }
 
-/* ---------- the avatar says hello: hover, keyboard focus, or a tap ---------- */
+/* ---------- hovering, focusing or tapping the avatar scans it, like the first prototype ---------- */
 .avatar.cut{cursor:pointer;outline-offset:8px}
 .avatar.cut .cutout{transition:transform .5s var(--ease)}
 .avatar.cut .orbit circle.track,.avatar.cut .orbit .dot::after{transition:stroke .4s var(--ease),transform .4s var(--ease),box-shadow .4s var(--ease)}
-.avatar.cut:is(:hover,:focus-visible,.on) .cutout{transform:translateY(-8px) scale(1.03)}
+.avatar.cut:is(:hover,:focus-visible,.on) .cutout{transform:translateY(-6px) scale(1.02)}
 .avatar.cut:is(:hover,:focus-visible,.on) .orbit circle.track{stroke:var(--pri)}
 .avatar.cut:is(:hover,:focus-visible,.on) .orbit .dot::after{transform:scale(1.5);box-shadow:0 0 0 4px var(--bg),0 0 14px 2px var(--c)}
-.hello{position:absolute;left:50%;top:-6%;z-index:3;white-space:nowrap;font-family:var(--body);font-size:.875rem;font-weight:500;color:var(--ink);
-  background:var(--surface);border:1px solid var(--line-strong);border-radius:12px;padding:8px 14px;box-shadow:0 14px 30px -18px rgba(21,25,30,.5);
-  opacity:0;pointer-events:none;transform:translate(-50%,6px) scale(.94);transition:opacity .3s var(--ease),transform .3s var(--ease)}
-.hello::after{content:"";position:absolute;left:50%;bottom:-6px;width:10px;height:10px;background:var(--surface);border-right:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);transform:translateX(-50%) rotate(45deg)}
-.avatar.cut:is(:hover,:focus-visible,.on) .hello{opacity:1;transform:translate(-50%,-100%) scale(1)}
-@media (max-width:640px){ .home{padding-top:72px} }
+.scan-fx{position:absolute;left:0;top:0;width:100%;height:auto;aspect-ratio:1197/1264;z-index:2;pointer-events:none;opacity:0;
+  -webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  background:linear-gradient(180deg,transparent 0 44%,rgba(134,166,255,.35) 47%,rgba(255,255,255,.95) 50%,rgba(134,166,255,.35) 53%,transparent 56% 100%),
+             repeating-linear-gradient(180deg,rgba(134,166,255,.10) 0 2px,transparent 2px 5px);
+  background-size:100% 300%,100% 100%;background-repeat:no-repeat,repeat;background-position:0 100%,0 0;
+  transition:transform .5s var(--ease)}
+.avatar.cut:is(:hover,:focus-visible,.on) .scan-fx{animation:scanFx 1.5s var(--ease) both;transform:translateY(-6px) scale(1.02)}
+@keyframes scanFx{0%{opacity:0;background-position:0 100%,0 0}12%{opacity:1}85%{opacity:1}100%{opacity:0;background-position:0 0%,0 0}}
 
 /* ---------- helpers that replace inline style attributes, which the CSP blocks ---------- */
 .sprite{position:absolute;width:0;height:0;overflow:hidden}
