@@ -51,6 +51,11 @@ hl.querySelectorAll(".sep").forEach((s,i) => s.style.animationDelay = (740 + i*9
 /* tap or Enter switches between the treated portrait and the original photo */
 
 
+/* the avatar says hello on hover, keyboard focus, or a tap on touch screens */
+const avatar = document.getElementById("avatar");
+avatar.addEventListener("click", () => avatar.classList.toggle("on"));
+document.addEventListener("click", e => { if (!avatar.contains(e.target)) avatar.classList.remove("on"); });
+
 /* ---------- data ---------- */
 const JOBS = [
   {co:"BTC Embedded Systems", mark:"BTC", role:"Senior QA Engineer", when:"12/2022 – present", current:true,
