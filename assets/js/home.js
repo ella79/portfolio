@@ -24,15 +24,23 @@ const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const nameEl = document.getElementById("name");
 if (!reduce){
   let i = 0;
+  /* letters animate one by one, but each word stays in one piece: a line may only break between words,
+     never inside "Emanuela" on a narrow phone */
   const split = (node) => [...node.childNodes].forEach(n => {
     if (n.nodeType === 3){
       const frag = document.createDocumentFragment();
-      [...n.textContent].forEach(ch => {
-        const s = document.createElement("span");
-        if (ch === " "){ s.className = "sp"; s.textContent = " "; }
-        else { s.className = "ch"; s.textContent = ch; s.style.animationDelay = (120 + i++ * 38) + "ms"; }
-        s.setAttribute("aria-hidden","true");
-        frag.appendChild(s);
+      n.textContent.split(/(\s+)/).forEach(part => {
+        if (!part) return;
+        if (/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(" ")); return; }
+        const word = document.createElement("span");
+        word.className = "word";
+        word.setAttribute("aria-hidden","true");
+        [...part].forEach(ch => {
+          const s = document.createElement("span");
+          s.className = "ch"; s.textContent = ch; s.style.animationDelay = (120 + i++ * 38) + "ms";
+          word.appendChild(s);
+        });
+        frag.appendChild(word);
       });
       n.replaceWith(frag);
     } else split(n);
