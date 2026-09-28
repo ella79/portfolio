@@ -40,6 +40,29 @@ test.describe('home page', () => {
     await expect(page.locator('main')).not.toContainText('SDET');
   });
 
+  // The name is animated letter by letter. On an iPhone 6 it once broke as "Emanuel" / "a",
+  // because every letter was a place the line could wrap. A line may only break between words.
+  for (const width of [375, 320]) {
+    test(`the name never breaks inside a word on a ${width}px phone`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 667 });
+      await page.reload();
+      await page.evaluate(() => document.fonts.ready);
+
+      // read the letters in order and group them by the words of the name, whatever the markup.
+      // offsetTop is the layout position: the letters rise in on load, and a transform must not count as a new line.
+      const linesPerWord = await page.locator('#name').evaluate((name) => {
+        const letters = [...name.querySelectorAll<HTMLElement>('.ch')];
+        const words = (name.getAttribute('aria-label') ?? '').split(/\s+/);
+        let at = 0;
+        return words.map((word) => {
+          const tops = letters.slice(at, (at += word.length)).map((letter) => letter.offsetTop);
+          return new Set(tops).size;
+        });
+      });
+      expect(linesPerWord).toEqual([1, 1]);
+    });
+  }
+
   test('in page navigation reaches every section', async ({ page }) => {
     for (const section of ['me', 'journey', 'skills', 'projects', 'reads', 'contact']) {
       await page.locator(`.nav a[href="#${section}"]`).click();

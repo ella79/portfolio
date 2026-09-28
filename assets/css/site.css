@@ -119,7 +119,7 @@ section.graphite + section{padding-top:var(--section)}
 .avatar .hint{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.625rem;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);background:var(--bg);padding:2px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
 .home h1{font-size:clamp(2.5rem,1.4rem + 5vw,5rem);font-weight:760;font-stretch:110%;line-height:1;letter-spacing:-.035em}
 .home h1 .ch{display:inline-block;animation:rise .8s var(--ease) both}
-.home h1 .sp{display:inline-block;width:.28em}
+.home h1 .word{display:inline-block;white-space:nowrap}
 @keyframes rise{from{opacity:0;transform:translateY(.4em)}}
 .home h1 .last{color:var(--pri)}
 .headline{font-family:var(--mono);font-size:clamp(.8125rem,.78rem + .2vw,.9375rem);line-height:1.8;color:var(--soft);margin-top:20px;max-width:62ch}
