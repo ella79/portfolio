@@ -168,17 +168,19 @@ test.describe('home page', () => {
   test('the Reads carousel lists the articles, newest first, each linking to LinkedIn', async ({ page }) => {
     await page.locator('#reads').scrollIntoViewIfNeeded();
     const cards = page.locator('#readTrack .art');
-    await expect(cards).toHaveCount(2);
+    await expect(cards).toHaveCount(3);
     // newest first
     await expect(cards.first()).toHaveAttribute('href', /linkedin\.com\//);
-    await expect(cards.first().locator('img')).toHaveAttribute('src', 'assets/img/article-green-correct.jpg');
+    await expect(cards.first().locator('img')).toHaveAttribute('src', 'assets/img/article-agentic-project.jpg');
     // every card points at LinkedIn
     for (const href of await cards.evaluateAll((els) => els.map((e) => e.getAttribute('href')))) {
       expect(href).toMatch(/linkedin\.com\//);
     }
     await expect(page.locator('#prevRead')).toBeDisabled();
-    // "View all" stays disabled until there are more than 2 articles
-    await expect(page.getByRole('link', { name: 'View all articles' })).toHaveAttribute('aria-disabled', 'true');
+    // "View all" activates once there are more than two articles
+    const viewAll = page.getByRole('link', { name: 'View all articles' });
+    await expect(viewAll).not.toHaveAttribute('aria-disabled', 'true');
+    await expect(viewAll).toHaveAttribute('href', /linkedin\.com\//);
   });
 
   test('the contact form rejects an empty submission', async ({ page }) => {
