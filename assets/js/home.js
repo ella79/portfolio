@@ -136,6 +136,10 @@ const SKILLS = [
 
 /* LinkedIn articles, newest first */
 const READS = [
+  {title:"green ≠ correct: what self-healing tests don't tell you", date:"2026-09-30", mins:2,
+   img:"assets/img/article-green-correct.jpg",
+   excerpt:"An AI healer can fix the locator and still assert the wrong thing. How I keep a human gate between AI-generated Playwright tests and CI.",
+   url:"https://www.linkedin.com/feed/update/urn:li:activity:7511138439715778560/"},
   {title:"Why I Stopped Prompting AI and Started Building Skills for It", date:"2026-08-11", mins:4,
    img:"assets/img/article-cover.jpg",
    excerpt:"Ad-hoc prompting gives two different answers to the same request. How our Playwright suite moved to Claude Code agents and skills that share one set of conventions.",
