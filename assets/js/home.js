@@ -136,6 +136,10 @@ const SKILLS = [
 
 /* LinkedIn articles, newest first */
 const READS = [
+  {title:"I packaged my QA architecture into one free command", date:"2026-10-01", mins:2,
+   img:"assets/img/article-agentic-project.jpg",
+   excerpt:"create-agentic-playwright-project scaffolds a full Playwright + TypeScript QA suite with Claude Code agents and skills already wired into the workflow. Free, one command.",
+   url:"https://www.linkedin.com/feed/update/urn:li:activity:7511193169934331904/"},
   {title:"green ≠ correct: what self-healing tests don't tell you", date:"2026-09-30", mins:2,
    img:"assets/img/article-green-correct.jpg",
    excerpt:"An AI healer can fix the locator and still assert the wrong thing. How I keep a human gate between AI-generated Playwright tests and CI.",
@@ -312,6 +316,15 @@ function syncCarousel(){
 const cardStep = () => (track.querySelector(".art")?.offsetWidth || 260) + 20;
 prevRead.addEventListener("click", () => track.scrollBy({left: -cardStep(), behavior: reduce ? "auto" : "smooth"}));
 nextRead.addEventListener("click", () => track.scrollBy({left: cardStep(), behavior: reduce ? "auto" : "smooth"}));
+// "View all articles" activates once there are more than two articles.
+const viewAll = document.getElementById("viewAllReads");
+if (viewAll && READS.length > 2){
+  viewAll.href = "https://www.linkedin.com/in/emanuelatelescu/recent-activity/all/";
+  viewAll.setAttribute("target","_blank"); viewAll.setAttribute("rel","noopener");
+  viewAll.removeAttribute("aria-disabled"); viewAll.tabIndex = 0;
+  const note = document.querySelector(".reads-foot .soon-note");
+  if (note) note.hidden = true;
+}
 track.addEventListener("scroll", syncCarousel, {passive:true});
 addEventListener("resize", syncCarousel);
 syncCarousel();
