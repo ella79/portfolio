@@ -957,6 +957,8 @@ textarea{min-height:132px;resize:vertical}
      the PDF. */
   .reveal{opacity:1 !important;transform:none !important;transition:none !important;animation:none !important}
   *,*::before,*::after{transition:none !important;animation:none !important}
+  /* no ligatures on paper: a parser without Unicode normalisation reads "ﬂaky" and "Conﬂuence" instead of the keywords */
+  *{font-variant-ligatures:none !important;font-feature-settings:"liga" 0,"clig" 0 !important}
 
   .wrap{max-width:none;padding:0}
   section{padding:0;border:0 !important}
@@ -964,7 +966,7 @@ textarea{min-height:132px;resize:vertical}
 
   .print-head{display:block;margin-bottom:8pt;padding-bottom:5pt;border-bottom:1.4pt solid var(--teal-dark)}
   .print-name{font-family:var(--font-display);font-weight:600;font-size:18pt;line-height:1.05;letter-spacing:-.02em;margin:0 0 2pt}
-  .print-role{font-family:var(--font-mono);font-size:8.4pt;color:var(--teal-dark);margin:0 0 3pt}
+  .print-role{font-family:var(--font-mono);font-size:8.0pt;color:var(--teal-dark);margin:0 0 3pt}
   .print-contact{font-size:7.8pt;color:var(--ink-soft);margin:0;white-space:nowrap}
 
   .cv-block{margin-bottom:4.5pt}
