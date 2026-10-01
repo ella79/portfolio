@@ -317,6 +317,17 @@ test.describe('CV page', () => {
       await expect(page, href).not.toHaveURL(/404\.html$/);
     }
   });
+
+  // The home page had this guard from the start; the CV page did not, which is
+  // exactly where SDET survived. The print head is hidden on screen but prints
+  // into the PDF, so this has to read the text content, not what is visible.
+  test('carries the LinkedIn title, never SDET', async ({ page }) => {
+    await page.goto('/cv.html');
+    await expect(page.locator('.print-role')).toHaveText(
+      'Senior QA Automation Engineer | AI-Augmented & Agentic Testing | Playwright | TypeScript | Claude Code',
+    );
+    await expect(page.locator('body')).not.toContainText('SDET');
+  });
 });
 
 test.describe('legal pages', () => {
