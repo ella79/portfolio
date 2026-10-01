@@ -1082,3 +1082,22 @@ test.describe('qa suite runner', () => {
     await expect(page.getByRole('button', { name: /open the report/i })).toBeEnabled();
   });
 });
+
+test.describe('tools page', () => {
+  test('projects links to the tools page', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('#projects a[href="tools.html"]')).toBeVisible();
+  });
+
+  test('the tools page lists the scaffolder with its repository', async ({ page }) => {
+    await page.goto('/tools.html');
+    await expect(
+      page.locator('a[href="https://github.com/ella79/create-agentic-playwright-project"]'),
+    ).toBeVisible();
+  });
+
+  test('the tools page returns to the portfolio', async ({ page }) => {
+    await page.goto('/tools.html');
+    await expect(page.locator('a[href="index.html#projects"]').first()).toBeVisible();
+  });
+});
