@@ -137,7 +137,7 @@ const SKILLS = [
 /* LinkedIn articles, newest first */
 const READS = [
   {title:"I packaged my QA architecture into one free command", date:"2026-10-01", mins:2,
-   img:"assets/img/article-agentic-project.jpg",
+   img:"assets/img/article-agentic-project.jpg?v=2026100101",
    excerpt:"create-agentic-playwright-project scaffolds a full Playwright + TypeScript QA suite with Claude Code agents and skills already wired into the workflow. Free, one command.",
    url:"https://www.linkedin.com/feed/update/urn:li:activity:7511193169934331904/"},
   {title:"green ≠ correct: what self-healing tests don't tell you", date:"2026-09-30", mins:2,
