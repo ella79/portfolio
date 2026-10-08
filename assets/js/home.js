@@ -136,6 +136,14 @@ const SKILLS = [
 
 /* LinkedIn articles, newest first */
 const READS = [
+  {title:"Prompt library", date:"2026-10-07", mins:2,
+   img:"assets/img/post-prompt-library.jpg",
+   excerpt:"Anthropic's copy-paste prompts for Claude Code are a starting point. The real win is making one repeatable: save it as a skill the team runs as a /command, and keep the conventions in CLAUDE.md.",
+   url:"https://www.linkedin.com/feed/update/urn:li:activity:7513673793639464960/"},
+  {title:"A test agent that fixes everything is scarier than one that fails", date:"2026-10-07", mins:2,
+   img:"assets/img/post-healer-says-no.jpg",
+   excerpt:"Playwright's healer agent rewrites broken locators, but the move that matters is restraint: it marks a test test.fixme instead of forcing a dead backend green.",
+   url:"https://www.linkedin.com/feed/update/urn:li:activity:7513662624882995200/"},
   {title:"I packaged my QA architecture into one free command", date:"2026-10-01", mins:2,
    img:"assets/img/article-agentic-project.jpg?v=2026100101",
    excerpt:"create-agentic-playwright-project scaffolds a full Playwright + TypeScript QA suite with Claude Code agents and skills already wired into the workflow. Free, one command.",
