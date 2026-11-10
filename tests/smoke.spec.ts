@@ -168,10 +168,10 @@ test.describe('home page', () => {
   test('the Reads carousel lists the articles, newest first, each linking to LinkedIn', async ({ page }) => {
     await page.locator('#reads').scrollIntoViewIfNeeded();
     const cards = page.locator('#readTrack .art');
-    await expect(cards).toHaveCount(5);
+    await expect(cards).toHaveCount(7);
     // newest first
     await expect(cards.first()).toHaveAttribute('href', /linkedin\.com\//);
-    await expect(cards.first().locator('img')).toHaveAttribute('src', 'assets/img/post-prompt-library.jpg');
+    await expect(cards.first().locator('img')).toHaveAttribute('src', 'assets/img/post-pw-framework-map.jpg');
     // every card points at LinkedIn
     for (const href of await cards.evaluateAll((els) => els.map((e) => e.getAttribute('href')))) {
       expect(href).toMatch(/linkedin\.com\//);
