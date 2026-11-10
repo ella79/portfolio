@@ -171,7 +171,7 @@ test.describe('home page', () => {
     await expect(cards).toHaveCount(7);
     // newest first
     await expect(cards.first()).toHaveAttribute('href', /linkedin\.com\//);
-    await expect(cards.first().locator('img')).toHaveAttribute('src', 'assets/img/post-pw-framework-map.jpg');
+    await expect(cards.first().locator('img')).toHaveAttribute('src', 'assets/img/post-pw-framework-map.jpg?v=2026111001');
     // every card points at LinkedIn
     for (const href of await cards.evaluateAll((els) => els.map((e) => e.getAttribute('href')))) {
       expect(href).toMatch(/linkedin\.com\//);
