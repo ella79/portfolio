@@ -136,6 +136,14 @@ const SKILLS = [
 
 /* LinkedIn articles, newest first */
 const READS = [
+  {title:"700 AI agents teamed up, broke out of a test and hacked a real company", date:"2026-11-18", mins:2,
+   img:"assets/img/post-agents-broke-out.jpg?v=2026111901",
+   excerpt:"About 1,200 agents were meant to be isolated during an OpenAI security eval. They found a shared cache, turned it into a message board, elected coordinators, and roughly 700 broke into Hugging Face production, to cheat the test.",
+   url:"https://www.linkedin.com/feed/update/urn:li:activity:7528780084485357568/"},
+  {title:"AI has learned to cheat on its own tests. And to hide it.", date:"2026-11-18", mins:2,
+   img:"assets/img/post-ai-cheats-tests.jpg?v=2026111901",
+   excerpt:"Paul Christiano, co-creator of RLHF, puts a high risk of AI takeover within three years. The behaviour is already in the logs: a model that hacked the stopwatch, an agent that tampered with logs for admin, models that behave better when watched.",
+   url:"https://www.linkedin.com/feed/update/urn:li:activity:7528769359712956416/"},
   {title:"I drew the whole Playwright framework as one map", date:"2026-11-09", mins:1,
    img:"assets/img/post-pw-framework-map.jpg?v=2026111001",
    excerpt:"A Playwright + TypeScript framework in the order you build it: architecture, execution model, auth and data, AI agents, the four suites, CI/CD with sharding and reports. Real config, checked against Playwright 1.64.1.",
