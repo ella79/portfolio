@@ -543,6 +543,17 @@
     return [].slice.call(document.querySelectorAll(".cb-engines-chip"));
   }
 
+  /* The chips a given suite is about to replay: all of its browsers on a full
+     run, the one that was chosen when the run is filtered. They light up while
+     that suite plays, so the row the console is talking about is the row the
+     eye lands on. */
+  function playingChips(suite) {
+    return chips().filter(function (chip) {
+      if (chip.dataset.suite !== suite.name) { return false; }
+      return !filter || chip.dataset.engine === filter.engine;
+    });
+  }
+
   function toggleFilter(suite, engine) {
     if (running) { return; }
     var same = filter && filter.suite === suite.name && filter.engine === engine.name;
@@ -608,6 +619,7 @@
     /* the ticks belong to the replay that is starting, not the one before it */
     chips().forEach(function (chip) {
       chip.classList.remove("is-ran");
+      chip.classList.remove("is-playing");
       if (chip.dataset.title) { chip.title = chip.dataset.title; }
     });
 
@@ -628,6 +640,7 @@
       var suite = row.suite;
       chain = chain.then(function () {
         suite.node.classList.add("is-running");
+        playingChips(suite).forEach(function (chip) { chip.classList.add("is-playing"); });
         write("> yarn playwright test --project=" + (PROJECT[suite.name] || suite.name), "head");
         write(
           "Running " + plural(row.tests.length, "test") +
@@ -656,6 +669,7 @@
 
       chain = chain.then(function () {
         suite.node.classList.remove("is-running");
+        playingChips(suite).forEach(function (chip) { chip.classList.remove("is-playing"); });
         suite.countNode.textContent = plural(suite.total, "test");
         write("");
         return wait(180);
