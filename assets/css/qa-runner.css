@@ -142,6 +142,35 @@
 .cb-engines-chip.is-on .cb-unit,
 .cb-engines-chip.is-on .cb-ran,
 .cb-engines-chip.is-off.is-on .cb-ran{color:#bfe6df}
+/* The browser the runner is replaying right now. It outranks both the failing
+   tint and the selected state on purpose: while a replay is on screen, which
+   engine is playing is the more useful of the two things a chip can say. */
+.cb-engines-chip.is-playing,
+.cb-engines-chip.is-off.is-playing,
+.cb-engines-chip.is-on.is-playing{
+  border-color:var(--amber);background:var(--amber-wash);color:var(--ink);
+  /* the ring never leaves: it widens and narrows, so a still frame of the page
+     still shows which chip is playing */
+  box-shadow:0 0 0 3px var(--amber-line);
+  animation:cb-playing 1.4s ease-in-out infinite;
+}
+.cb-engines-chip.is-playing .cb-n,
+.cb-engines-chip.is-off.is-playing .cb-n,
+.cb-engines-chip.is-on.is-playing .cb-n,
+.cb-engines-chip.is-playing .cb-unit,
+.cb-engines-chip.is-on.is-playing .cb-unit,
+.cb-engines-chip.is-playing .cb-ran,
+.cb-engines-chip.is-off.is-playing .cb-ran,
+.cb-engines-chip.is-on.is-playing .cb-ran{color:var(--amber)}
+@keyframes cb-playing{
+  0%,100%{box-shadow:0 0 0 2px var(--amber-line)}
+  50%{box-shadow:0 0 0 5px var(--amber-line)}
+}
+@media (prefers-reduced-motion:reduce){
+  .cb-engines-chip.is-playing,
+  .cb-engines-chip.is-off.is-playing,
+  .cb-engines-chip.is-on.is-playing{animation:none;box-shadow:0 0 0 3px var(--amber-line)}
+}
 
 .area-bar{height:5px;border-radius:999px;background:var(--line);overflow:hidden}
 .area-bar span{display:block;height:100%;background:var(--teal);opacity:.55}
