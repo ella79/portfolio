@@ -1047,7 +1047,11 @@
         ? "That is " + filterLabel() + " out of the published run, and the report below opens on it."
         : "That is the published run. What it says is below, report included.";
     }
-    results.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    /* no scroll from here. The replay is short enough that the run finishes
+       while the visitor is still reading the console, and moving the page
+       under them reads as the button having navigated somewhere instead of
+       having started anything. The hint above says the results are below,
+       which is the whole prompt they need. */
   }
 
   /* ---------- start ---------- */
