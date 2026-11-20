@@ -5,9 +5,17 @@
   --teal:var(--pri); --teal-dark:var(--pri); --teal-wash:var(--pri-wash);
   --ink-soft:var(--soft); --paper:var(--bg); --card:var(--surface);
   --amber:#B45309; --red:#B42318; --violet:#6A4A9C; --grey:#98A2AD;
+  /* the tints a failing or running result sits on. Tokens rather than
+     literals because the text over them is --ink and --ink-soft, which flip
+     with the theme: a tint that does not flip with them leaves near-white
+     text on a near-white chip. */
+  --red-wash:#FDF3F1; --red-line:#E3C4BE; --amber-wash:#FDF6EC; --amber-line:#E6C9A4;
   --font-display:var(--display); --font-body:var(--body); --font-mono:var(--mono);
 }
-:root[data-theme="dark"]{ --amber:#E0A04A; --red:#F07167; --violet:#B9A3E3; --grey:#6B7480; }
+:root[data-theme="dark"]{
+  --amber:#E0A04A; --red:#F07167; --violet:#B9A3E3; --grey:#6B7480;
+  --red-wash:#3A2422; --red-line:#6A4540; --amber-wash:#3A3222; --amber-line:#5E5033;
+}
 .page-head{padding:clamp(40px,6vw,72px) 0 clamp(40px,5vw,64px);background:var(--band)}
 /* the dashboard sits on the same tint as the page head, full width, so the page alternates like the home page */
 #runnerResults{margin-top:clamp(40px,5vw,64px);padding-block:clamp(40px,5vw,64px) clamp(56px,7vw,104px);background:var(--band);box-shadow:0 0 0 100vmax var(--band);clip-path:inset(0 -100vmax)}
@@ -70,9 +78,9 @@
   display:inline-flex;align-items:center;justify-content:center;
   background:var(--teal-wash);color:var(--teal-dark);
 }
-.suite-mark.is-off{background:#f7e3e0;color:var(--red)}
+.suite-mark.is-off{background:var(--red-wash);color:var(--red)}
 /* a suite that is mid replay is the one place the amber belongs here */
-.suite.is-running .suite-mark{background:#fbeedd;color:var(--amber)}
+.suite.is-running .suite-mark{background:var(--amber-wash);color:var(--amber)}
 .suite.is-running .suite-count{color:var(--amber)}
 .suite-name{flex:1;font-family:var(--font-display);font-weight:600;font-size:1rem}
 .suite-count{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft)}
@@ -120,7 +128,7 @@
    still says which engine was run after the console has scrolled on */
 .cb-ran{display:none;font-size:.75rem;line-height:1;color:var(--teal-dark)}
 .cb-engines-chip.is-ran .cb-ran{display:inline}
-.cb-engines-chip.is-off{border-color:#e3c4be;background:#fdf3f1}
+.cb-engines-chip.is-off{border-color:var(--red-line);background:var(--red-wash)}
 .cb-engines-chip.is-off .cb-n{color:var(--red)}
 .cb-engines-chip.is-off .cb-ran{color:var(--red)}
 /* the chosen browser is the one the runner will replay, so it carries the
@@ -191,7 +199,7 @@
    a number worth stopping on */
 .not-clean{
   margin:26px 0 0;padding:22px 24px;
-  border:1px solid #e6c9a4;border-left:4px solid var(--amber);border-radius:10px;background:#fdf6ec;
+  border:1px solid var(--amber-line);border-left:4px solid var(--amber);border-radius:10px;background:var(--amber-wash);
 }
 .not-clean[hidden]{display:none}
 .nc-head{font-family:var(--font-display);font-weight:600;color:var(--amber);margin:0 0 8px}
