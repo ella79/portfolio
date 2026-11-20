@@ -765,6 +765,12 @@ test.describe('qa suite runner', () => {
     await expect(page.locator('#allureFrame')).toHaveAttribute('src', `${REPORT}/#suites/uid-webkit`);
     await expect(page.locator('#reportLink')).toHaveAttribute('href', `${REPORT}/#suites/uid-webkit`);
 
+    // A chip is inert while a replay is on, so the run has to be over before
+    // the next one is pressed. The label says so: waiting on it is the only
+    // thing that makes the press below land, whatever the replay's own pacing.
+    const runner = page.getByRole('button', { name: /run again/i });
+    await expect(runner).toBeEnabled();
+
     // the visual suite forks on area, so it has no engine branch. Its engine is
     // on every result all the same, which is what gives it a chip of its own.
     const chromium = visual.locator('.cb-engines-chip', { hasText: 'Chromium' });
@@ -777,7 +783,8 @@ test.describe('qa suite runner', () => {
     await expect(page.locator('#consoleLog')).not.toContainText('TC-17');
     await expect(page.locator('#allureFrame')).toHaveAttribute('src', `${REPORT}/#suites/uid-visual`);
 
-    // pressing it again gives the whole run back
+    // pressing it again gives the whole run back, once this replay has ended
+    await expect(runner).toBeEnabled();
     await chromium.click();
     await expect(chromium).toHaveAttribute('aria-pressed', 'false');
     await expect(page.getByRole('button', { name: /run the qa suites/i })).toBeEnabled();
@@ -904,6 +911,49 @@ test.describe('qa suite runner', () => {
 
     await expect(chromium.locator('.cb-ran')).toBeVisible();
     await expect(webkit.locator('.cb-ran')).toBeHidden();
+  });
+
+  // The runner used to play a suite as one block, so the moment the functional
+  // suite started both of its chips came on and stayed on until it was done.
+  // That is not what the run does: Playwright plays every case on one browser,
+  // then every case again on the next. Recorded as it happens rather than
+  // sampled at the end, because the end state of a correct run and of a run
+  // that lit everything at once look the same.
+  test('a suite replays one browser at a time', async ({ page }) => {
+    await page.route(`${REPORT}/data/suites.json`, (route) =>
+      route.fulfill({ json: parentEngineTree }),
+    );
+    await page.reload();
+
+    await page.evaluate(() => {
+      const seen: string[] = [];
+      (window as unknown as { __lit: string[] }).__lit = seen;
+      const read = () =>
+        [...document.querySelectorAll<HTMLElement>('.cb-engines-chip')]
+          .filter((chip) => chip.classList.contains('is-playing'))
+          .map((chip) => `${chip.dataset.suite} / ${chip.dataset.engine}`)
+          .join(' + ');
+      const push = () => {
+        const now = read();
+        if (now && seen[seen.length - 1] !== now) seen.push(now);
+      };
+      new MutationObserver(push).observe(document.getElementById('suiteList')!, {
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+    });
+
+    await page.getByRole('button', { name: /run the qa suites/i }).click();
+    await expect(page.getByRole('button', { name: /run again/i })).toBeEnabled();
+
+    // one entry per browser, in the order the chips are drawn. An entry naming
+    // two at once would mean the suite was played as a block again.
+    expect(await page.evaluate(() => (window as unknown as { __lit: string[] }).__lit)).toEqual([
+      'Functional E2E / Chromium',
+      'Functional E2E / WebKit',
+      'Visual Regression / Chromium',
+    ]);
   });
 
   // The bar stopped at the pass rate and left the rest as track. The track is

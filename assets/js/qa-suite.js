@@ -673,7 +673,7 @@
         return wait(420);
       });
 
-      legs.forEach(function (leg) {
+      legs.forEach(function (leg, legIndex) {
         chain = chain.then(function () {
           if (leg.chip) { leg.chip.classList.add("is-playing"); }
           /* only worth announcing when the suite forked: on a single browser
@@ -710,7 +710,9 @@
             leg.chip.classList.add("is-ran");
             leg.chip.title = "Replayed in this run. " + leg.chip.dataset.title;
           }
-          return wait(180);
+          /* a beat between one browser and the next, and none after the last,
+             where the suite's own pause follows anyway */
+          return wait(legIndex === legs.length - 1 ? 0 : 180);
         });
       });
 
