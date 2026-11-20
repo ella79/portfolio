@@ -543,15 +543,34 @@
     return [].slice.call(document.querySelectorAll(".cb-engines-chip"));
   }
 
-  /* The chips a given suite is about to replay: all of its browsers on a full
-     run, the one that was chosen when the run is filtered. They light up while
-     that suite plays, so the row the console is talking about is the row the
-     eye lands on. */
-  function playingChips(suite) {
+  /* The chip standing for one browser of one suite, or null when the suite has
+     no chips to speak of. */
+  function chipFor(suiteName, engineName) {
     return chips().filter(function (chip) {
-      if (chip.dataset.suite !== suite.name) { return false; }
-      return !filter || chip.dataset.engine === filter.engine;
+      return chip.dataset.suite === suiteName && chip.dataset.engine === engineName;
+    })[0] || null;
+  }
+
+  /* A suite is replayed one browser at a time, the way Playwright runs it:
+     every functional case on Chromium, then every case again on WebKit. The
+     legs are what the console and the chips follow, so one chip is lit at a
+     time rather than the whole row at once.
+     A test lands in the first leg whose engine it records; anything the engine
+     names do not account for plays last in a leg with no chip, so a run never
+     silently drops a case it cannot place. */
+  function legsOf(suite, tests) {
+    var placed = [];
+    var legs = suite.engines.map(function (engine) {
+      var own = tests.filter(function (test) {
+        if (placed.indexOf(test) !== -1) { return false; }
+        return (test.parameters || []).indexOf(engine.name) !== -1;
+      });
+      own.forEach(function (test) { placed.push(test); });
+      return { display: engineName(engine.name), chip: chipFor(suite.name, engine.name), tests: own };
     });
+    var rest = tests.filter(function (test) { return placed.indexOf(test) === -1; });
+    if (rest.length) { legs.push({ display: "", chip: null, tests: rest }); }
+    return legs.filter(function (leg) { return leg.tests.length; });
   }
 
   function toggleFilter(suite, engine) {
@@ -638,9 +657,13 @@
 
     playing.forEach(function (row) {
       var suite = row.suite;
+      var legs = legsOf(suite, row.tests);
+      /* the count on the suite's own row keeps climbing across the legs, so it
+         reads as one suite running and not as two short ones */
+      var inSuite = 0;
+
       chain = chain.then(function () {
         suite.node.classList.add("is-running");
-        playingChips(suite).forEach(function (chip) { chip.classList.add("is-playing"); });
         write("> yarn playwright test --project=" + (PROJECT[suite.name] || suite.name), "head");
         write(
           "Running " + plural(row.tests.length, "test") +
@@ -650,26 +673,51 @@
         return wait(420);
       });
 
-      row.tests.forEach(function (test, index) {
+      legs.forEach(function (leg, legIndex) {
         chain = chain.then(function () {
-          var ok = test.status === "passed";
-          if (ok) { passed += 1; } else { failures[test.status] = (failures[test.status] || 0) + 1; }
-          done += 1;
-          write(
-            "  " + (ok ? CHECK : CROSS) + "  " + test.name + "  (" + secs(duration(test)) + ")" +
-              (ok ? "" : "  " + test.status),
-            ok ? "ok" : "warn"
-          );
-          suite.countNode.textContent = index + 1 + " / " + row.tests.length;
-          if (progress) { progress.style.width = (done / total) * 100 + "%"; }
-          if (counter) { counter.textContent = done + " / " + total + " tests"; }
-          return wait(70);
+          if (leg.chip) { leg.chip.classList.add("is-playing"); }
+          /* only worth announcing when the suite forked: on a single browser
+             the line above has already said it */
+          if (leg.display && legs.length > 1) {
+            write("  " + leg.display + ": " + plural(leg.tests.length, "test"), "muted");
+          }
+          return wait(leg.display && legs.length > 1 ? 260 : 0);
+        });
+
+        leg.tests.forEach(function (test) {
+          chain = chain.then(function () {
+            var ok = test.status === "passed";
+            if (ok) { passed += 1; } else { failures[test.status] = (failures[test.status] || 0) + 1; }
+            done += 1;
+            inSuite += 1;
+            write(
+              "  " + (ok ? CHECK : CROSS) + "  " + test.name + "  (" + secs(duration(test)) + ")" +
+                (ok ? "" : "  " + test.status),
+              ok ? "ok" : "warn"
+            );
+            suite.countNode.textContent = inSuite + " / " + row.tests.length;
+            if (progress) { progress.style.width = (done / total) * 100 + "%"; }
+            if (counter) { counter.textContent = done + " / " + total + " tests"; }
+            return wait(70);
+          });
+        });
+
+        chain = chain.then(function () {
+          /* the browser that has just finished keeps its tick from here on
+             rather than waiting for the whole run to end */
+          if (leg.chip) {
+            leg.chip.classList.remove("is-playing");
+            leg.chip.classList.add("is-ran");
+            leg.chip.title = "Replayed in this run. " + leg.chip.dataset.title;
+          }
+          /* a beat between one browser and the next, and none after the last,
+             where the suite's own pause follows anyway */
+          return wait(legIndex === legs.length - 1 ? 0 : 180);
         });
       });
 
       chain = chain.then(function () {
         suite.node.classList.remove("is-running");
-        playingChips(suite).forEach(function (chip) { chip.classList.remove("is-playing"); });
         suite.countNode.textContent = plural(suite.total, "test");
         write("");
         return wait(180);
